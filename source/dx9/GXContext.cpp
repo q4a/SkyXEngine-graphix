@@ -928,9 +928,9 @@ GLuint CGXContext::GetShaderPart(GLenum type, const DString & name, UINT flags, 
 
 IGXVertexShader * CGXContext::createVertexShader(const char * szFile, GXMACRO *pDefs)
 {
-	ID3DXBuffer *pShaderBlob;
-	ID3DXBuffer *pErrorBlob;
-	ID3DXConstantTable *pConstTable;
+	ID3DXBuffer *pShaderBlob = 0;
+	ID3DXBuffer *pErrorBlob = 0;
+	ID3DXConstantTable *pConstTable = 0;
 
 	if(FAILED(DX_CALL(D3DXCompileShaderFromFileA(szFile, (D3DXMACRO*)pDefs, NULL, "main", "vs_3_0", SHADER_FLAGS, &pShaderBlob, &pErrorBlob, &pConstTable))))
 	{
@@ -1040,9 +1040,9 @@ void CGXContext::destroyVertexShader(IGXVertexShader * pSH)
 
 IGXPixelShader * CGXContext::createPixelShader(const char * szFile, GXMACRO *pDefs)
 {
-	ID3DXBuffer *pShaderBlob;
-	ID3DXBuffer *pErrorBlob;
-	ID3DXConstantTable *pConstTable;
+	ID3DXBuffer *pShaderBlob = 0;
+	ID3DXBuffer *pErrorBlob = 0;
+	ID3DXConstantTable *pConstTable = 0;
 
 	if(FAILED(DX_CALL(D3DXCompileShaderFromFileA(szFile, (D3DXMACRO*)pDefs, NULL, "main", "ps_3_0", SHADER_FLAGS, &pShaderBlob, &pErrorBlob, &pConstTable))))
 	{
@@ -1051,7 +1051,7 @@ IGXPixelShader * CGXContext::createPixelShader(const char * szFile, GXMACRO *pDe
 			char * pBuff = (char*)pErrorBlob->GetBufferPointer();
 			int s = strlen(pBuff);
 			char *str = (char*)alloca(s + 33);
-			sprintf(str, "Unable to create vertex shader: %s", pBuff);
+			sprintf(str, "Unable to create pixel shader: %s", pBuff);
 			debugMessage(GX_LOG_ERROR, str);
 		}
 		mem_release(pErrorBlob);
