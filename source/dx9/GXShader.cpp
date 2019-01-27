@@ -72,14 +72,26 @@ void CGXVertexShader::setConstantF(UINT uStartRegister, const float *pConstantDa
 {
 	assert(uStartRegister + uVector4fCount <= m_uConstBuffRegCountF);
 
+	if(!memcmp(m_pConstBufferF + uStartRegister * 4, pConstantData, sizeof(float) * 4 * uVector4fCount))
+	{
+		return;
+	}
+
 	memcpy(m_pConstBufferF + uStartRegister * 4, pConstantData, sizeof(float)* 4 * uVector4fCount);
+	m_isConstantDirtyF = true;
 }
 
 void CGXVertexShader::setConstantI(UINT uStartRegister, const int *pConstantData, UINT uVector4iCount)
 {
 	assert(uStartRegister + uVector4iCount <= m_uConstBuffRegCountI);
 
-	memcpy(m_pConstBufferI + uStartRegister * 4, pConstantData, sizeof(int)* 4 * uVector4iCount);
+	if(!memcmp(m_pConstBufferI + uStartRegister * 4, pConstantData, sizeof(float) * 4 * uVector4iCount))
+	{
+		return;
+	}
+
+	memcpy(m_pConstBufferI + uStartRegister * 4, pConstantData, sizeof(int) * 4 * uVector4iCount);
+	m_isConstantDirtyI = true;
 }
 
 UINT CGXVertexShader::getConstantCount()
@@ -223,14 +235,26 @@ void CGXPixelShader::setConstantF(UINT uStartRegister, const float *pConstantDat
 {
 	assert(uStartRegister + uVector4fCount <= m_uConstBuffRegCountF);
 
-	memcpy(m_pConstBufferF + uStartRegister * 4, pConstantData, sizeof(float)* 4 * uVector4fCount);
+	if(!memcmp(m_pConstBufferF + uStartRegister * 4, pConstantData, sizeof(float) * 4 * uVector4fCount))
+	{
+		return;
+	}
+
+	memcpy(m_pConstBufferF + uStartRegister * 4, pConstantData, sizeof(float) * 4 * uVector4fCount);
+	m_isConstantDirtyF = true;
 }
 
 void CGXPixelShader::setConstantI(UINT uStartRegister, const int *pConstantData, UINT uVector4iCount)
 {
 	assert(uStartRegister + uVector4iCount <= m_uConstBuffRegCountI);
 
-	memcpy(m_pConstBufferI + uStartRegister * 4, pConstantData, sizeof(int)* 4 * uVector4iCount);
+	if(!memcmp(m_pConstBufferI + uStartRegister * 4, pConstantData, sizeof(float) * 4 * uVector4iCount))
+	{
+		return;
+	}
+
+	memcpy(m_pConstBufferI + uStartRegister * 4, pConstantData, sizeof(int) * 4 * uVector4iCount);
+	m_isConstantDirtyI = true;
 }
 
 UINT CGXPixelShader::getConstantCount()

@@ -625,10 +625,8 @@ void CGXContext::syncronize(UINT flags)
 			m_sync_state.bColorTarget[i] = FALSE;
 		}
 	}
-
-	//@TODO: Handle a case shader constant changed but the shader wasn't rebound
-
-	if(m_sync_state.bShader && !(flags & GX_SYNCFLAG_NO_SHADER))
+	
+	if(!(flags & GX_SYNCFLAG_NO_SHADER))
 	{
 		if(!m_pShader)
 		{
@@ -637,42 +635,80 @@ void CGXContext::syncronize(UINT flags)
 		else
 		{
 			CGXShader *pShader = (CGXShader*)m_pShader;
-			if(pShader->m_pVShader)
+			if(m_sync_state.bShader)
 			{
-				CGXVertexShader *pVS = (CGXVertexShader*)pShader->m_pVShader;
-				DX_CALL(m_pDevice->SetVertexShader(pVS->m_pShader));
-				if(pVS->m_uConstBuffRegCountF)
+				if(pShader->m_pVShader)
 				{
-					m_pDevice->SetVertexShaderConstantF(0, pVS->m_pConstBufferF, pVS->m_uConstBuffRegCountF);
+					CGXVertexShader *pVS = (CGXVertexShader*)pShader->m_pVShader;
+					DX_CALL(m_pDevice->SetVertexShader(pVS->m_pShader));
+					if(pVS->m_uConstBuffRegCountF)
+					{
+						m_pDevice->SetVertexShaderConstantF(0, pVS->m_pConstBufferF, pVS->m_uConstBuffRegCountF);
+						pVS->m_isConstantDirtyF = false;
+					}
+					if(pVS->m_uConstBuffRegCountI)
+					{
+						m_pDevice->SetVertexShaderConstantI(0, pVS->m_pConstBufferI, pVS->m_uConstBuffRegCountI);
+						pVS->m_isConstantDirtyI = false;
+					}
 				}
-				if(pVS->m_uConstBuffRegCountI)
+				else
 				{
-					m_pDevice->SetVertexShaderConstantI(0, pVS->m_pConstBufferI, pVS->m_uConstBuffRegCountI);
+					DX_CALL(m_pDevice->SetVertexShader(NULL));
 				}
+				if(pShader->m_pPShader)
+				{
+					CGXPixelShader *pPS = (CGXPixelShader*)pShader->m_pPShader;
+					DX_CALL(m_pDevice->SetPixelShader(pPS->m_pShader));
+					if(pPS->m_uConstBuffRegCountF)
+					{
+						m_pDevice->SetPixelShaderConstantF(0, pPS->m_pConstBufferF, pPS->m_uConstBuffRegCountF);
+						pPS->m_isConstantDirtyF = false;
+					}
+					if(pPS->m_uConstBuffRegCountI)
+					{
+						m_pDevice->SetPixelShaderConstantI(0, pPS->m_pConstBufferI, pPS->m_uConstBuffRegCountI);
+						pPS->m_isConstantDirtyI = false;
+					}
+				}
+				else
+				{
+					DX_CALL(m_pDevice->SetPixelShader(NULL));
+				}
+				m_sync_state.bShader = FALSE;
 			}
 			else
 			{
-				DX_CALL(m_pDevice->SetVertexShader(NULL));
-			}
-			if(pShader->m_pPShader)
-			{
-				CGXPixelShader *pPS = (CGXPixelShader*)pShader->m_pPShader;
-				DX_CALL(m_pDevice->SetPixelShader(pPS->m_pShader));
-				if(pPS->m_uConstBuffRegCountF)
+				if(pShader->m_pVShader)
 				{
-					m_pDevice->SetPixelShaderConstantF(0, pPS->m_pConstBufferF, pPS->m_uConstBuffRegCountF);
+					CGXVertexShader *pVS = (CGXVertexShader*)pShader->m_pVShader;
+					if(pVS->m_isConstantDirtyF && pVS->m_uConstBuffRegCountF)
+					{
+						m_pDevice->SetVertexShaderConstantF(0, pVS->m_pConstBufferF, pVS->m_uConstBuffRegCountF);
+						pVS->m_isConstantDirtyF = false;
+					}
+					if(pVS->m_isConstantDirtyI && pVS->m_uConstBuffRegCountI)
+					{
+						m_pDevice->SetVertexShaderConstantI(0, pVS->m_pConstBufferI, pVS->m_uConstBuffRegCountI);
+						pVS->m_isConstantDirtyI = false;
+					}
 				}
-				if(pPS->m_uConstBuffRegCountI)
+				if(pShader->m_pPShader)
 				{
-					m_pDevice->SetPixelShaderConstantI(0, pPS->m_pConstBufferI, pPS->m_uConstBuffRegCountI);
+					CGXPixelShader *pPS = (CGXPixelShader*)pShader->m_pPShader;
+					if(pPS->m_isConstantDirtyF && pPS->m_uConstBuffRegCountF)
+					{
+						m_pDevice->SetPixelShaderConstantF(0, pPS->m_pConstBufferF, pPS->m_uConstBuffRegCountF);
+						pPS->m_isConstantDirtyF = false;
+					}
+					if(pPS->m_isConstantDirtyI && pPS->m_uConstBuffRegCountI)
+					{
+						m_pDevice->SetPixelShaderConstantI(0, pPS->m_pConstBufferI, pPS->m_uConstBuffRegCountI);
+						pPS->m_isConstantDirtyI = false;
+					}
 				}
-			}
-			else
-			{
-				DX_CALL(m_pDevice->SetPixelShader(NULL));
 			}
 		}
-		m_sync_state.bShader = FALSE;
 	}
 
 	for(UINT i = 0; i < MAXGXTEXTURES; ++i)

@@ -24,6 +24,9 @@ class CGXVertexShader: public IGXVertexShader
 	int *m_pConstBufferI = NULL;
 	UINT m_uConstBuffRegCountI = 0;
 	UINT m_uConstBuffRegCountF = 0;
+
+	bool m_isConstantDirtyF = false;
+	bool m_isConstantDirtyI = false;
 public:
 	void Release();
 
@@ -54,6 +57,9 @@ class CGXPixelShader: public IGXPixelShader
 	int *m_pConstBufferI = NULL;
 	UINT m_uConstBuffRegCountI = 0;
 	UINT m_uConstBuffRegCountF = 0;
+
+	bool m_isConstantDirtyF = false;
+	bool m_isConstantDirtyI = false;
 public:
 	void Release();
 
