@@ -100,6 +100,10 @@ public:
 	void setDepthStencilSurface(IGXDepthStencilSurface *pSurface);
 	IGXDepthStencilSurface *getDepthStencilSurface();
 
+	IGXSurface *createColorTarget(UINT uWidth, UINT uHeight, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false);
+	void destroyColorTarget(IGXSurface *pSurface);
+	void downsampleColorTarget(IGXSurface *pSource, IGXSurface *pTarget);
+
 	void setColorTarget(IGXSurface *pSurf, UINT idx = 0);
 	IGXSurface *getColorTarget(UINT idx = 0);
 
@@ -227,6 +231,7 @@ protected:
 	Array<IGXTexture2D*> m_aResettableTextures2D;
 	Array<IGXTextureCube*> m_aResettableTexturesCube;
 	Array<IGXDepthStencilSurface*> m_aResettableDSSurfaces;
+	Array<IGXSurface*> m_aResettableColorSurfaces;
 
 	void _beginInstancing(UINT uInstanceCount);
 	void _endInstancing();

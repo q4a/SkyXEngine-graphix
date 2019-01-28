@@ -50,13 +50,20 @@ IGXSurface *CGXTexture2D::getMipmap(UINT i)
 
 bool CGXTexture2D::lock(void **ppData, GXTEXLOCK mode)
 {
-	CGXContext::debugMessage(GX_LOG_ERROR, "Not implemented: CGXTexture2D::lock");
-	return(false);
+	D3DLOCKED_RECT rect;
+	if(FAILED(DX_CALL(m_pTexture->LockRect(0, &rect, NULL, mode == GXTL_WRITE ? 0 : D3DLOCK_READONLY))))
+	{
+		return(false);
+	}
+	//CGXContext::debugMessage(GX_LOG_ERROR, "Not implemented: CGXTexture2D::lock");
+	*ppData = rect.pBits;
+	return(true);
 }
 
 void CGXTexture2D::unlock()
 {
-	CGXContext::debugMessage(GX_LOG_ERROR, "Not implemented: CGXTexture2D::unlock");
+	DX_CALL(m_pTexture->UnlockRect(0));
+	//CGXContext::debugMessage(GX_LOG_ERROR, "Not implemented: CGXTexture2D::unlock");
 }
 
 IDirect3DBaseTexture9 *CGXTexture2D::getDXTexture()

@@ -16,6 +16,16 @@ class CGXSurface: public IGXSurface
 	UINT m_uHeight;
 	GXFORMAT m_format;
 
+	D3DMULTISAMPLE_TYPE m_multisampleType;
+
+
+	bool m_bAutoResize = false;
+	float m_fSizeCoeffW = 1.0f;
+	float m_fSizeCoeffH = 1.0f;
+
+	void onDevLost();
+	void onDevRst(UINT uScreenWidth, UINT uScreenHeight);
+
 public:
 	CGXSurface(CGXContext * pRender, UINT uWidth, UINT uHeight, GXFORMAT format, IDirect3DSurface9 *pSurface):
 		m_pRender(pRender),

@@ -26,3 +26,12 @@ GXFORMAT CGXSurface::getFormat()
 {
 	return(m_format);
 }
+
+void CGXSurface::onDevLost()
+{
+	mem_release(m_pSurface);
+}
+void CGXSurface::onDevRst(UINT uScreenWidth, UINT uScreenHeight)
+{
+	DX_CALL(m_pRender->getDXDevice()->CreateRenderTarget(m_uWidth, m_uHeight, m_pRender->getDXFormat(m_format), m_multisampleType, 0, FALSE, &m_pSurface, NULL));
+}

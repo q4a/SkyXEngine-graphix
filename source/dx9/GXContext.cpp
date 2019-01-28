@@ -110,6 +110,10 @@ void CGXContext::onLostDevice()
 	{
 		((CGXDepthStencilSurface*)m_aResettableDSSurfaces[i])->onDevLost();
 	}
+	for(UINT i = 0, l = m_aResettableColorSurfaces.size(); i < l; ++i)
+	{
+		((CGXSurface*)m_aResettableColorSurfaces[i])->onDevLost();
+	}
 	for(UINT i = 0, l = m_aResettableTextures2D.size(); i < l; ++i)
 	{
 		dynamic_cast<CGXTexture2D*>(m_aResettableTextures2D[i])->onDevLost();
@@ -133,6 +137,10 @@ void CGXContext::onResetDevice()
 	for(UINT i = 0, l = m_aResettableDSSurfaces.size(); i < l; ++i)
 	{
 		((CGXDepthStencilSurface*)m_aResettableDSSurfaces[i])->onDevRst(m_oD3DAPP.BackBufferWidth, m_oD3DAPP.BackBufferHeight);
+	}
+	for(UINT i = 0, l = m_aResettableColorSurfaces.size(); i < l; ++i)
+	{
+		((CGXSurface*)m_aResettableColorSurfaces[i])->onDevRst(m_oD3DAPP.BackBufferWidth, m_oD3DAPP.BackBufferHeight);
 	}
 	for(UINT i = 0, l = m_aResettableTextures2D.size(); i < l; ++i)
 	{
@@ -735,7 +743,7 @@ void CGXContext::syncronize(UINT flags)
 				DX_CALL(m_pDevice->SetTexture(i, NULL));
 			}
 
-			m_sync_state.bColorTarget[i] = FALSE;
+			m_sync_state.bTexture[i] = FALSE;
 		}
 	}
 }
@@ -1631,6 +1639,64 @@ IGXDepthStencilSurface *CGXContext::getDepthStencilSurface()
 	return(m_pDepthStencilSurface);
 }
 
+
+IGXSurface *CGXContext::createColorTarget(UINT uWidth, UINT uHeight, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize)
+{
+	IDirect3DSurface9 *pDXSurf;
+
+	DX_CALL(m_pDevice->CreateRenderTarget(uWidth, uHeight, getDXFormat(format), (D3DMULTISAMPLE_TYPE)multisampleType, 0, FALSE, &(pDXSurf), NULL));
+
+	CGXSurface *pColorSurface = new CGXSurface(this, uWidth, uHeight, format, pDXSurf);
+	pColorSurface->m_multisampleType = (D3DMULTISAMPLE_TYPE)multisampleType;
+
+	m_aResettableColorSurfaces.push_back(pColorSurface);
+
+	if(bAutoResize)
+	{
+		pColorSurface->m_bAutoResize = true;
+
+		pColorSurface->m_fSizeCoeffH = (float)uHeight / (float)m_oD3DAPP.BackBufferHeight;
+		pColorSurface->m_fSizeCoeffW = (float)uWidth / (float)m_oD3DAPP.BackBufferWidth;
+	}
+
+	return(pColorSurface);
+}
+void CGXContext::destroyColorTarget(IGXSurface *pSurface)
+{
+	if(pSurface)
+	{
+		for(UINT i = 0; i < MAXGXCOLORTARGETS; ++i)
+		{
+			if(pSurface == m_pColorTarget[0])
+			{
+				setColorTarget(NULL, i);
+			}
+		}
+
+		for(UINT i = 0, l = m_aResettableColorSurfaces.size(); i < l; ++i)
+		{
+			if(m_aResettableColorSurfaces[i] == pSurface)
+			{
+				m_aResettableColorSurfaces.erase(i);
+				break;
+			}
+		}
+
+		mem_delete(pSurface);
+	}
+}
+void CGXContext::downsampleColorTarget(IGXSurface *pSource, IGXSurface *pTarget)
+{
+	assert(pSource);
+	assert(pTarget);
+	CGXSurface *pSrcSurface = (CGXSurface*)pSource;
+	CGXSurface *pTgtSurface = (CGXSurface*)pTarget;
+
+	syncronize(GX_SYNCFLAG_NO_SHADER);
+
+	DX_CALL(m_pDevice->StretchRect(pSrcSurface->m_pSurface, NULL, pTgtSurface->m_pSurface, NULL, D3DTEXF_NONE));
+
+}
 void CGXContext::setColorTarget(IGXSurface *pSurf, UINT idx)
 {
 	assert(idx < MAXGXCOLORTARGETS);

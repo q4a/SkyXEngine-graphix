@@ -556,6 +556,10 @@ class IGXDepthStencilSurface: public IGXBaseInterface
 {
 };
 
+class IGXColorTarget: public IGXBaseInterface
+{
+};
+
 class IGXSurface: public IGXBaseInterface
 {
 public:
@@ -695,6 +699,10 @@ public:
 	virtual void destroyDepthStencilSurface(IGXDepthStencilSurface *pSurface) = 0;
 	virtual void setDepthStencilSurface(IGXDepthStencilSurface *pSurface) = 0;
 	virtual IGXDepthStencilSurface *getDepthStencilSurface() = 0;
+
+	virtual IGXSurface *createColorTarget(UINT uWidth, UINT uHeight, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false) = 0;
+	virtual void destroyColorTarget(IGXSurface *pSurface) = 0;
+	virtual void downsampleColorTarget(IGXSurface *pSource, IGXSurface *pTarget) = 0;
 
 	virtual void setColorTarget(IGXSurface *pSurf, UINT idx = 0) = 0;
 	virtual IGXSurface *getColorTarget(UINT idx = 0) = 0;

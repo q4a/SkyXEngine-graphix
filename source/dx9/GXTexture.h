@@ -20,7 +20,7 @@ protected:
 
 	UINT m_uWidth;
 	UINT m_uHeight;
-	IDirect3DTexture9 *m_pTexture;
+	IDirect3DTexture9 *m_pTexture = NULL;
 	float m_fSizeCoeffW = 1.0f;
 	float m_fSizeCoeffH = 1.0f;
 	UINT m_uMipLevels;
@@ -64,7 +64,7 @@ protected:
 	bool m_bAutoResize = false;
 
 	UINT m_uSize;
-	IDirect3DCubeTexture9 *m_pTexture;
+	IDirect3DCubeTexture9 *m_pTexture = NULL;
 	float m_fSizeCoeff = 1.0f;
 
 	UINT m_uMipLevels;
