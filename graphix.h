@@ -165,7 +165,7 @@ enum GXINDEXTYPE
 #define GXCOLOR_XYUV(y,u,v)   GXCOLOR_ARGB(0xff,y,u,v)
 #define GXCOLOR_AYUV(a,y,u,v) GXCOLOR_ARGB(a,y,u,v)
 
-// maps floating point channels (0.f to 1.f range) to D3DCOLOR
+// maps floating point channels (0.f to 1.f range) to GXCOLOR
 #define GXCOLOR_COLORVALUE(r,g,b,a) \
     GXCOLOR_RGBA((DWORD)((r)*255.f),(DWORD)((g)*255.f),(DWORD)((b)*255.f),(DWORD)((a)*255.f))
 
@@ -734,6 +734,7 @@ public:
 	virtual void destroyRasterizerState(IGXRasterizerState *pState) = 0;
 	virtual void setRasterizerState(IGXRasterizerState *pState) = 0;
 	virtual IGXRasterizerState *getRasterizerState() = 0;
+	virtual void setScissorRect(int iTop, int iRight, int iBottom, int iLeft) = 0;
 
 	virtual IGXSamplerState *createSamplerState(GXSAMPLER_DESC *pSamplerDesc) = 0;
 	virtual void destroySamplerState(IGXSamplerState *pState) = 0;

@@ -134,7 +134,7 @@ public:
 	void destroyRasterizerState(IGXRasterizerState *pState);
 	void setRasterizerState(IGXRasterizerState *pState);
 	IGXRasterizerState *getRasterizerState();
-
+	void setScissorRect(int iTop, int iRight, int iBottom, int iLeft);
 
 	IGXSamplerState *createSamplerState(GXSAMPLER_DESC *pSamplerDesc);
 	void destroySamplerState(IGXSamplerState *pState);
@@ -217,6 +217,7 @@ protected:
 		BOOL bColorTarget[MAXGXCOLORTARGETS];
 		BOOL bTexture[MAXGXTEXTURES];
 		BOOL bShader;
+		BOOL bScissorsRect;
 		//BOOL bVertexBuffers[MAXDSGVSTREAM];
 	};
 
@@ -232,6 +233,9 @@ protected:
 	Array<IGXTextureCube*> m_aResettableTexturesCube;
 	Array<IGXDepthStencilSurface*> m_aResettableDSSurfaces;
 	Array<IGXSurface*> m_aResettableColorSurfaces;
+
+	BOOL m_isScissorsEnable = 0;
+	RECT m_rcScissors;
 
 	void _beginInstancing(UINT uInstanceCount);
 	void _endInstancing();

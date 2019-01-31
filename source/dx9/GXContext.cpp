@@ -542,6 +542,7 @@ void CGXContext::syncronize(UINT flags)
 			pRS = (CGXRasterizerState*)m_pDefaultRasterizerState;
 		}
 		DX_CALL(pRS->m_pStateBlock->Apply());
+		m_isScissorsEnable = pRS->m_isScissorsEnabled;
 		m_sync_state.bRasterizerState = FALSE;
 	}
 	for(UINT i = 0; i < MAX_GXSAMPLERS; ++i)
@@ -745,6 +746,11 @@ void CGXContext::syncronize(UINT flags)
 
 			m_sync_state.bTexture[i] = FALSE;
 		}
+	}
+
+	if(m_isScissorsEnable && m_sync_state.bScissorsRect)
+	{
+		DX_CALL(m_pDevice->SetScissorRect(&m_rcScissors));
 	}
 }
 
@@ -1399,6 +1405,9 @@ IGXRasterizerState *CGXContext::createRasterizerState(GXRASTERIZER_DESC *pRSDesc
 	m_pDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, pRSDesc->bScissorEnable);
 
 	DX_CALL(m_pDevice->EndStateBlock(&(pRS->m_pStateBlock)));
+
+	pRS->m_isScissorsEnabled = pRSDesc->bScissorEnable;
+
 	return(pRS);
 }
 void CGXContext::destroyRasterizerState(IGXRasterizerState *pState)
@@ -1434,6 +1443,11 @@ IGXRasterizerState *CGXContext::getRasterizerState()
 		m_pRasterizerState->AddRef();
 	}
 	return(m_pRasterizerState);
+}
+void CGXContext::setScissorRect(int iTop, int iRight, int iBottom, int iLeft)
+{
+	m_rcScissors = {iLeft, iTop, iRight, iBottom};
+	m_sync_state.bScissorsRect = TRUE;
 }
 
 

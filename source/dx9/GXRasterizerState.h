@@ -14,6 +14,7 @@ class CGXRasterizerState: public IGXRasterizerState
 
 	CGXContext * m_pRender;
 	IDirect3DStateBlock9 *m_pStateBlock = NULL;
+	BOOL m_isScissorsEnabled = 0;
 
 public:
 	void Release();
