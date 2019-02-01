@@ -1471,6 +1471,18 @@ IGXDepthStencilState *CGXContext::createDepthStencilState(GXDEPTH_STENCIL_DESC *
 		m_pDevice->SetRenderState(D3DRS_STENCILZFAIL, pDSDesc->stencilDepthFailOp);
 		m_pDevice->SetRenderState(D3DRS_STENCILPASS, pDSDesc->stencilPassOp);
 		m_pDevice->SetRenderState(D3DRS_STENCILFUNC, pDSDesc->stencilFunc);
+		if(pDSDesc->stencilBackFunc != GXCOMPARISON_ALWAYS || pDSDesc->stencilBackFailOp != GXSTENCIL_OP_KEEP || pDSDesc->stencilBackDepthFailOp != GXSTENCIL_OP_KEEP || pDSDesc->stencilBackPassOp != GXSTENCIL_OP_KEEP)
+		{
+			m_pDevice->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, TRUE);
+			m_pDevice->SetRenderState(D3DRS_CCW_STENCILFAIL, pDSDesc->stencilFailOp);
+			m_pDevice->SetRenderState(D3DRS_CCW_STENCILZFAIL, pDSDesc->stencilDepthFailOp);
+			m_pDevice->SetRenderState(D3DRS_CCW_STENCILPASS, pDSDesc->stencilPassOp);
+			m_pDevice->SetRenderState(D3DRS_CCW_STENCILFUNC, pDSDesc->stencilFunc);
+		}
+		else
+		{
+			m_pDevice->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, FALSE);
+		}
 	}
 
 	DX_CALL(m_pDevice->EndStateBlock(&(pDS->m_pStateBlock)));
@@ -1884,7 +1896,10 @@ IGXTextureCube *CGXContext::createTextureCube(UINT uSize, UINT uMipLevels, UINT 
 		m_aResettableTexturesCube.push_back(pTex);
 	}
 
-	debugMessage(GX_LOG_WARN, "Not implemented: Unable to implace init cube texture");
+	if(pInitData)
+	{
+		debugMessage(GX_LOG_WARN, "Not implemented: Unable to implace init cube texture");
+	}
 
 	return(pTex);
 }

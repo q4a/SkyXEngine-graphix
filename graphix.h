@@ -396,10 +396,16 @@ typedef struct _GXDEPTH_STENCIL_DESC
 	BOOL bStencilEnable = 0;
 	byte u8StencilReadMask = 0xFF;
 	byte u8StencilWriteMask = 0xFF;
+
 	GXSTENCIL_OP stencilFailOp = GXSTENCIL_OP_KEEP;
 	GXSTENCIL_OP stencilDepthFailOp = GXSTENCIL_OP_KEEP;
 	GXSTENCIL_OP stencilPassOp = GXSTENCIL_OP_KEEP;
 	GXCOMPARISON_FUNC stencilFunc = GXCOMPARISON_ALWAYS;
+
+	GXSTENCIL_OP stencilBackFailOp = GXSTENCIL_OP_KEEP;
+	GXSTENCIL_OP stencilBackDepthFailOp = GXSTENCIL_OP_KEEP;
+	GXSTENCIL_OP stencilBackPassOp = GXSTENCIL_OP_KEEP;
+	GXCOMPARISON_FUNC stencilBackFunc = GXCOMPARISON_ALWAYS;
 } GXDEPTH_STENCIL_DESC;
 
 typedef enum _GXFILL_MODE
