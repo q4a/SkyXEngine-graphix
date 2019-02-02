@@ -14,6 +14,10 @@ class CGXDepthStencilState: public IGXDepthStencilState
 
 	CGXContext * m_pRender;
 	IDirect3DStateBlock9 *m_pStateBlock = NULL;
+	GXDEPTH_STENCIL_DESC m_desc;
+
+	void onDevLost();
+	void onDevRst();
 
 public:
 	void Release();

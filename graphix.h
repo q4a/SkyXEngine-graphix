@@ -748,6 +748,7 @@ public:
 	virtual IGXSamplerState *getSamplerState(UINT uSlot) = 0;
 
 	virtual GXTEXTURE_TYPE getTextureTypeFromFile(const char *szFile) = 0;
+	virtual bool saveTextureToFile(const char *szTarget, IGXBaseTexture *pTexture) = 0;
 	// http://www.gamedev.ru/terms/StencilBuffer
 	// virtual void setStencilTest(bool isEnable) = 0;
 

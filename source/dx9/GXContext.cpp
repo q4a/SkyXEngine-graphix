@@ -47,11 +47,11 @@ bool CGXContext::beginFrame()
 		return(false);
 	}
 
-	return(SUCCEEDED(m_pDevice->BeginScene()));
+	return(SUCCEEDED(DX_CALL(m_pDevice->BeginScene())));
 }
 void CGXContext::endFrame()
 {
-	m_pDevice->EndScene();
+	DX_CALL(m_pDevice->EndScene());
 
 	if(m_bDeviceWasReset)
 	{
@@ -77,7 +77,7 @@ bool CGXContext::canBeginFrame()
 			// (be sure to test the hr from your Reset call too!)
 			//ReleaseResources();
 			onLostDevice();
-			m_pDevice->Reset(&m_oD3DAPP);
+			DX_CALL(m_pDevice->Reset(&m_oD3DAPP));
 			onResetDevice();
 			m_bDeviceWasReset = true;
 			return(false);
@@ -104,7 +104,7 @@ void CGXContext::onLostDevice()
 	}
 	for(UINT i = 0, l = m_aResettableIndexBuffers.size(); i < l; ++i)
 	{
-		((CGXIndexBuffer*)m_aResettableVertexBuffers[i])->onDevLost();
+		((CGXIndexBuffer*)m_aResettableIndexBuffers[i])->onDevLost();
 	}
 	for(UINT i = 0, l = m_aResettableDSSurfaces.size(); i < l; ++i)
 	{
@@ -122,6 +122,22 @@ void CGXContext::onLostDevice()
 	{
 		dynamic_cast<CGXTextureCube*>(m_aResettableTexturesCube[i])->onDevLost();
 	}
+	for(UINT i = 0, l = m_aResettableDepthStencilStates.size(); i < l; ++i)
+	{
+		((CGXDepthStencilState*)m_aResettableDepthStencilStates[i])->onDevLost();
+	}
+	for(UINT i = 0, l = m_aResettableBlendStates.size(); i < l; ++i)
+	{
+		((CGXBlendState*)m_aResettableBlendStates[i])->onDevLost();
+	}
+	for(UINT i = 0, l = m_aResettableRasterizerStates.size(); i < l; ++i)
+	{
+		((CGXRasterizerState*)m_aResettableRasterizerStates[i])->onDevLost();
+	}
+
+
+	mem_release(m_pDefaultColorTarget);
+	mem_release(m_pDefaultDepthStencilSurface);
 }
 
 void CGXContext::onResetDevice()
@@ -132,7 +148,7 @@ void CGXContext::onResetDevice()
 	}
 	for(UINT i = 0, l = m_aResettableIndexBuffers.size(); i < l; ++i)
 	{
-		((CGXIndexBuffer*)m_aResettableVertexBuffers[i])->onDevRst();
+		((CGXIndexBuffer*)m_aResettableIndexBuffers[i])->onDevRst();
 	}
 	for(UINT i = 0, l = m_aResettableDSSurfaces.size(); i < l; ++i)
 	{
@@ -150,6 +166,21 @@ void CGXContext::onResetDevice()
 	{
 		dynamic_cast<CGXTextureCube*>(m_aResettableTexturesCube[i])->onDevRst(m_oD3DAPP.BackBufferHeight);
 	}
+	for(UINT i = 0, l = m_aResettableDepthStencilStates.size(); i < l; ++i)
+	{
+		((CGXDepthStencilState*)m_aResettableDepthStencilStates[i])->onDevRst();
+	}
+	for(UINT i = 0, l = m_aResettableBlendStates.size(); i < l; ++i)
+	{
+		((CGXBlendState*)m_aResettableBlendStates[i])->onDevRst();
+	}
+	for(UINT i = 0, l = m_aResettableRasterizerStates.size(); i < l; ++i)
+	{
+		((CGXRasterizerState*)m_aResettableRasterizerStates[i])->onDevRst();
+	}
+
+	DX_CALL(m_pDevice->GetDepthStencilSurface(&m_pDefaultDepthStencilSurface));
+	DX_CALL(m_pDevice->GetRenderTarget(0, &m_pDefaultColorTarget));
 }
 
 void CGXContext::resize(int iWidth, int iHeight, bool isWindowed)
@@ -157,8 +188,11 @@ void CGXContext::resize(int iWidth, int iHeight, bool isWindowed)
 	m_oD3DAPP.BackBufferWidth = iWidth;
 	m_oD3DAPP.BackBufferHeight = iHeight;
 	m_oD3DAPP.Windowed = isWindowed;
-
+	onLostDevice();
 	m_pDevice->Reset(&m_oD3DAPP);
+	onResetDevice();
+//	m_bDeviceLost = true;
+	m_bDeviceWasReset = true;
 }
 
 
@@ -1376,37 +1410,10 @@ IGXRasterizerState *CGXContext::createRasterizerState(GXRASTERIZER_DESC *pRSDesc
 {
 	CGXRasterizerState *pRS = new CGXRasterizerState(this);
 
-	DX_CALL(m_pDevice->BeginStateBlock());
-
-	switch(pRSDesc->fillMode)
-	{
-	case GXFILL_SOLID:
-		m_pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
-		break;
-	case GXFILL_WIREFRAME:
-		m_pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
-		break;
-	}
-	
-	switch(pRSDesc->cullMode)
-	{
-	case GXCULL_NONE:
-		m_pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-		break;
-	case GXCULL_FRONT:
-		m_pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
-		break;
-	case GXCULL_BACK:
-		m_pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
-		break;
-	}
-
-	//m_pDevice->SetRenderState(D3DRS_DEPTHBIAS, pRSDesc->iDepthBias); // ?
-	m_pDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, pRSDesc->bScissorEnable);
-
-	DX_CALL(m_pDevice->EndStateBlock(&(pRS->m_pStateBlock)));
-
 	pRS->m_isScissorsEnabled = pRSDesc->bScissorEnable;
+	pRS->m_desc = *pRSDesc;
+	pRS->onDevRst();
+	m_aResettableRasterizerStates.push_back(pRS);
 
 	return(pRS);
 }
@@ -1418,6 +1425,15 @@ void CGXContext::destroyRasterizerState(IGXRasterizerState *pState)
 		{
 			m_pRasterizerState = NULL;
 			m_sync_state.bRasterizerState = TRUE;
+		}
+
+		for(UINT i = 0, l = m_aResettableRasterizerStates.size(); i < l; ++i)
+		{
+			if(m_aResettableRasterizerStates[i] == pState)
+			{
+				m_aResettableRasterizerStates.erase(i);
+				break;
+			}
 		}
 	}
 	mem_delete(pState);
@@ -1454,42 +1470,26 @@ void CGXContext::setScissorRect(int iTop, int iRight, int iBottom, int iLeft)
 IGXDepthStencilState *CGXContext::createDepthStencilState(GXDEPTH_STENCIL_DESC *pDSDesc)
 {
 	CGXDepthStencilState *pDS = new CGXDepthStencilState(this);
+	pDS->m_desc = *pDSDesc;
+	pDS->onDevRst();
 
-	DX_CALL(m_pDevice->BeginStateBlock());
-	m_pDevice->SetRenderState(D3DRS_ZENABLE, pDSDesc->bDepthEnable ? D3DZB_TRUE : D3DZB_FALSE);
-	if(pDSDesc->bDepthEnable)
-	{
-		m_pDevice->SetRenderState(D3DRS_ZWRITEENABLE, pDSDesc->bEnableDepthWrite);
-		m_pDevice->SetRenderState(D3DRS_ZFUNC, pDSDesc->depthFunc);
-	}
-	m_pDevice->SetRenderState(D3DRS_STENCILENABLE, pDSDesc->bStencilEnable);
-	if(pDSDesc->bStencilEnable)
-	{
-		m_pDevice->SetRenderState(D3DRS_STENCILMASK, (DWORD)pDSDesc->u8StencilReadMask);
-		m_pDevice->SetRenderState(D3DRS_STENCILWRITEMASK, (DWORD)pDSDesc->u8StencilWriteMask);
-		m_pDevice->SetRenderState(D3DRS_STENCILFAIL, pDSDesc->stencilFailOp);
-		m_pDevice->SetRenderState(D3DRS_STENCILZFAIL, pDSDesc->stencilDepthFailOp);
-		m_pDevice->SetRenderState(D3DRS_STENCILPASS, pDSDesc->stencilPassOp);
-		m_pDevice->SetRenderState(D3DRS_STENCILFUNC, pDSDesc->stencilFunc);
-		if(pDSDesc->stencilBackFunc != GXCOMPARISON_ALWAYS || pDSDesc->stencilBackFailOp != GXSTENCIL_OP_KEEP || pDSDesc->stencilBackDepthFailOp != GXSTENCIL_OP_KEEP || pDSDesc->stencilBackPassOp != GXSTENCIL_OP_KEEP)
-		{
-			m_pDevice->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, TRUE);
-			m_pDevice->SetRenderState(D3DRS_CCW_STENCILFAIL, pDSDesc->stencilFailOp);
-			m_pDevice->SetRenderState(D3DRS_CCW_STENCILZFAIL, pDSDesc->stencilDepthFailOp);
-			m_pDevice->SetRenderState(D3DRS_CCW_STENCILPASS, pDSDesc->stencilPassOp);
-			m_pDevice->SetRenderState(D3DRS_CCW_STENCILFUNC, pDSDesc->stencilFunc);
-		}
-		else
-		{
-			m_pDevice->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, FALSE);
-		}
-	}
+	m_aResettableDepthStencilStates.push_back(pDS);
 
-	DX_CALL(m_pDevice->EndStateBlock(&(pDS->m_pStateBlock)));
 	return(pDS);
 }
 void CGXContext::destroyDepthStencilState(IGXDepthStencilState *pState)
 {
+	if(pState)
+	{
+		for(UINT i = 0, l = m_aResettableDepthStencilStates.size(); i < l; ++i)
+		{
+			if(m_aResettableDepthStencilStates[i] == pState)
+			{
+				m_aResettableDepthStencilStates.erase(i);
+				break;
+			}
+		}
+	}
 	mem_delete(pState);
 }
 void CGXContext::setDepthStencilState(IGXDepthStencilState *pState)
@@ -1533,39 +1533,24 @@ IGXBlendState *CGXContext::createBlendState(GXBLEND_DESC *pBSDesc)
 		debugMessage(GX_LOG_WARN, "Ignoring bIndependentBlendEnabled blend desc!");
 	}
 
-	DX_CALL(m_pDevice->BeginStateBlock());
-	
-	m_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, pBSDesc->renderTarget[0].bBlendEnable);
-	if(pBSDesc->renderTarget[0].bBlendEnable)
-	{
-		m_pDevice->SetRenderState(D3DRS_SRCBLEND, pBSDesc->renderTarget[0].srcBlend);
-		m_pDevice->SetRenderState(D3DRS_DESTBLEND, pBSDesc->renderTarget[0].destBlend);
-		m_pDevice->SetRenderState(D3DRS_BLENDOP, pBSDesc->renderTarget[0].blendOp);
-
-		if(pBSDesc->renderTarget[0].srcBlend != pBSDesc->renderTarget[0].srcBlendAlpha ||
-			pBSDesc->renderTarget[0].destBlend != pBSDesc->renderTarget[0].destBlendAlpha ||
-			pBSDesc->renderTarget[0].blendOp != pBSDesc->renderTarget[0].blendOpAlpha)
-		{
-			m_pDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, TRUE);
-
-			m_pDevice->SetRenderState(D3DRS_SRCBLENDALPHA, pBSDesc->renderTarget[0].srcBlendAlpha);
-			m_pDevice->SetRenderState(D3DRS_DESTBLENDALPHA, pBSDesc->renderTarget[0].destBlendAlpha);
-			m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, pBSDesc->renderTarget[0].blendOpAlpha);
-		}
-		else
-		{
-			m_pDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, FALSE);
-		}
-	}
-	m_pDevice->SetRenderState(D3DRS_COLORWRITEENABLE, pBSDesc->renderTarget[0].u8RenderTargetWriteMask);
-
-	
-
-	DX_CALL(m_pDevice->EndStateBlock(&(pBS->m_pStateBlock)));
+	pBS->m_desc = *pBSDesc;
+	pBS->onDevRst();
+	m_aResettableBlendStates.push_back(pBS);
 	return(pBS);
 }
 void CGXContext::destroyBlendState(IGXBlendState *pState)
 {
+	if(pState)
+	{
+		for(UINT i = 0, l = m_aResettableBlendStates.size(); i < l; ++i)
+		{
+			if(m_aResettableBlendStates[i] == pState)
+			{
+				m_aResettableBlendStates.erase(i);
+				break;
+			}
+		}
+	}
 	mem_delete(pState);
 }
 void CGXContext::setBlendState(IGXBlendState *pState)
@@ -1669,7 +1654,6 @@ IGXDepthStencilSurface *CGXContext::getDepthStencilSurface()
 IGXSurface *CGXContext::createColorTarget(UINT uWidth, UINT uHeight, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize)
 {
 	IDirect3DSurface9 *pDXSurf;
-
 	DX_CALL(m_pDevice->CreateRenderTarget(uWidth, uHeight, getDXFormat(format), (D3DMULTISAMPLE_TYPE)multisampleType, 0, FALSE, &(pDXSurf), NULL));
 
 	CGXSurface *pColorSurface = new CGXSurface(this, uWidth, uHeight, format, pDXSurf);
@@ -2121,4 +2105,19 @@ GXTEXTURE_TYPE CGXContext::getTextureTypeFromFile(const char *szFile)
 	}
 
 	return(GXTEXTURE_TYPE_UNKNOWN);
+}
+
+bool CGXContext::saveTextureToFile(const char *szTarget, IGXBaseTexture *pTexture)
+{
+	IDirect3DBaseTexture9 *pTex = NULL;
+	switch(pTexture->getType())
+	{
+	case GXTEXTURE_TYPE_2D:
+		pTex = ((CGXTexture2D*)pTexture)->getDXTexture();
+		break;
+	case GXTEXTURE_TYPE_CUBE:
+		pTex = ((CGXTextureCube*)pTexture)->getDXTexture();
+		break;
+	}
+	return(!FAILED(D3DXSaveTextureToFileA(szTarget, D3DXIFF_PNG, pTex, NULL)));
 }

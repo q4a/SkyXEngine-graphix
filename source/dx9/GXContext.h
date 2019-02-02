@@ -154,6 +154,7 @@ public:
 	UINT getBitsPerPixel(GXFORMAT format);
 
 	GXTEXTURE_TYPE getTextureTypeFromFile(const char *szFile);
+	bool saveTextureToFile(const char *szTarget, IGXBaseTexture *pTexture);
 protected:
 	
 	IDirect3D9 *m_pD3D = NULL;
@@ -233,6 +234,9 @@ protected:
 	Array<IGXTextureCube*> m_aResettableTexturesCube;
 	Array<IGXDepthStencilSurface*> m_aResettableDSSurfaces;
 	Array<IGXSurface*> m_aResettableColorSurfaces;
+	Array<IGXDepthStencilState*> m_aResettableDepthStencilStates;
+	Array<IGXBlendState*> m_aResettableBlendStates;
+	Array<IGXRasterizerState*> m_aResettableRasterizerStates;
 
 	BOOL m_isScissorsEnable = 0;
 	RECT m_rcScissors;

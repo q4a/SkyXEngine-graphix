@@ -29,6 +29,7 @@ protected:
 	void onDevLost();
 	void onDevRst(UINT uScreenWidth, UINT uScreenHeight);
 
+	Array<IGXSurface*> m_apSurfaces;
 public:
 	void Release();
 
@@ -69,6 +70,8 @@ protected:
 
 	UINT m_uMipLevels;
 	UINT m_uUsage;
+
+	Array<IGXSurface*> m_apSurfaces;
 
 
 	void onDevLost();

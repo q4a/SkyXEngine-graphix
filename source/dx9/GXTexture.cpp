@@ -31,20 +31,36 @@ void CGXTexture2D::Release()
 	--m_uRefCount;
 	if(!m_uRefCount)
 	{
+		for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
+		{
+			mem_release(m_apSurfaces[i]);
+		}
 		m_pRender->destroyTexture2D(this);
 	}
 }
 
-IGXSurface *CGXTexture2D::getMipmap(UINT i)
+IGXSurface *CGXTexture2D::getMipmap(UINT n)
 {
+	for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
+	{
+		if(((CGXSurface*)m_apSurfaces[i])->m_uMipmapNumber == n)
+		{
+			m_apSurfaces[i]->AddRef();
+			return(m_apSurfaces[i]);
+		}
+	}
+
 	IDirect3DSurface9 *pDXSurface;
 
-	if(!SUCCEEDED(DX_CALL(m_pTexture->GetSurfaceLevel(i, &pDXSurface))))
+	if(!SUCCEEDED(DX_CALL(m_pTexture->GetSurfaceLevel(n, &pDXSurface))))
 	{
 		return(NULL);
 	}
 
-	CGXSurface *pSurface = new CGXSurface(m_pRender, max(1, m_uWidth >> i), max(1, m_uHeight >> i), m_format, pDXSurface);
+	CGXSurface *pSurface = new CGXSurface(m_pRender, max(1, m_uWidth >> n), max(1, m_uHeight >> n), m_format, pDXSurface);
+	pSurface->m_uMipmapNumber = n;
+	m_apSurfaces.push_back(pSurface);
+	pSurface->AddRef();
 	return(pSurface);
 }
 
@@ -74,6 +90,10 @@ IDirect3DBaseTexture9 *CGXTexture2D::getDXTexture()
 void CGXTexture2D::onDevLost()
 {
 	mem_release(m_pTexture);
+	for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
+	{
+		mem_release(((CGXSurface*)m_apSurfaces[i])->m_pSurface);
+	}
 }
 void CGXTexture2D::onDevRst(UINT uScreenWidth, UINT uScreenHeight)
 {
@@ -84,6 +104,14 @@ void CGXTexture2D::onDevRst(UINT uScreenWidth, UINT uScreenHeight)
 	}
 	m_bWasReset = true;
 	DX_CALL(m_pRender->getDXDevice()->CreateTexture(m_uWidth, m_uHeight, m_uMipLevels, m_uUsage, m_pRender->getDXFormat(m_format), D3DPOOL_DEFAULT, &m_pTexture, NULL));
+
+	for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
+	{
+		CGXSurface *pSurf = (CGXSurface*)m_apSurfaces[i];
+		pSurf->m_uWidth = max(1, m_uWidth >> pSurf->m_uMipmapNumber);
+		pSurf->m_uHeight = max(1, m_uHeight >> pSurf->m_uMipmapNumber);
+		DX_CALL(m_pTexture->GetSurfaceLevel(pSurf->m_uMipmapNumber, &(pSurf->m_pSurface)));
+	}
 }
 
 GXTEXTURE_TYPE CGXTexture2D::getType()
@@ -103,19 +131,36 @@ void CGXTextureCube::Release()
 	--m_uRefCount;
 	if(!m_uRefCount)
 	{
+		for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
+		{
+			mem_release(m_apSurfaces[i]);
+		}
 		m_pRender->destroyTextureCube(this);
 	}
 }
 
-IGXSurface *CGXTextureCube::getMipmap(GXCUBEMAP_FACES face, UINT i)
+IGXSurface *CGXTextureCube::getMipmap(GXCUBEMAP_FACES face, UINT n)
 {
+	for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
+	{
+		if(((CGXSurface*)m_apSurfaces[i])->m_uMipmapNumber == n && ((CGXSurface*)m_apSurfaces[i])->m_face == face)
+		{
+			m_apSurfaces[i]->AddRef();
+			return(m_apSurfaces[i]);
+		}
+	}
+
 	IDirect3DSurface9 *pDXSurface;
-	if(!SUCCEEDED(DX_CALL(m_pTexture->GetCubeMapSurface((D3DCUBEMAP_FACES)face, i, &pDXSurface))))
+	if(!SUCCEEDED(DX_CALL(m_pTexture->GetCubeMapSurface((D3DCUBEMAP_FACES)face, n, &pDXSurface))))
 	{
 		return(NULL);
 	}
 
-	CGXSurface *pSurface = new CGXSurface(m_pRender, max(1, m_uSize >> i), max(1, m_uSize >> i), m_format, pDXSurface);
+	CGXSurface *pSurface = new CGXSurface(m_pRender, max(1, m_uSize >> n), max(1, m_uSize >> n), m_format, pDXSurface);
+	pSurface->m_uMipmapNumber = n;
+	pSurface->m_face = face;
+	m_apSurfaces.push_back(pSurface);
+	pSurface->AddRef();
 	return(pSurface);
 }
 
@@ -153,6 +198,10 @@ bool CGXTextureCube::wasReset()
 void CGXTextureCube::onDevLost()
 {
 	mem_release(m_pTexture);
+	for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
+	{
+		mem_release(((CGXSurface*)m_apSurfaces[i])->m_pSurface);
+	}
 }
 void CGXTextureCube::onDevRst(UINT uScreenHeight)
 {
@@ -162,6 +211,14 @@ void CGXTextureCube::onDevRst(UINT uScreenHeight)
 	}
 	m_bWasReset = true;
 	DX_CALL(m_pRender->getDXDevice()->CreateCubeTexture(m_uSize, m_uMipLevels, m_uUsage, m_pRender->getDXFormat(m_format), D3DPOOL_DEFAULT, &m_pTexture, NULL));
+
+	for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
+	{
+		CGXSurface *pSurf = (CGXSurface*)m_apSurfaces[i];
+		pSurf->m_uWidth = pSurf->m_uHeight = max(1, m_uSize >> pSurf->m_uMipmapNumber);
+
+		DX_CALL(m_pTexture->GetCubeMapSurface((D3DCUBEMAP_FACES)(pSurf->m_face), pSurf->m_uMipmapNumber, &(pSurf->m_pSurface)));
+	}
 }
 
 GXTEXTURE_TYPE CGXTextureCube::getType()

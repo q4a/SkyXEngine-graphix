@@ -6,6 +6,8 @@
 class CGXSurface: public IGXSurface
 {					  
 	friend class CGXContext;
+	friend class CGXTexture2D;
+	friend class CGXTextureCube;
 
 	~CGXSurface();
 
@@ -18,6 +20,8 @@ class CGXSurface: public IGXSurface
 
 	D3DMULTISAMPLE_TYPE m_multisampleType;
 
+	UINT m_uMipmapNumber;
+	GXCUBEMAP_FACES m_face;
 
 	bool m_bAutoResize = false;
 	float m_fSizeCoeffW = 1.0f;

@@ -20,5 +20,11 @@ void CGXDepthStencilSurface::onDevLost()
 }
 void CGXDepthStencilSurface::onDevRst(UINT uScreenWidth, UINT uScreenHeight)
 {
+	if(m_bAutoResize)
+	{
+		m_uWidth = (UINT)((float)uScreenWidth * m_fSizeCoeffW);
+		m_uHeight = (UINT)((float)uScreenHeight * m_fSizeCoeffH);
+	}
+
 	DX_CALL(m_pRender->getDXDevice()->CreateDepthStencilSurface(m_uWidth, m_uHeight, m_format, m_multisampleType, 0, FALSE, &m_pSurface, NULL));
 }

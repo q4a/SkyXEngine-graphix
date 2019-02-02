@@ -33,5 +33,11 @@ void CGXSurface::onDevLost()
 }
 void CGXSurface::onDevRst(UINT uScreenWidth, UINT uScreenHeight)
 {
+	if(m_bAutoResize)
+	{
+		m_uWidth = (UINT)((float)uScreenWidth * m_fSizeCoeffW);
+		m_uHeight = (UINT)((float)uScreenHeight * m_fSizeCoeffH);
+	}
+
 	DX_CALL(m_pRender->getDXDevice()->CreateRenderTarget(m_uWidth, m_uHeight, m_pRender->getDXFormat(m_format), m_multisampleType, 0, FALSE, &m_pSurface, NULL));
 }
