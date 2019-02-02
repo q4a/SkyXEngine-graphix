@@ -5,7 +5,7 @@ void CGXSurface::Release()
 	--m_uRefCount;
 	if(!m_uRefCount)
 	{
-		delete this;
+		m_pRender->destroyColorTarget(this);
 	}
 }
 

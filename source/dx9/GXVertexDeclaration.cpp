@@ -28,7 +28,11 @@ CGXVertexDeclaration::CGXVertexDeclaration(IDirect3DDevice9 *pDevice, CGXContext
 			CGXContext::debugMessage(GX_LOG_ERROR, "Unable to create vertex declaration: Stream >= MAXGXVSTREAM!");
 			return;
 		}
-		if(m_u8SpecSpec[pDecl[i].Stream] != (GXDECLSPEC)-1 && m_u8SpecSpec[pDecl[i].Stream] != pDecl[i].spec)
+		if(m_u8SpecSpec[pDecl[i].Stream] == (GXDECLSPEC)-1)
+		{
+			m_u8SpecSpec[pDecl[i].Stream] = pDecl[i].spec;
+		}
+		else if(m_u8SpecSpec[pDecl[i].Stream] != pDecl[i].spec)
 		{
 			CGXContext::debugMessage(GX_LOG_ERROR, "Unable to create vertex declaration: vertex instance specs in a stream must be the same!");
 			return;
