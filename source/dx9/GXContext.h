@@ -141,6 +141,9 @@ public:
 	void setSamplerState(IGXSamplerState *pState, UINT uSlot);
 	IGXSamplerState *getSamplerState(UINT uSlot);
 
+	IGXSwapChain *createSwapChain(UINT uWidth, UINT uHeight, SXWINDOW wnd);
+	void destroySwapChain(IGXSwapChain *pSwapChain);
+
 	static void debugMessage(GX_LOG, const char *msg);
 	static void logDXcall(const char *szCodeString, HRESULT hr);
 
@@ -237,6 +240,7 @@ protected:
 	Array<IGXDepthStencilState*> m_aResettableDepthStencilStates;
 	Array<IGXBlendState*> m_aResettableBlendStates;
 	Array<IGXRasterizerState*> m_aResettableRasterizerStates;
+	Array<IGXSwapChain*> m_aResettableSwapChains;
 
 	BOOL m_isScissorsEnable = 0;
 	RECT m_rcScissors;

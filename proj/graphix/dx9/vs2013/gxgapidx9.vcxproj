@@ -22,6 +22,7 @@
     <ClInclude Include="..\..\..\..\source\dx9\GXSamplerState.h" />
     <ClInclude Include="..\..\..\..\source\dx9\GXShader.h" />
     <ClInclude Include="..\..\..\..\source\dx9\GXSurface.h" />
+    <ClInclude Include="..\..\..\..\source\dx9\GXSwapChain.h" />
     <ClInclude Include="..\..\..\..\source\dx9\GXTexture.h" />
     <ClInclude Include="..\..\..\..\source\dx9\GXVertexBuffer.h" />
     <ClInclude Include="..\..\..\..\source\dx9\GXVertexDeclaration.h" />
@@ -38,6 +39,7 @@
     <ClCompile Include="..\..\..\..\source\dx9\GXSamplerState.cpp" />
     <ClCompile Include="..\..\..\..\source\dx9\GXShader.cpp" />
     <ClCompile Include="..\..\..\..\source\dx9\GXSurface.cpp" />
+    <ClCompile Include="..\..\..\..\source\dx9\GXSwapChain.cpp" />
     <ClCompile Include="..\..\..\..\source\dx9\GXTexture.cpp" />
     <ClCompile Include="..\..\..\..\source\dx9\GXVertexBuffer.cpp" />
     <ClCompile Include="..\..\..\..\source\dx9\GXVertexDeclaration.cpp" />

@@ -8,6 +8,7 @@ class CGXSurface: public IGXSurface
 	friend class CGXContext;
 	friend class CGXTexture2D;
 	friend class CGXTextureCube;
+	friend class CGXSwapChain;
 
 	~CGXSurface();
 

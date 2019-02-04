@@ -12,6 +12,7 @@
 #include "GXSurface.h"
 #include "GXBlendState.h"
 #include "GXTexture.h"
+#include "GXSwapChain.h"
 #include <cstdio>
 
 //флаги компиляции шейдеров
@@ -134,6 +135,10 @@ void CGXContext::onLostDevice()
 	{
 		((CGXRasterizerState*)m_aResettableRasterizerStates[i])->onDevLost();
 	}
+	for(UINT i = 0, l = m_aResettableSwapChains.size(); i < l; ++i)
+	{
+		((CGXSwapChain*)m_aResettableSwapChains[i])->onDevLost();
+	}
 
 
 	mem_release(m_pDefaultColorTarget);
@@ -178,6 +183,10 @@ void CGXContext::onResetDevice()
 	{
 		((CGXRasterizerState*)m_aResettableRasterizerStates[i])->onDevRst();
 	}
+	for(UINT i = 0, l = m_aResettableSwapChains.size(); i < l; ++i)
+	{
+		((CGXSwapChain*)m_aResettableSwapChains[i])->onDevRst();
+	}
 
 	DX_CALL(m_pDevice->GetDepthStencilSurface(&m_pDefaultDepthStencilSurface));
 	DX_CALL(m_pDevice->GetRenderTarget(0, &m_pDefaultColorTarget));
@@ -185,6 +194,14 @@ void CGXContext::onResetDevice()
 
 void CGXContext::resize(int iWidth, int iHeight, bool isWindowed)
 {
+	if(iWidth < 1)
+	{
+		iWidth = 1;
+	}
+	if(iHeight < 1)
+	{
+		iHeight = 1;
+	}
 	m_oD3DAPP.BackBufferWidth = iWidth;
 	m_oD3DAPP.BackBufferHeight = iHeight;
 	m_oD3DAPP.Windowed = isWindowed;
@@ -259,6 +276,7 @@ BOOL CGXContext::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindo
 
 	DX_CALL(m_pDevice->GetDepthStencilSurface(&m_pDefaultDepthStencilSurface));
 	DX_CALL(m_pDevice->GetRenderTarget(0, &m_pDefaultColorTarget));
+	
 
 	return(TRUE);
 }
@@ -1939,6 +1957,29 @@ void CGXContext::destroyTextureCube(IGXTextureCube * pTexture)
 	}
 	mem_delete(pTexture);
 }
+
+IGXSwapChain *CGXContext::createSwapChain(UINT uWidth, UINT uHeight, SXWINDOW wnd)
+{
+	CGXSwapChain *pSC = new CGXSwapChain(this, uWidth, uHeight, wnd);
+	m_aResettableSwapChains.push_back(pSC);
+	return(pSC);
+}
+void CGXContext::destroySwapChain(IGXSwapChain *pSwapChain)
+{
+	if(pSwapChain)
+	{
+		for(UINT i = 0, l = m_aResettableSwapChains.size(); i < l; ++i)
+		{
+			if(pSwapChain == m_aResettableSwapChains[i])
+			{
+				m_aResettableSwapChains.erase(i);
+				break;
+			}
+		}
+	}
+	mem_delete(pSwapChain);
+}
+
 
 UINT CGXContext::getTextureDataSize(UINT uPitch, UINT uHeight, GXFORMAT format)
 {

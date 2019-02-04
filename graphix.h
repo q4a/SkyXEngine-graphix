@@ -622,6 +622,13 @@ class IGXSamplerState: public IGXBaseInterface
 {
 };
 
+class IGXSwapChain: public IGXBaseInterface
+{
+public:
+	virtual void swapBuffers() = 0;
+	virtual IGXSurface *getColorTarget() = 0;
+};
+
 //class IGXRenderTarget
 //{
 //public:
@@ -746,6 +753,9 @@ public:
 	virtual void destroySamplerState(IGXSamplerState *pState) = 0;
 	virtual void setSamplerState(IGXSamplerState *pState, UINT uSlot) = 0;
 	virtual IGXSamplerState *getSamplerState(UINT uSlot) = 0;
+
+	virtual IGXSwapChain *createSwapChain(UINT uWidth, UINT uHeight, SXWINDOW wnd) = 0;
+	virtual void destroySwapChain(IGXSwapChain *pSwapChain) = 0;
 
 	virtual GXTEXTURE_TYPE getTextureTypeFromFile(const char *szFile) = 0;
 	virtual bool saveTextureToFile(const char *szTarget, IGXBaseTexture *pTexture) = 0;
