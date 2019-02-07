@@ -190,6 +190,8 @@ void CGXContext::onResetDevice()
 
 	DX_CALL(m_pDevice->GetDepthStencilSurface(&m_pDefaultDepthStencilSurface));
 	DX_CALL(m_pDevice->GetRenderTarget(0, &m_pDefaultColorTarget));
+
+	memset(&m_sync_state, 1, sizeof(m_sync_state));
 }
 
 void CGXContext::resize(int iWidth, int iHeight, bool isWindowed)
@@ -1606,6 +1608,16 @@ IGXDepthStencilSurface *CGXContext::createDepthStencilSurface(UINT uWidth, UINT 
 
 	pDSSurface->m_multisampleType = (D3DMULTISAMPLE_TYPE)multisampleType;
 	pDSSurface->m_format = getDXFormat(format);
+
+	if(!uWidth)
+	{
+		uWidth = 1;
+	}
+
+	if(!uHeight)
+	{
+		uHeight = 1;
+	}
 
 	pDSSurface->m_uWidth = uWidth;
 	pDSSurface->m_uHeight = uHeight;
