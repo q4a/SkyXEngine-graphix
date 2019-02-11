@@ -172,10 +172,10 @@ enum GXINDEXTYPE
 #define GXCOLOR_COLORVALUE_V4(vec) GXCOLOR_COLORVALUE((vec).x, (vec).y, (vec).z, (vec).w)
 
 #define GXCOLOR_COLORVECTOR_ARGB(val) float4_t( \
-	(float)(((DWORD)(val) >> 24) & 0xFF) / 255.0f, \
 	(float)(((DWORD)(val) >> 16) & 0xFF) / 255.0f, \
 	(float)(((DWORD)(val) >> 8) & 0xFF) / 255.0f, \
-	(float)((DWORD)(val) & 0xFF) / 255.0f \
+	(float)((DWORD)(val) & 0xFF) / 255.0f, \
+	(float)(((DWORD)(val) >> 24) & 0xFF) / 255.0f \
 )
 
 typedef enum _GXFORMAT
