@@ -79,8 +79,8 @@ CGXVertexDeclaration::CGXVertexDeclaration(IDirect3DDevice9 *pDevice, CGXContext
 		case GXDECLTYPE_FLOAT4:
 			pEls[i].Type = D3DDECLTYPE_FLOAT4; uSize = 16; break;
 
-		case GXDECLTYPE_GXCOLOR:
-			pEls[i].Type = D3DDECLTYPE_D3DCOLOR; uSize = 4; break;
+		//case GXDECLTYPE_GXCOLOR:
+		//	pEls[i].Type = D3DDECLTYPE_D3DCOLOR; uSize = 4; break;
 
 
 		case GXDECLTYPE_UBYTE4:
@@ -104,11 +104,11 @@ CGXVertexDeclaration::CGXVertexDeclaration(IDirect3DDevice9 *pDevice, CGXContext
 		case GXDECLTYPE_USHORT4N:
 			pEls[i].Type = D3DDECLTYPE_USHORT4N; uSize = 8; break;
 
-		case GXDECLTYPE_UDEC3:
-			pEls[i].Type = D3DDECLTYPE_UDEC3; uSize = 32; break;
+		//case GXDECLTYPE_UDEC3:
+		//	pEls[i].Type = D3DDECLTYPE_UDEC3; uSize = 32; break;
 
-		case GXDECLTYPE_DEC3N:
-			pEls[i].Type = D3DDECLTYPE_DEC3N; uSize = 32; break;
+		//case GXDECLTYPE_DEC3N:
+		//	pEls[i].Type = D3DDECLTYPE_DEC3N; uSize = 32; break;
 
 		case GXDECLTYPE_FLOAT16_2:
 			pEls[i].Type = D3DDECLTYPE_FLOAT16_2; uSize = 4; break;

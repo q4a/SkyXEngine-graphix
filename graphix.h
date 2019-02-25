@@ -8,7 +8,7 @@ typedef DWORD GXCOLOR;
 
 enum GXBUFFERLOCK
 {
-	GXBL_READ,
+	GXBL_READ, // obsolete
 	GXBL_WRITE
 };
 
@@ -20,14 +20,14 @@ enum GXTEXLOCK
 
 #define GXCLEAR_COLOR 0x00000001 
 #define GXCLEAR_DEPTH 0x00000002 
-#define GXCLEAR_STENCIL 0x000000024
+#define GXCLEAR_STENCIL 0x00000004
 
 enum
 {
-	GX_BUFFER_USAGE_STATIC = 0x01, // данные будут очень редко обновляться
-	GX_BUFFER_USAGE_DYNAMIC = 0x02, // данные будут обновляться, но не каждый кадр
-	GX_BUFFER_USAGE_STREAM = 0x04, // данные будут обновляться каждый кадр
-	GX_BUFFER_WRITEONLY = 0x08,
+	GX_BUFFER_USAGE_STATIC = 0x01, // данные будут очень редко обновляться, нет доступа с CPU
+	GX_BUFFER_USAGE_DYNAMIC = 0x02, // данные будут обновляться, но не каждый кадр, есть доступ с CPU на запись
+	GX_BUFFER_USAGE_STREAM = 0x04, // данные будут обновляться каждый кадр, есть доступ с CPU на запись
+	GX_BUFFER_WRITEONLY = 0x08, // устарел
 	GX_BUFFER_ALLOWDISCARD = 0x10
 };
 
@@ -41,7 +41,7 @@ typedef enum _GXDECLTYPE
 	GXDECLTYPE_FLOAT2 = 1,  // 2D float expanded to (value, value, 0., 1.)
 	GXDECLTYPE_FLOAT3 = 2,  // 3D float expanded to (value, value, value, 1.)
 	GXDECLTYPE_FLOAT4 = 3,  // 4D float
-	GXDECLTYPE_GXCOLOR = 4,  // 4D packed unsigned bytes mapped to 0. to 1. range
+	//GXDECLTYPE_GXCOLOR = 4,  // 4D packed unsigned bytes mapped to 0. to 1. range
 	// Input is in GXCOLOR format (ARGB) expanded to (R, G, B, A)
 	GXDECLTYPE_UBYTE4 = 5,  // 4D unsigned byte
 	GXDECLTYPE_SHORT2 = 6,  // 2D signed short expanded to (value, value, 0., 1.)
@@ -55,8 +55,8 @@ typedef enum _GXDECLTYPE
 	GXDECLTYPE_SHORT4N = 10,  // 4D signed short normalized (v[0]/32767.0,v[1]/32767.0,v[2]/32767.0,v[3]/32767.0)
 	GXDECLTYPE_USHORT2N = 11,  // 2D unsigned short normalized (v[0]/65535.0,v[1]/65535.0,0,1)
 	GXDECLTYPE_USHORT4N = 12,  // 4D unsigned short normalized (v[0]/65535.0,v[1]/65535.0,v[2]/65535.0,v[3]/65535.0)
-	GXDECLTYPE_UDEC3 = 13,  // 3D unsigned 10 10 10 format expanded to (value, value, value, 1)
-	GXDECLTYPE_DEC3N = 14,  // 3D signed 10 10 10 format normalized and expanded to (v[0]/511.0, v[1]/511.0, v[2]/511.0, 1)
+	//GXDECLTYPE_UDEC3 = 13,  // 3D unsigned 10 10 10 format expanded to (value, value, value, 1)
+	//GXDECLTYPE_DEC3N = 14,  // 3D signed 10 10 10 format normalized and expanded to (v[0]/511.0, v[1]/511.0, v[2]/511.0, 1)
 	GXDECLTYPE_FLOAT16_2 = 15,  // Two 16-bit floating point values, expanded to (value, value, 0, 1)
 	GXDECLTYPE_FLOAT16_4 = 16,  // Four 16-bit floating point values
 	GXDECLTYPE_UNUSED = 17,  // When the type field in a decl is unused.
@@ -667,54 +667,42 @@ public:
 	virtual IGXVertexBuffer * createVertexBuffer(size_t size, UINT flags, void * pInitData = NULL) = 0;
 	virtual IGXIndexBuffer * createIndexBuffer(size_t size, UINT flags, GXINDEXTYPE it, void * pInitData = NULL) = 0;
 
-	virtual void destroyIndexBuffer(IGXIndexBuffer * pBuff) = 0;
-	virtual void destroyVertexBuffer(IGXVertexBuffer * pBuff) = 0;
-
 	virtual void setIndexBuffer(IGXIndexBuffer * pBuff) = 0;
 	virtual void setRenderBuffer(IGXRenderBuffer * pBuff) = 0;
-	//virtual void setVertexBuffers(UINT startSlot, UINT countSlots, IDSRvertexBuffer ** pBuff) = 0;
 
 	virtual IGXVertexDeclaration * createVertexDeclaration(const GXVERTEXELEMENT * pDecl) = 0;
-	virtual void destroyVertexDeclaration(IGXVertexDeclaration * pDecl) = 0;
 
-	//virtual void IASetInputLayout(IGXvertexDeclaration * pDecl) = 0;
 	virtual void setPrimitiveTopology(GXPT pt) = 0;
 
 	virtual void drawIndexed(UINT uVertexCount, UINT uPrimitiveCount, UINT uStartIndexLocation, int iBaseVertexLocation) = 0;
 	virtual void drawIndexedInstanced(UINT uInstanceCount, UINT uVertexCount, UINT uPrimitiveCount, UINT uStartIndexLocation, int iBaseVertexLocation) = 0;
 	virtual void drawPrimitive(UINT uStartVertex, UINT uPrimitiveCount) = 0;
-	virtual void drawPrimitiveInstanced(UINT uInstanceCount, UINT uStartVertex, UINT uPrimitiveCount) = 0;
+	//virtual void drawPrimitiveInstanced(UINT uInstanceCount, UINT uStartVertex, UINT uPrimitiveCount) = 0;
 	
 	// https://github.com/LukasBanana/XShaderCompiler/releases
 	// https://github.com/Thekla/hlslparser/tree/master/src
 	virtual IGXVertexShader * createVertexShader(const char * szFile, GXMACRO *pDefs = NULL) = 0;
 	virtual IGXVertexShader * createVertexShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) = 0;
 	virtual IGXVertexShader * createVertexShader(void *pData, UINT uSize) = 0;
-	virtual void destroyVertexShader(IGXVertexShader * pSH) = 0;
 
 	virtual IGXPixelShader * createPixelShader(const char * szFile, GXMACRO *pDefs = NULL) = 0;
 	virtual IGXPixelShader * createPixelShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) = 0;
 	virtual IGXPixelShader * createPixelShader(void *pData, UINT uSize) = 0;
-	virtual void destroyPixelShader(IGXPixelShader * pSH) = 0;
 
 	// virtual void setVertexShader(IGXVertexShader * pSH) = 0;
 	// virtual void setPixelShader(IGXPixelShader * pSH) = 0;
 
 	virtual IGXShader *createShader(IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL) = 0;
-	virtual void destroyShader(IGXShader *pSH) = 0;
 	virtual void setShader(IGXShader *pSH) = 0;
 	virtual IGXShader *getShader() = 0;
 
 	virtual IGXRenderBuffer * createRenderBuffer(UINT countSlots, IGXVertexBuffer ** ppBuff, IGXVertexDeclaration * pDecl) = 0;
-	virtual void destroyRenderBuffer(IGXRenderBuffer * pDecl) = 0;
 
 	virtual IGXDepthStencilSurface *createDepthStencilSurface(UINT uWidth, UINT uHeight, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false) = 0;
-	virtual void destroyDepthStencilSurface(IGXDepthStencilSurface *pSurface) = 0;
 	virtual void setDepthStencilSurface(IGXDepthStencilSurface *pSurface) = 0;
 	virtual IGXDepthStencilSurface *getDepthStencilSurface() = 0;
 
 	virtual IGXSurface *createColorTarget(UINT uWidth, UINT uHeight, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false) = 0;
-	virtual void destroyColorTarget(IGXSurface *pSurface) = 0;
 	virtual void downsampleColorTarget(IGXSurface *pSource, IGXSurface *pTarget) = 0;
 
 	virtual void setColorTarget(IGXSurface *pSurf, UINT idx = 0) = 0;
@@ -722,8 +710,6 @@ public:
 
 	virtual IGXTexture2D *createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData = NULL) = 0;
 	virtual IGXTextureCube *createTextureCube(UINT uSize, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData = NULL) = 0;
-	virtual void destroyTexture2D(IGXTexture2D * pTexture) = 0;
-	virtual void destroyTextureCube(IGXTextureCube * pTexture) = 0;
 
 	virtual IGXTexture2D *createTexture2DFromFile(const char *szFileName, UINT uTexUsageFlags, bool bAllowNonPowerOf2 = false) = 0;
 	virtual IGXTextureCube *createTextureCubeFromFile(const char *szFileName, UINT uTexUsageFlags, bool bAllowNonPowerOf2 = false) = 0;
@@ -732,30 +718,25 @@ public:
 	virtual IGXBaseTexture *getTexture(UINT uStage = 0) = 0;
 
 	virtual IGXBlendState *createBlendState(GXBLEND_DESC *pBlendDesc) = 0;
-	virtual void destroyBlendState(IGXBlendState *pState) = 0;
 	virtual void setBlendState(IGXBlendState *pState) = 0;
 	virtual IGXBlendState *getBlendState() = 0;
 	virtual void setBlendFactor(GXCOLOR val) = 0;
 
 	virtual IGXDepthStencilState *createDepthStencilState(GXDEPTH_STENCIL_DESC *pDSDesc) = 0;
-	virtual void destroyDepthStencilState(IGXDepthStencilState *pState) = 0;
 	virtual void setDepthStencilState(IGXDepthStencilState *pState) = 0;
 	virtual IGXDepthStencilState *getDepthStencilState() = 0;
 	virtual void setStencilRef(UINT uVal) = 0;
 
 	virtual IGXRasterizerState *createRasterizerState(GXRASTERIZER_DESC *pRSDesc) = 0;
-	virtual void destroyRasterizerState(IGXRasterizerState *pState) = 0;
 	virtual void setRasterizerState(IGXRasterizerState *pState) = 0;
 	virtual IGXRasterizerState *getRasterizerState() = 0;
 	virtual void setScissorRect(int iTop, int iRight, int iBottom, int iLeft) = 0;
 
 	virtual IGXSamplerState *createSamplerState(GXSAMPLER_DESC *pSamplerDesc) = 0;
-	virtual void destroySamplerState(IGXSamplerState *pState) = 0;
 	virtual void setSamplerState(IGXSamplerState *pState, UINT uSlot) = 0;
 	virtual IGXSamplerState *getSamplerState(UINT uSlot) = 0;
 
 	virtual IGXSwapChain *createSwapChain(UINT uWidth, UINT uHeight, SXWINDOW wnd) = 0;
-	virtual void destroySwapChain(IGXSwapChain *pSwapChain) = 0;
 
 	virtual GXTEXTURE_TYPE getTextureTypeFromFile(const char *szFile) = 0;
 	virtual bool saveTextureToFile(const char *szTarget, IGXBaseTexture *pTexture) = 0;

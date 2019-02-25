@@ -20,6 +20,8 @@ class CGXIndexBuffer: public IGXIndexBuffer
 	bool m_wasReset = true;
 	bool m_isResettable = false;
 
+	bool m_isLockable = true;
+
 	UINT m_uFlags;
 
 	void onDevLost();

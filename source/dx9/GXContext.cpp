@@ -321,6 +321,7 @@ IGXVertexBuffer * CGXContext::createVertexBuffer(size_t size, UINT flags, void *
 	if(flags & GX_BUFFER_USAGE_STATIC)
 	{
 		//usage = 0;
+		pBuff->m_isLockable = false;
 	}
 	if(flags & GX_BUFFER_USAGE_DYNAMIC && pool == D3DPOOL_DEFAULT)
 	{
@@ -373,6 +374,7 @@ IGXIndexBuffer * CGXContext::createIndexBuffer(size_t size, UINT flags, GXINDEXT
 
 	if(flags & GX_BUFFER_USAGE_STATIC)
 	{
+		pBuff->m_isLockable = false;
 		//usage = 0;
 	}
 	if(flags & GX_BUFFER_USAGE_DYNAMIC && pool == D3DPOOL_DEFAULT)

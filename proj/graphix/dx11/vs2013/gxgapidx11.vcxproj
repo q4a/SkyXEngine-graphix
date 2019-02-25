@@ -10,6 +10,39 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\source\dx11\GXBlendState.h" />
+    <ClInclude Include="..\..\..\..\source\dx11\GXContext.h" />
+    <ClInclude Include="..\..\..\..\source\dx11\GXDepthStencilState.h" />
+    <ClInclude Include="..\..\..\..\source\dx11\GXDepthStencilSurface.h" />
+    <ClInclude Include="..\..\..\..\source\dx11\GXIndexBuffer.h" />
+    <ClInclude Include="..\..\..\..\source\dx11\GXRasterizerState.h" />
+    <ClInclude Include="..\..\..\..\source\dx11\GXRenderBuffer.h" />
+    <ClInclude Include="..\..\..\..\source\dx11\GXSamplerState.h" />
+    <ClInclude Include="..\..\..\..\source\dx11\GXShader.h" />
+    <ClInclude Include="..\..\..\..\source\dx11\GXSurface.h" />
+    <ClInclude Include="..\..\..\..\source\dx11\GXSwapChain.h" />
+    <ClInclude Include="..\..\..\..\source\dx11\GXTexture.h" />
+    <ClInclude Include="..\..\..\..\source\dx11\GXVertexBuffer.h" />
+    <ClInclude Include="..\..\..\..\source\dx11\GXVertexDeclaration.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\source\dx11\dllmain.cpp" />
+    <ClCompile Include="..\..\..\..\source\dx11\GXBlendState.cpp" />
+    <ClCompile Include="..\..\..\..\source\dx11\GXContext.cpp" />
+    <ClCompile Include="..\..\..\..\source\dx11\GXDepthStencilState.cpp" />
+    <ClCompile Include="..\..\..\..\source\dx11\GXDepthStencilSurface.cpp" />
+    <ClCompile Include="..\..\..\..\source\dx11\GXIndexBuffer.cpp" />
+    <ClCompile Include="..\..\..\..\source\dx11\GXRasterizerState.cpp" />
+    <ClCompile Include="..\..\..\..\source\dx11\GXRenderBuffer.cpp" />
+    <ClCompile Include="..\..\..\..\source\dx11\GXSamplerState.cpp" />
+    <ClCompile Include="..\..\..\..\source\dx11\GXShader.cpp" />
+    <ClCompile Include="..\..\..\..\source\dx11\GXSurface.cpp" />
+    <ClCompile Include="..\..\..\..\source\dx11\GXSwapChain.cpp" />
+    <ClCompile Include="..\..\..\..\source\dx11\GXTexture.cpp" />
+    <ClCompile Include="..\..\..\..\source\dx11\GXVertexBuffer.cpp" />
+    <ClCompile Include="..\..\..\..\source\dx11\GXVertexDeclaration.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DAFA20F5-5162-4F21-99AF-DB8084D3C557}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -43,14 +76,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>../../../../../../build/bin/</OutDir>
-    <IncludePath>../../../../../../source/;../../../../../;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>../../../../../../libs/;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
+    <IncludePath>../../../../../../source/;../../../../../;$(VC_IncludePath);$(WindowsSDK_IncludePath);;../../../../sdks/dx11sdk/Include;</IncludePath>
+    <LibraryPath>../../../../../../libs/;../../../../sdks/dx11sdk/Lib/x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>../../../../../../build/bin/</OutDir>
-    <IncludePath>../../../../../../source/;../../../../../;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>../../../../../../libs/;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
+    <IncludePath>../../../../../../source/;../../../../../;$(VC_IncludePath);$(WindowsSDK_IncludePath);;../../../../sdks/dx11sdk/Include;</IncludePath>
+    <LibraryPath>../../../../../../libs/;../../../../sdks/dx11sdk/Lib/x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
