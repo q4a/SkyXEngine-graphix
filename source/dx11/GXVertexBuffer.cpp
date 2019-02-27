@@ -12,14 +12,16 @@ void CGXVertexBuffer::Release()
 bool CGXVertexBuffer::lock(void **ppData, GXBUFFERLOCK mode)
 {
 	assert(mode == GXBL_WRITE);
-	assert(m_isLockable || m_wasReset);
+	assert(m_isLockable);
 
-	if(!(m_isLockable || m_wasReset) || mode != GXBL_WRITE)
+	if(!m_isLockable || mode != GXBL_WRITE)
 	{
 		return(false);
 	}
 
-	if(!FAILED(m_pBuffer->Lock(0, m_uSize, ppData, mode == GXBL_WRITE ? m_uLockFlagsWrite : D3DLOCK_READONLY)))
+	D3D11_MAPPED_SUBRESOURCE srs;
+
+	if(!FAILED(DX_CALL(m_pRender->getDXDeviceContext()->Map(m_pBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &srs))))
 	{
 		m_wasReset = false;
 		return(true);
@@ -29,7 +31,7 @@ bool CGXVertexBuffer::lock(void **ppData, GXBUFFERLOCK mode)
 
 void CGXVertexBuffer::unlock()
 {
-	m_pBuffer->Unlock();
+	m_pRender->getDXDeviceContext()->Unmap(m_pBuffer, 0);
 }
 
 CGXVertexBuffer::~CGXVertexBuffer()
