@@ -5,7 +5,7 @@
 #if defined(_WINDOWS)
 #	define WIN32_LEAN_AND_MEAN
 #	include <Windows.h>
-#	if defined(GXGAPIDX9_EXPORTS)
+#	if defined(GXGAPIDX11_EXPORTS)
 #		define GXGAPI __declspec(dllexport)
 #	else
 #		define GXGAPI __declspec(dllimport)
