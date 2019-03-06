@@ -48,6 +48,8 @@ bool CGXContext::beginFrame()
 		return(false);
 	}
 
+	memset(&m_frameStats, 0, sizeof(m_frameStats));
+
 	return(SUCCEEDED(DX_CALL(m_pDevice->BeginScene())));
 }
 void CGXContext::endFrame()
@@ -507,11 +509,32 @@ void CGXContext::setIndexBuffer(IGXIndexBuffer * pBuff)
 	m_sync_state.bIndexBuffer = TRUE;
 }
 
+void CGXContext::_updateStats(UINT uPrimCount)
+{
+	++m_frameStats.uDIPcount;
+	switch(m_drawPT)
+	{
+	case D3DPT_POINTLIST:
+		m_frameStats.uPointCount += uPrimCount;
+		break;
+	case D3DPT_LINELIST:
+	case D3DPT_LINESTRIP:
+		m_frameStats.uLineCount += uPrimCount;
+		break;
+	case D3DPT_TRIANGLELIST:
+	case D3DPT_TRIANGLESTRIP:
+		m_frameStats.uPolyCount += uPrimCount;
+		break;
+	}
+}
+
 void CGXContext::drawIndexed(UINT uVertexCount, UINT uPrimitiveCount, UINT uStartIndexLocation, int iBaseVertexLocation)
 {
 	syncronize();
-	
+
 	DX_CALL(m_pDevice->DrawIndexedPrimitive(m_drawPT, iBaseVertexLocation, 0, uVertexCount, uStartIndexLocation, uPrimitiveCount));
+
+	_updateStats(uPrimitiveCount);
 }
 
 void CGXContext::drawPrimitive(UINT uStartVertex, UINT uPrimitiveCount)
@@ -519,6 +542,8 @@ void CGXContext::drawPrimitive(UINT uStartVertex, UINT uPrimitiveCount)
 	syncronize();
 
 	DX_CALL(m_pDevice->DrawPrimitive(m_drawPT, uStartVertex, uPrimitiveCount));
+
+	_updateStats(uPrimitiveCount);
 }
 
 void CGXContext::_beginInstancing(UINT uInstanceCount)
@@ -555,6 +580,8 @@ void CGXContext::drawIndexedInstanced(UINT uInstanceCount, UINT uVertexCount, UI
 
 	DX_CALL(m_pDevice->DrawIndexedPrimitive(m_drawPT, iBaseVertexLocation, 0, uVertexCount, uStartIndexLocation, uPrimitiveCount));
 
+	_updateStats(uPrimitiveCount * uInstanceCount);
+
 	_endInstancing();
 }
 void CGXContext::drawPrimitiveInstanced(UINT uInstanceCount, UINT uStartVertex, UINT uPrimitiveCount)
@@ -562,6 +589,8 @@ void CGXContext::drawPrimitiveInstanced(UINT uInstanceCount, UINT uStartVertex, 
 	_beginInstancing(uInstanceCount);
 
 	DX_CALL(m_pDevice->DrawPrimitive(m_drawPT, uStartVertex, uPrimitiveCount));
+
+	_updateStats(uPrimitiveCount * uInstanceCount);
 
 	_endInstancing();
 }

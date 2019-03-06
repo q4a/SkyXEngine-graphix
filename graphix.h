@@ -485,6 +485,14 @@ typedef enum _GXTEXTURE_TYPE
 	GXTEXTURE_TYPE_UNKNOWN
 } GXTEXTURE_TYPE;
 
+struct GX_FRAME_STATS
+{
+	UINT uDIPcount;
+	UINT uPolyCount;
+	UINT uLineCount;
+	UINT uPointCount;
+};
+
 //##########################################################################
 
 class IGXBaseInterface
@@ -641,7 +649,6 @@ public:
 
 //##########################################################################
 
-#define bAllowDiscard bAllowDiscard /* данные могут быть потеряны, например при потере/восстановлении устройства в dx9 */
 class IGXContext
 {
 protected:
@@ -737,6 +744,8 @@ public:
 	virtual IGXSamplerState *getSamplerState(UINT uSlot) = 0;
 
 	virtual IGXSwapChain *createSwapChain(UINT uWidth, UINT uHeight, SXWINDOW wnd) = 0;
+
+	virtual const GX_FRAME_STATS *getFrameStats() = 0;
 
 	virtual GXTEXTURE_TYPE getTextureTypeFromFile(const char *szFile) = 0;
 	virtual bool saveTextureToFile(const char *szTarget, IGXBaseTexture *pTexture) = 0;

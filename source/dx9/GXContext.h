@@ -158,6 +158,11 @@ public:
 
 	GXTEXTURE_TYPE getTextureTypeFromFile(const char *szFile);
 	bool saveTextureToFile(const char *szTarget, IGXBaseTexture *pTexture);
+
+	const GX_FRAME_STATS *getFrameStats()
+	{
+		return(&m_frameStats);
+	}
 protected:
 	
 	IDirect3D9 *m_pD3D = NULL;
@@ -247,6 +252,9 @@ protected:
 
 	void _beginInstancing(UINT uInstanceCount);
 	void _endInstancing();
+	void _updateStats(UINT uPrimCount);
+
+	GX_FRAME_STATS m_frameStats;
 };
 
 #endif
