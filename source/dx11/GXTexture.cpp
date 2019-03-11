@@ -53,7 +53,7 @@ IGXSurface *CGXTexture2D::getMipmap(UINT n)
 	
 	CGXSurface *pSurface = new CGXSurface(m_pRender, max(1, m_uWidth >> n), max(1, m_uHeight >> n), m_format, m_pTexture);
 	pSurface->m_uMipmapNumber = n;
-	if(m_descTex2D.BindFlags | D3D11_BIND_RENDER_TARGET)
+	if(m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET)
 	{
 		pSurface->initRT();
 	}

@@ -45,6 +45,9 @@ public:
 		m_format(format),
 		m_pSurface(pSurface)
 	{
+		m_descTex2D.Width = uWidth;
+		m_descTex2D.Height = uHeight;
+		m_descTex2D.Format = m_pRender->getDXFormat(format);
 	}
 
 	void Release();
