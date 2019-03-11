@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\source\dx11\GXBlendState.h" />
+    <ClInclude Include="..\..\..\..\source\dx11\GXConstantBuffer.h" />
     <ClInclude Include="..\..\..\..\source\dx11\GXContext.h" />
     <ClInclude Include="..\..\..\..\source\dx11\GXDepthStencilState.h" />
     <ClInclude Include="..\..\..\..\source\dx11\GXDepthStencilSurface.h" />
@@ -29,6 +30,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\..\source\dx11\dllmain.cpp" />
     <ClCompile Include="..\..\..\..\source\dx11\GXBlendState.cpp" />
+    <ClCompile Include="..\..\..\..\source\dx11\GXConstantBuffer.cpp" />
     <ClCompile Include="..\..\..\..\source\dx11\GXContext.cpp" />
     <ClCompile Include="..\..\..\..\source\dx11\GXDepthStencilState.cpp" />
     <ClCompile Include="..\..\..\..\source\dx11\GXDepthStencilSurface.cpp" />

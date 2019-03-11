@@ -70,6 +70,8 @@ bool CGXTexture2D::lock(void **ppData, GXTEXLOCK mode)
 		return(false);
 	}
 
+	m_pRender->addBytesTextures(sr.RowPitch * m_uHeight);
+
 	*ppData = sr.pData;
 	return(true);
 }
@@ -113,6 +115,17 @@ void CGXTexture2D::onDevRst(UINT uScreenWidth, UINT uScreenHeight)
 		}
 		m_descTex2D.Width = m_uWidth;
 		m_descTex2D.Height = m_uHeight;
+
+		if(!m_descTex2D.MipLevels)
+		{
+			m_descSRV.Texture2D.MipLevels = 0;
+			UINT uSize = max(m_uHeight, m_uWidth);
+			do
+			{
+				++m_descSRV.Texture2D.MipLevels;
+			}
+			while(uSize >>= 1);
+		}
 	}
 
 	m_bWasReset = true;

@@ -7,6 +7,7 @@
 #include <d3d11.h>
 #include <D3DX11tex.h>
 #include <DxErr.h>
+#include <d3dcompiler.h>
 
 #if defined(_WINDOWS)
 #	define WIN32_LEAN_AND_MEAN
@@ -14,6 +15,7 @@
 #	pragma comment(lib, "d3d11.lib")
 #	pragma comment(lib, "d3dx11.lib")
 #	pragma comment(lib, "DxErr.lib")
+#	pragma comment(lib, "d3dcompiler.lib")
 #endif
 
 enum GX_LOG
@@ -22,8 +24,6 @@ enum GX_LOG
 	GX_LOG_WARN,
 	GX_LOG_ERROR
 };
-
-#define GX_SYNCFLAG_NO_SHADER 0x00000001
 
 #define DX_CALL(code) ([](HRESULT hr, const char *szCode){if(FAILED(hr)){CGXContext::logDXcall(szCode, hr);}return(hr);})((code), #code)
 
@@ -78,11 +78,13 @@ public:
 	IGXVertexShader * createVertexShaderFromString(const char * szCode, GXMACRO *pDefs = NULL);
 	IGXVertexShader * createVertexShader(void *pData, UINT uSize);
 	void destroyVertexShader(IGXVertexShader * pSH);
+	void setVertexShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0);
 
 	IGXPixelShader * createPixelShader(const char * szFile, GXMACRO *pDefs = NULL);
 	IGXPixelShader * createPixelShaderFromString(const char * szCode, GXMACRO *pDefs = NULL);
 	IGXPixelShader * createPixelShader(void *pData, UINT uSize);
-	void destroyPixelShader(IGXPixelShader * pSH);
+	void destroyPixelShader(IGXPixelShader * pSH); 
+	void setPixelShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0);
 
 	//void setVertexShader(IGXVertexShader * pSH);
 	//void setPixelShader(IGXPixelShader * pSH);
@@ -145,6 +147,8 @@ public:
 	IGXSwapChain *createSwapChain(UINT uWidth, UINT uHeight, SXWINDOW wnd, bool bWindowed);
 	void destroySwapChain(IGXSwapChain *pSwapChain);
 
+	IGXConstantBuffer *createConstantBuffer(UINT uSize);
+
 	static void debugMessage(GX_LOG, const char *msg);
 	static void logDXcall(const char *szCodeString, HRESULT hr);
 
@@ -163,6 +167,24 @@ public:
 
 	GXTEXTURE_TYPE getTextureTypeFromFile(const char *szFile);
 	bool saveTextureToFile(const char *szTarget, IGXBaseTexture *pTexture);
+
+	const GX_FRAME_STATS *getFrameStats()
+	{
+		return(&m_frameStats);
+	}
+
+	void addBytesTextures(UINT uBytes)
+	{
+		m_frameStats.uUploadedBuffersTextures += uBytes;
+	}
+	void addBytesVertices(UINT uBytes)
+	{
+		m_frameStats.uUploadedBuffersVertexes += uBytes;
+	}
+	void addBytesIndices(UINT uBytes)
+	{
+		m_frameStats.uUploadedBuffersIndices += uBytes;
+	}
 protected:
 	
 	ID3D11Device *m_pDevice = NULL;
@@ -177,6 +199,8 @@ protected:
 	
 	void onLostDevice();
 	void onResetDevice();
+
+	GX_FRAME_STATS m_frameStats;
 
 	HWND m_hWnd;
 
@@ -232,11 +256,13 @@ protected:
 	};
 
 	_sync_state m_sync_state;
+	bool m_bDeviceWasReset = false;
 
 	void syncronize(UINT flags=0);
 	UINT getPTcount(UINT idxCount);
 	UINT getIDXcount(UINT ptCount);
 	UINT getIndexSize(DXGI_FORMAT idx);
+	void _updateStats(UINT uPrimCount);
 
 	Array<IGXTexture2D*> m_aResettableTextures2D;
 	Array<IGXTextureCube*> m_aResettableTexturesCube;
@@ -246,6 +272,7 @@ protected:
 
 	BOOL m_isScissorsEnable = 0;
 	RECT m_rcScissors;
+
 };
 
 #endif

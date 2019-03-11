@@ -21,6 +21,7 @@ bool CGXIndexBuffer::lock(void **ppData, GXBUFFERLOCK mode)
 
 	if(!FAILED(m_pBuffer->Lock(0, m_uSize, ppData, mode == GXBL_WRITE ? m_uLockFlagsWrite : D3DLOCK_READONLY)))
 	{
+		m_pRender->addBytesIndices(m_uSize);
 		m_wasReset = false;
 		return(true);
 	}

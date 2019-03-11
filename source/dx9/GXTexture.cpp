@@ -71,7 +71,7 @@ bool CGXTexture2D::lock(void **ppData, GXTEXLOCK mode)
 	{
 		return(false);
 	}
-	//CGXContext::debugMessage(GX_LOG_ERROR, "Not implemented: CGXTexture2D::lock");
+	m_pRender->addBytesTextures(m_pRender->getTextureDataSize(rect.Pitch, m_uHeight, m_format));
 	*ppData = rect.pBits;
 	return(true);
 }
@@ -79,7 +79,6 @@ bool CGXTexture2D::lock(void **ppData, GXTEXLOCK mode)
 void CGXTexture2D::unlock()
 {
 	DX_CALL(m_pTexture->UnlockRect(0));
-	//CGXContext::debugMessage(GX_LOG_ERROR, "Not implemented: CGXTexture2D::unlock");
 }
 
 IDirect3DBaseTexture9 *CGXTexture2D::getDXTexture()

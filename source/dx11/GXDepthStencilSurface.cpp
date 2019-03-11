@@ -38,5 +38,5 @@ void CGXDepthStencilSurface::onDevRst(UINT uScreenWidth, UINT uScreenHeight)
 	}
 
 	DX_CALL(m_pRender->getDXDevice()->CreateTexture2D(&m_descTex, NULL, &m_pBuffer));
-	DX_CALL(m_pRender->getDXDevice()->CreateDepthStencilView(&m_pBuffer, &m_desc, &m_pSurface));
+	DX_CALL(m_pRender->getDXDevice()->CreateDepthStencilView(m_pBuffer, &m_desc, &m_pSurface));
 }

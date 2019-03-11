@@ -29,7 +29,7 @@ void CGXBlendState::onDevRst()
 	D3D11_BLEND_DESC blendDesc;
 	blendDesc.AlphaToCoverageEnable = m_desc.bAlphaToCoverageEnable;
 	blendDesc.IndependentBlendEnable = m_desc.bIndependentBlendEnabled;
-	for(UINT i = 0; i < blendDesc.IndependentBlendEnable ? 8 : 1; ++i)
+	for(int i = 0; i < (blendDesc.IndependentBlendEnable ? 8 : 1); ++i)
 	{
 		if(blendDesc.RenderTarget[i].BlendEnable = m_desc.renderTarget[i].bBlendEnable)
 		{
@@ -44,5 +44,5 @@ void CGXBlendState::onDevRst()
 		blendDesc.RenderTarget[i].RenderTargetWriteMask = m_desc.renderTarget[i].u8RenderTargetWriteMask;
 	}
 
-	m_pDevice->CreateBlendState(&blendDesc, &m_pStateBlock);
+	DX_CALL(m_pDevice->CreateBlendState(&blendDesc, &m_pStateBlock));
 }

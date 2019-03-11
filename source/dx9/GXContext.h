@@ -163,6 +163,20 @@ public:
 	{
 		return(&m_frameStats);
 	}
+
+	void addBytesTextures(UINT uBytes)
+	{
+		m_frameStats.uUploadedBuffersTextures += uBytes;
+	}
+	void addBytesVertices(UINT uBytes)
+	{
+		m_frameStats.uUploadedBuffersVertexes += uBytes;
+	}
+	void addBytesIndices(UINT uBytes)
+	{
+		m_frameStats.uUploadedBuffersIndices += uBytes;
+	}
+
 protected:
 	
 	IDirect3D9 *m_pD3D = NULL;

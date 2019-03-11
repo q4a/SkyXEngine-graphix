@@ -21,7 +21,30 @@ void CGXSwapChain::onDevRst()
 	pSurface->m_pRTV = pRenderTargetView;
 }
 
-CGXSwapChain::CGXSwapChain(CGXContext * pRender, int iWidth, int iHeight, SXWINDOW wnd, bool isFullscreen):m_pRender(pRender)
+void CGXSwapChain::resize(int iWidth, int iHeight, bool isWindowed)
+{
+	if(iWidth < 1)
+	{
+		iWidth = 1;
+	}
+	if(iHeight < 1)
+	{
+		iHeight = 1;
+	}
+
+	m_presentParameters.BufferDesc.Width = iWidth;
+	m_presentParameters.BufferDesc.Height = iHeight;
+	m_presentParameters.Windowed = isWindowed;
+	CGXSurface *pSurface = (CGXSurface*)m_pColorSurface;
+
+	pSurface->m_uWidth = iWidth;
+	pSurface->m_uHeight = iHeight;
+
+	onDevLost();
+	onDevRst();
+}
+
+CGXSwapChain::CGXSwapChain(CGXContext * pRender, int iWidth, int iHeight, SXWINDOW wnd, bool isWindowed):m_pRender(pRender)
 {
 	memset(&m_presentParameters, 0, sizeof(m_presentParameters));
 	if(iWidth < 1)
@@ -43,7 +66,7 @@ CGXSwapChain::CGXSwapChain(CGXContext * pRender, int iWidth, int iHeight, SXWIND
 	m_presentParameters.OutputWindow = (HWND)wnd;
 	m_presentParameters.SampleDesc.Count = 1;
 	m_presentParameters.SampleDesc.Quality = 0;
-	m_presentParameters.Windowed = !isFullscreen;
+	m_presentParameters.Windowed = isWindowed;
 
 
 

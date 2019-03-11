@@ -156,7 +156,7 @@ enum GXINDEXTYPE
                 ((DWORD)(BYTE)(ch2) << 16) | ((DWORD)(BYTE)(ch3) << 24 ))
 #endif
 
-// maps unsigned 8 bits/channel to D3DCOLOR
+// maps unsigned 8 bits/channel to GXCOLOR
 #define GXCOLOR_ARGB(a,r,g,b) \
     ((GXCOLOR)((((a)&0xff)<<24)|(((r)&0xff)<<16)|(((g)&0xff)<<8)|((b)&0xff)))
 #define GXCOLOR_RGBA(r,g,b,a) GXCOLOR_ARGB(a,r,g,b)
@@ -228,7 +228,7 @@ typedef enum _GXFORMAT
 	GXFMT_D32 = 71,
 	//GXFMT_D15S1 = 73,
 	GXFMT_D24S8 = 75,
-	GXFMT_D24X8 = 77,
+	GXFMT_D24X8 = 77, //@DEPRECATED
 	//GXFMT_D24X4S4 = 79,
 	GXFMT_D16 = 80,
 
@@ -491,6 +491,9 @@ struct GX_FRAME_STATS
 	UINT uPolyCount;
 	UINT uLineCount;
 	UINT uPointCount;
+	UINT uUploadedBuffersTextures;
+	UINT uUploadedBuffersVertexes;
+	UINT uUploadedBuffersIndices;
 };
 
 //##########################################################################
@@ -637,6 +640,13 @@ public:
 	virtual IGXSurface *getColorTarget() = 0;
 };
 
+class IGXConstantBuffer: public IGXBaseInterface
+{
+public:
+	virtual void update(const void *pData) = 0;
+	virtual UINT getSize() = 0;
+};
+
 //class IGXRenderTarget
 //{
 //public:
@@ -691,10 +701,18 @@ public:
 	virtual IGXVertexShader * createVertexShader(const char * szFile, GXMACRO *pDefs = NULL) = 0;
 	virtual IGXVertexShader * createVertexShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) = 0;
 	virtual IGXVertexShader * createVertexShader(void *pData, UINT uSize) = 0;
+	virtual void setVertexShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) = 0;
 
 	virtual IGXPixelShader * createPixelShader(const char * szFile, GXMACRO *pDefs = NULL) = 0;
 	virtual IGXPixelShader * createPixelShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) = 0;
 	virtual IGXPixelShader * createPixelShader(void *pData, UINT uSize) = 0;
+	virtual void setPixelShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) = 0;
+
+	//virtual IGXPixelShader * createGeometryShader(const char * szFile, GXMACRO *pDefs = NULL) = 0;
+	//virtual IGXPixelShader * createGeometryShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) = 0;
+	//virtual IGXPixelShader * createGeometryShader(void *pData, UINT uSize) = 0;
+	//virtual void setGeometryShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) = 0;
+
 
 	// virtual void setVertexShader(IGXVertexShader * pSH) = 0;
 	// virtual void setPixelShader(IGXPixelShader * pSH) = 0;
@@ -753,6 +771,8 @@ public:
 	// virtual void setStencilTest(bool isEnable) = 0;
 
 	//https://docs.microsoft.com/ru-ru/windows/desktop/direct3d10/d3d10-graphics-programming-guide-api-features-deprecated
+
+	virtual IGXConstantBuffer *createConstantBuffer(UINT uSize) = 0;
 };
 
 #endif

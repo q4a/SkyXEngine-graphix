@@ -13,15 +13,20 @@
 #include "GXBlendState.h"
 #include "GXTexture.h"
 #include "GXSwapChain.h"
+#include "GXConstantBuffer.h"
+
 #include <cstdio>
 
 //флаги компиляции шейдеров
 
 
 #ifdef _DEBUG
-#	define SHADER_FLAGS (D3DXSHADER_DEBUG | D3DXSHADER_ENABLE_BACKWARDS_COMPATIBILITY | D3DXSHADER_AVOID_FLOW_CONTROL | D3DXSHADER_SKIPOPTIMIZATION)
+/* D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY */
+#	define SHADER_FLAGS (D3DCOMPILE_DEBUG | D3DCOMPILE_AVOID_FLOW_CONTROL | D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_PARTIAL_PRECISION | D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY)
+//#	define SHADER_FLAGS (D3DXSHADER_DEBUG | D3DXSHADER_ENABLE_BACKWARDS_COMPATIBILITY | D3DXSHADER_AVOID_FLOW_CONTROL | D3DXSHADER_SKIPOPTIMIZATION)
 #else
-#	define SHADER_FLAGS (D3DXSHADER_OPTIMIZATION_LEVEL3 | D3DXSHADER_ENABLE_BACKWARDS_COMPATIBILITY | D3DXSHADER_PARTIALPRECISION | D3DXSHADER_PREFER_FLOW_CONTROL)
+//#	define SHADER_FLAGS (D3DXSHADER_OPTIMIZATION_LEVEL3 | D3DXSHADER_ENABLE_BACKWARDS_COMPATIBILITY | D3DXSHADER_PARTIALPRECISION | D3DXSHADER_PREFER_FLOW_CONTROL)
+#	define SHADER_FLAGS (D3DCOMPILE_OPTIMIZATION_LEVEL3 | D3DCOMPILE_PARTIAL_PRECISION | D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY) 
 #endif
 
 CGXContext::CGXContext():
@@ -44,10 +49,16 @@ void CGXContext::Release()
 
 bool CGXContext::beginFrame()
 {
+	memset(&m_frameStats, 0, sizeof(m_frameStats));
+
 	return(canBeginFrame());
 }
 void CGXContext::endFrame()
 {
+	if(m_bDeviceWasReset)
+	{
+		m_bDeviceWasReset = false;
+	}
 }
 bool CGXContext::canBeginFrame()
 {
@@ -56,7 +67,7 @@ bool CGXContext::canBeginFrame()
 
 bool CGXContext::wasReset()
 {
-	return(false);
+	return(m_bDeviceWasReset);
 }
 
 void CGXContext::onLostDevice()
@@ -77,10 +88,10 @@ void CGXContext::onLostDevice()
 	{
 		dynamic_cast<CGXTextureCube*>(m_aResettableTexturesCube[i])->onDevLost();
 	}
-	for(UINT i = 0, l = m_aResettableSwapChains.size(); i < l; ++i)
+	/*for(UINT i = 0, l = m_aResettableSwapChains.size(); i < l; ++i)
 	{
 		((CGXSwapChain*)m_aResettableSwapChains[i])->onDevLost();
-	}
+	}*/
 }
 
 void CGXContext::onResetDevice()
@@ -101,14 +112,16 @@ void CGXContext::onResetDevice()
 	{
 		dynamic_cast<CGXTextureCube*>(m_aResettableTexturesCube[i])->onDevRst(m_uWindowHeight);
 	}
-	for(UINT i = 0, l = m_aResettableSwapChains.size(); i < l; ++i)
+	/*for(UINT i = 0, l = m_aResettableSwapChains.size(); i < l; ++i)
 	{
-		((CGXSwapChain*)m_aResettableSwapChains[i])->onDevRst();
-	}
+		((CGXSwapChain*)m_aResettableSwapChains[i])->onDevRst(m_uWindowWidth, m_uWindowHeight);
+	}*/
 
 	setColorTarget(NULL);
 
 	memset(&m_sync_state, 1, sizeof(m_sync_state));
+
+	m_bDeviceWasReset = true;
 }
 
 void CGXContext::resize(int iWidth, int iHeight, bool isWindowed)
@@ -128,6 +141,8 @@ void CGXContext::resize(int iWidth, int iHeight, bool isWindowed)
 	onLostDevice();
 //	m_pDevice->Reset(&m_oD3DAPP);
 	onResetDevice();
+
+	((CGXSwapChain*)m_pDefaultSwapChain)->resize(iWidth, iHeight, isWindowed);
 }
 
 BOOL CGXContext::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindowed)
@@ -159,10 +174,18 @@ BOOL CGXContext::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindo
 		return(FALSE);
 	}
 
-	if(FAILED(DX_CALL(m_pDXGIDevice->GetParent(__uuidof(IDXGIFactory), (void **)&m_pDXGIFactory))))
+	IDXGIAdapter * pDXGIAdapter = NULL;
+	if(FAILED(DX_CALL(m_pDXGIDevice->GetAdapter(&pDXGIAdapter))))
 	{
 		return(FALSE);
 	}
+
+
+	if(FAILED(DX_CALL(pDXGIAdapter->GetParent(__uuidof(IDXGIFactory), (void **)&m_pDXGIFactory))))
+	{
+		return(FALSE);
+	}
+	mem_release(pDXGIAdapter);
 
 	m_uWindowWidth = iWidth;
 	m_uWindowHeight = iHeight;
@@ -199,6 +222,11 @@ BOOL CGXContext::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindo
 	blendDesc.renderTarget[0].u8RenderTargetWriteMask = GXCOLOR_WRITE_ENABLE_ALL;
 	
 	m_pDefaultBlendState = createBlendState(&blendDesc);
+
+	setDepthStencilSurface(m_pDefaultDepthStencilSurface);
+	IGXSurface *pColorTarget = m_pDefaultSwapChain->getColorTarget();
+	setColorTarget(pColorTarget);
+	mem_release(pColorTarget);
 
 	return(TRUE);
 }
@@ -269,6 +297,8 @@ IGXVertexBuffer * CGXContext::createVertexBuffer(size_t size, UINT flags, void *
 		initData.pSysMem = pInitData;
 		initData.SysMemPitch = bd.ByteWidth;
 		pSubresourceData = &initData;
+
+		addBytesVertices(size);
 	}
 
 	if(FAILED(DX_CALL(m_pDevice->CreateBuffer(&bd, pSubresourceData, &pBuff->m_pBuffer))))
@@ -309,6 +339,8 @@ IGXIndexBuffer * CGXContext::createIndexBuffer(size_t size, UINT flags, GXINDEXT
 		initData.pSysMem = pInitData;
 		initData.SysMemPitch = bd.ByteWidth;
 		pSubresourceData = &initData;
+
+		addBytesIndices(size);
 	}
 
 	if(FAILED(DX_CALL(m_pDevice->CreateBuffer(&bd, pSubresourceData, &pBuff->m_pBuffer))))
@@ -398,6 +430,8 @@ void CGXContext::drawIndexed(UINT uVertexCount, UINT uPrimitiveCount, UINT uStar
 	m_pDeviceContext->IASetPrimitiveTopology(m_drawPT);
 
 	m_pDeviceContext->DrawIndexed(getIDXcount(uPrimitiveCount), uStartIndexLocation, iBaseVertexLocation);
+
+	_updateStats(uPrimitiveCount);
 }
 
 void CGXContext::drawPrimitive(UINT uStartVertex, UINT uPrimitiveCount)
@@ -406,7 +440,9 @@ void CGXContext::drawPrimitive(UINT uStartVertex, UINT uPrimitiveCount)
 	//@TODO: move to syncronize
 	m_pDeviceContext->IASetPrimitiveTopology(m_drawPT);
 
-	m_pDeviceContext->Draw(getIDXcount(uPrimitiveCount), uStartVertex);
+	m_pDeviceContext->Draw(getIDXcount(uPrimitiveCount), uStartVertex); 
+	
+	_updateStats(uPrimitiveCount);
 }
 void CGXContext::drawIndexedInstanced(UINT uInstanceCount, UINT uVertexCount, UINT uPrimitiveCount, UINT uStartIndexLocation, int iBaseVertexLocation)
 {
@@ -418,6 +454,7 @@ void CGXContext::drawIndexedInstanced(UINT uInstanceCount, UINT uVertexCount, UI
 
 	m_pDeviceContext->DrawIndexedInstanced(getIDXcount(uPrimitiveCount), uInstanceCount, uStartIndexLocation, iBaseVertexLocation, 0);
 
+	_updateStats(uPrimitiveCount);
 }
 void CGXContext::drawPrimitiveInstanced(UINT uInstanceCount, UINT uStartVertex, UINT uPrimitiveCount)
 {
@@ -426,6 +463,8 @@ void CGXContext::drawPrimitiveInstanced(UINT uInstanceCount, UINT uStartVertex, 
 	m_pDeviceContext->IASetPrimitiveTopology(m_drawPT);
 
 	m_pDeviceContext->DrawInstanced(getIDXcount(uPrimitiveCount), uInstanceCount, uStartVertex, 0);
+
+	_updateStats(uPrimitiveCount);
 }
 
 void CGXContext::syncronize(UINT flags)
@@ -526,12 +565,12 @@ void CGXContext::syncronize(UINT flags)
 		m_pDeviceContext->OMSetRenderTargets(uMaxIdx + 1, m_pDXColorTarget, ((CGXDepthStencilSurface*)m_pDepthStencilSurface)->m_pSurface);
 
 		D3D11_VIEWPORT vp;
-		vp.Width = (float)m_pColorTarget[0]->getWidth();
-		vp.Height = (float)m_pColorTarget[0]->getHeight();
+		vp.Width = (float)m_pColorTarget[0]->getWidth() + 0.5f;
+		vp.Height = (float)m_pColorTarget[0]->getHeight() + 0.5f;
 		vp.MinDepth = 0.0f;
 		vp.MaxDepth = 1.0f;
-		vp.TopLeftX = 0;
-		vp.TopLeftY = 0;
+		vp.TopLeftX = 0.5f;
+		vp.TopLeftY = 0.5f;
 		m_pDeviceContext->RSSetViewports(1, &vp);
 
 		m_sync_state.bRenderTarget = FALSE;
@@ -539,88 +578,37 @@ void CGXContext::syncronize(UINT flags)
 
 	
 	
-	if(!(flags & GX_SYNCFLAG_NO_SHADER))
+	
+	if(!m_pShader)
 	{
-		if(!m_pShader)
+		debugMessage(GX_LOG_ERROR, "Shader is not set!");
+	}
+	else
+	{
+		CGXShader *pShader = (CGXShader*)m_pShader;
+		if(m_sync_state.bShader)
 		{
-			debugMessage(GX_LOG_ERROR, "Shader is not set!");
-		}
-		else
-		{
-			CGXShader *pShader = (CGXShader*)m_pShader;
-			if(m_sync_state.bShader)
+			if(pShader->m_pVShader)
 			{
-				if(pShader->m_pVShader)
-				{
-					CGXVertexShader *pVS = (CGXVertexShader*)pShader->m_pVShader;
-					DX_CALL(m_pDevice->SetVertexShader(pVS->m_pShader));
-					if(pVS->m_uConstBuffRegCountF)
-					{
-						m_pDevice->SetVertexShaderConstantF(0, pVS->m_pConstBufferF, pVS->m_uConstBuffRegCountF);
-						pVS->m_isConstantDirtyF = false;
-					}
-					if(pVS->m_uConstBuffRegCountI)
-					{
-						m_pDevice->SetVertexShaderConstantI(0, pVS->m_pConstBufferI, pVS->m_uConstBuffRegCountI);
-						pVS->m_isConstantDirtyI = false;
-					}
-				}
-				else
-				{
-					DX_CALL(m_pDevice->SetVertexShader(NULL));
-				}
-				if(pShader->m_pPShader)
-				{
-					CGXPixelShader *pPS = (CGXPixelShader*)pShader->m_pPShader;
-					DX_CALL(m_pDevice->SetPixelShader(pPS->m_pShader));
-					if(pPS->m_uConstBuffRegCountF)
-					{
-						m_pDevice->SetPixelShaderConstantF(0, pPS->m_pConstBufferF, pPS->m_uConstBuffRegCountF);
-						pPS->m_isConstantDirtyF = false;
-					}
-					if(pPS->m_uConstBuffRegCountI)
-					{
-						m_pDevice->SetPixelShaderConstantI(0, pPS->m_pConstBufferI, pPS->m_uConstBuffRegCountI);
-						pPS->m_isConstantDirtyI = false;
-					}
-				}
-				else
-				{
-					DX_CALL(m_pDevice->SetPixelShader(NULL));
-				}
-				m_sync_state.bShader = FALSE;
+				CGXVertexShader *pVS = (CGXVertexShader*)pShader->m_pVShader;
+
+				m_pDeviceContext->VSSetShader(pVS->m_pShader, NULL, 0);
 			}
 			else
 			{
-				if(pShader->m_pVShader)
-				{
-					CGXVertexShader *pVS = (CGXVertexShader*)pShader->m_pVShader;
-					if(pVS->m_isConstantDirtyF && pVS->m_uConstBuffRegCountF)
-					{
-						m_pDevice->SetVertexShaderConstantF(0, pVS->m_pConstBufferF, pVS->m_uConstBuffRegCountF);
-						pVS->m_isConstantDirtyF = false;
-					}
-					if(pVS->m_isConstantDirtyI && pVS->m_uConstBuffRegCountI)
-					{
-						m_pDevice->SetVertexShaderConstantI(0, pVS->m_pConstBufferI, pVS->m_uConstBuffRegCountI);
-						pVS->m_isConstantDirtyI = false;
-					}
-				}
-				if(pShader->m_pPShader)
-				{
-					CGXPixelShader *pPS = (CGXPixelShader*)pShader->m_pPShader;
-					if(pPS->m_isConstantDirtyF && pPS->m_uConstBuffRegCountF)
-					{
-						m_pDevice->SetPixelShaderConstantF(0, pPS->m_pConstBufferF, pPS->m_uConstBuffRegCountF);
-						pPS->m_isConstantDirtyF = false;
-					}
-					if(pPS->m_isConstantDirtyI && pPS->m_uConstBuffRegCountI)
-					{
-						m_pDevice->SetPixelShaderConstantI(0, pPS->m_pConstBufferI, pPS->m_uConstBuffRegCountI);
-						pPS->m_isConstantDirtyI = false;
-					}
-				}
+				m_pDeviceContext->VSSetShader(NULL, NULL, 0);
 			}
+			if(pShader->m_pPShader)
+			{
+				CGXPixelShader *pPS = (CGXPixelShader*)pShader->m_pPShader;
+
+				m_pDeviceContext->PSSetShader(pPS->m_pShader, NULL, 0);
+			}
+			else
+			{
+				m_pDeviceContext->PSSetShader(NULL, NULL, 0);
+			}
+			m_sync_state.bShader = FALSE;
 		}
 	}
 
@@ -644,7 +632,8 @@ void CGXContext::syncronize(UINT flags)
 			}
 			else
 			{
-				m_pDeviceContext->PSSetShaderResources(i, 1, NULL);
+				ID3D11ShaderResourceView *pNull = NULL;
+				m_pDeviceContext->PSSetShaderResources(i, 1, &pNull);
 			}
 
 			m_sync_state.bTexture[i] = FALSE;
@@ -711,65 +700,49 @@ UINT CGXContext::getIndexSize(DXGI_FORMAT idx)
 
 IGXVertexShader * CGXContext::createVertexShader(const char * szFile, GXMACRO *pDefs)
 {
-	ID3DXBuffer *pShaderBlob = 0;
-	ID3DXBuffer *pErrorBlob = 0;
-	ID3DXConstantTable *pConstTable = 0;
-
-	if(FAILED(DX_CALL(D3DXCompileShaderFromFileA(szFile, (D3DXMACRO*)pDefs, NULL, "main", "vs_3_0", SHADER_FLAGS, &pShaderBlob, &pErrorBlob, &pConstTable))))
+	ID3DBlob *pShaderBlob = NULL;
+	ID3DBlob *pErrorBlob = NULL;
+	if(FAILED(DX_CALL(D3DX11CompileFromFileA(szFile, (D3D_SHADER_MACRO*)pDefs, NULL, "main", "vs_4_0", SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL))))
 	{
 		if(pErrorBlob)
 		{
-			char * pBuff = (char*)pErrorBlob->GetBufferPointer();
-			int s = strlen(pBuff);
+			int s = strlen((char*)pErrorBlob->GetBufferPointer());
 			char *str = (char*)alloca(s + 33);
-			sprintf(str, "Unable to create vertex shader: %s", pBuff);
+			sprintf(str, "Unable to create vertex shader: %s", (char*)pErrorBlob->GetBufferPointer());
 			debugMessage(GX_LOG_ERROR, str);
+			mem_release(pErrorBlob);
+			return(NULL);
 		}
-		mem_release(pErrorBlob);
-		return(NULL);
 	}
 	mem_release(pErrorBlob);
 
-	CGXVertexShader *pShader = new CGXVertexShader(this);
+	IGXVertexShader *pShader = createVertexShader(pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize());
 
-	DX_CALL(m_pDevice->CreateVertexShader((DWORD*)pShaderBlob->GetBufferPointer(), &(pShader->m_pShader)));
-
-	pShader->parseConstantTable(pConstTable);
-	
 	mem_release(pShaderBlob);
-	mem_release(pConstTable);
 	
 	return(pShader);
 }
 IGXVertexShader * CGXContext::createVertexShaderFromString(const char * szCode, GXMACRO *pDefs)
 {
-	ID3DXBuffer *pShaderBlob;
-	ID3DXBuffer *pErrorBlob;
-	ID3DXConstantTable *pConstTable;
-
-	if(FAILED(DX_CALL(D3DXCompileShader(szCode, strlen(szCode), (D3DXMACRO*)pDefs, NULL, "main", "vs_3_0", SHADER_FLAGS, &pShaderBlob, &pErrorBlob, &pConstTable))))
+	ID3DBlob *pShaderBlob = NULL;
+	ID3DBlob *pErrorBlob = NULL;
+	if(FAILED(DX_CALL(D3DX11CompileFromMemory(szCode, strlen(szCode), "memory.vs", (D3D_SHADER_MACRO*)pDefs, NULL, "main", "vs_4_0", SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL))))
 	{
 		if(pErrorBlob)
 		{
-			char * pBuff = (char*)pErrorBlob->GetBufferPointer();
-			int s = strlen(pBuff);
+			int s = strlen((char*)pErrorBlob->GetBufferPointer());
 			char *str = (char*)alloca(s + 33);
-			sprintf(str, "Unable to create vertex shader: %s", pBuff);
+			sprintf(str, "Unable to create vertex shader: %s", (char*)pErrorBlob->GetBufferPointer());
 			debugMessage(GX_LOG_ERROR, str);
+			mem_release(pErrorBlob);
+			return(NULL);
 		}
-		mem_release(pErrorBlob);
-		return(NULL);
 	}
 	mem_release(pErrorBlob);
 
-	CGXVertexShader *pShader = new CGXVertexShader(this);
-
-	DX_CALL(m_pDevice->CreateVertexShader((DWORD*)pShaderBlob->GetBufferPointer(), &(pShader->m_pShader)));
-
-	pShader->parseConstantTable(pConstTable);
+	IGXVertexShader *pShader = createVertexShader(pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
-	mem_release(pConstTable);
 
 	return(pShader);
 }
@@ -777,42 +750,14 @@ IGXVertexShader * CGXContext::createVertexShader(void *_pData, UINT uSize)
 {
 	CGXVertexShader *pShader = new CGXVertexShader(this);
 
-	byte *pData = (byte*)_pData;
-	UINT uConstCount = *((UINT*)pData);
-	pData += sizeof(UINT);
-	for(UINT i = 0; i < uConstCount; ++i)
-	{
-		AAString name;
-		name.setName((char*)pData);
-		pData += strlen(name.getName()) + 1;
-		pShader->m_mConstLocations[name] = *((D3DXCONSTANT_DESC*)pData);
-		pData += sizeof(D3DXCONSTANT_DESC);
-	}
-	pShader->m_uConstBuffRegCountF = *((UINT*)pData);
-	pData += sizeof(UINT);
-	pShader->m_uConstBuffRegCountI = *((UINT*)pData);
-	pData += sizeof(UINT);
+	DX_CALL(D3DCreateBlob(uSize, &pShader->m_pShaderBlob));
+	memcpy(pShader->m_pShaderBlob->GetBufferPointer(), _pData, uSize);
 
-	if(pShader->m_uConstBuffRegCountF)
+	if(FAILED(DX_CALL(m_pDevice->CreateVertexShader(pShader->m_pShaderBlob->GetBufferPointer(), uSize, NULL, &pShader->m_pShader))))
 	{
-		pShader->m_pConstBufferF = new float[pShader->m_uConstBuffRegCountF * 4];
-		memset(pShader->m_pConstBufferF, 0, sizeof(float) * pShader->m_uConstBuffRegCountF * 4);
+		mem_delete(pShader);
+		return(NULL);
 	}
-	if(pShader->m_uConstBuffRegCountI)
-	{
-		pShader->m_pConstBufferI = new int[pShader->m_uConstBuffRegCountI * 4];
-		memset(pShader->m_pConstBufferI, 0, sizeof(int) * pShader->m_uConstBuffRegCountI * 4);
-	}
-	UINT uProgramSize = *((UINT*)pData);
-	pData += sizeof(UINT);
-
-	ID3DXBuffer *pShaderBlob;
-	DX_CALL(D3DXCreateBuffer(uProgramSize, &pShaderBlob));
-	memcpy(pShaderBlob->GetBufferPointer(), pData, uProgramSize);
-	
-	DX_CALL(m_pDevice->CreateVertexShader((DWORD*)pShaderBlob->GetBufferPointer(), &(pShader->m_pShader)));
-
-	mem_release(pShaderBlob);
 
 	return(pShader);
 }
@@ -820,36 +765,38 @@ void CGXContext::destroyVertexShader(IGXVertexShader * pSH)
 {
 	mem_delete(pSH);
 }
+void CGXContext::setVertexShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot)
+{
+	//@TODO: defer this
+	ID3D11Buffer *pBuf = NULL;
+	if(pBuffer)
+	{
+		pBuf = ((CGXConstantBuffer*)pBuffer)->m_pBuffer;
+	}
+	m_pDeviceContext->VSSetConstantBuffers(uSlot, 1, &pBuf);
+}
 
 IGXPixelShader * CGXContext::createPixelShader(const char * szFile, GXMACRO *pDefs)
 {
-	ID3DXBuffer *pShaderBlob = 0;
-	ID3DXBuffer *pErrorBlob = 0;
-	ID3DXConstantTable *pConstTable = 0;
-
-	if(FAILED(DX_CALL(D3DXCompileShaderFromFileA(szFile, (D3DXMACRO*)pDefs, NULL, "main", "ps_3_0", SHADER_FLAGS, &pShaderBlob, &pErrorBlob, &pConstTable))))
+	ID3DBlob *pShaderBlob = NULL;
+	ID3DBlob *pErrorBlob = NULL;
+	if(FAILED(DX_CALL(D3DX11CompileFromFileA(szFile, (D3D_SHADER_MACRO*)pDefs, NULL, "main", "ps_4_0", SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL))))
 	{
 		if(pErrorBlob)
 		{
-			char * pBuff = (char*)pErrorBlob->GetBufferPointer();
-			int s = strlen(pBuff);
+			int s = strlen((char*)pErrorBlob->GetBufferPointer());
 			char *str = (char*)alloca(s + 33);
-			sprintf(str, "Unable to create pixel shader: %s", pBuff);
+			sprintf(str, "Unable to create pixel shader: %s", (char*)pErrorBlob->GetBufferPointer());
 			debugMessage(GX_LOG_ERROR, str);
+			mem_release(pErrorBlob);
+			return(NULL);
 		}
-		mem_release(pErrorBlob);
-		return(NULL);
 	}
 	mem_release(pErrorBlob);
 
-	CGXPixelShader *pShader = new CGXPixelShader(this);
-
-	DX_CALL(m_pDevice->CreatePixelShader((DWORD*)pShaderBlob->GetBufferPointer(), &(pShader->m_pShader)));
-
-	pShader->parseConstantTable(pConstTable);
+	IGXPixelShader *pShader = createPixelShader(pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
-	mem_release(pConstTable);
 
 	return(pShader);
 }
@@ -857,80 +804,54 @@ IGXPixelShader * CGXContext::createPixelShader(void *_pData, UINT uSize)
 {
 	CGXPixelShader *pShader = new CGXPixelShader(this);
 
-	byte *pData = (byte*)_pData;
-	UINT uConstCount = *((UINT*)pData);
-	pData += sizeof(UINT);
-	for(UINT i = 0; i < uConstCount; ++i)
-	{
-		AAString name;
-		name.setName((char*)pData);
-		pData += strlen(name.getName()) + 1;
-		pShader->m_mConstLocations[name] = *((D3DXCONSTANT_DESC*)pData);
-		pData += sizeof(D3DXCONSTANT_DESC);
-	}
-	pShader->m_uConstBuffRegCountF = *((UINT*)pData);
-	pData += sizeof(UINT);
-	pShader->m_uConstBuffRegCountI = *((UINT*)pData);
-	pData += sizeof(UINT);
+	DX_CALL(D3DCreateBlob(uSize, &pShader->m_pShaderBlob));
+	memcpy(pShader->m_pShaderBlob->GetBufferPointer(), _pData, uSize);
 
-	if(pShader->m_uConstBuffRegCountF)
+	if(FAILED(DX_CALL(m_pDevice->CreatePixelShader(pShader->m_pShaderBlob->GetBufferPointer(), uSize, NULL, &pShader->m_pShader))))
 	{
-		pShader->m_pConstBufferF = new float[pShader->m_uConstBuffRegCountF * 4];
-		memset(pShader->m_pConstBufferF, 0, sizeof(float) * pShader->m_uConstBuffRegCountF * 4);
+		mem_delete(pShader);
+		return(NULL);
 	}
-	if(pShader->m_uConstBuffRegCountI)
-	{
-		pShader->m_pConstBufferI = new int[pShader->m_uConstBuffRegCountI * 4];
-		memset(pShader->m_pConstBufferI, 0, sizeof(int) * pShader->m_uConstBuffRegCountI * 4);
-	}
-	UINT uProgramSize = *((UINT*)pData);
-	pData += sizeof(UINT);
-
-	ID3DXBuffer *pShaderBlob;
-	DX_CALL(D3DXCreateBuffer(uProgramSize, &pShaderBlob));
-	memcpy(pShaderBlob->GetBufferPointer(), pData, uProgramSize);
-	
-	DX_CALL(m_pDevice->CreatePixelShader((DWORD*)pShaderBlob->GetBufferPointer(), &(pShader->m_pShader)));
-
-	mem_release(pShaderBlob);
 
 	return(pShader);
 }
 IGXPixelShader * CGXContext::createPixelShaderFromString(const char * szCode, GXMACRO *pDefs)
 {
-	ID3DXBuffer *pShaderBlob;
-	ID3DXBuffer *pErrorBlob;
-	ID3DXConstantTable *pConstTable;
-
-	if(FAILED(DX_CALL(D3DXCompileShader(szCode, strlen(szCode), (D3DXMACRO*)pDefs, NULL, "main", "ps_3_0", SHADER_FLAGS, &pShaderBlob, &pErrorBlob, &pConstTable))))
+	ID3DBlob *pShaderBlob = NULL;
+	ID3DBlob *pErrorBlob = NULL;
+	if(FAILED(DX_CALL(D3DX11CompileFromMemory(szCode, strlen(szCode), "memory.ps", (D3D_SHADER_MACRO*)pDefs, NULL, "main", "ps_4_0", SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL))))
 	{
 		if(pErrorBlob)
 		{
-			char * pBuff = (char*)pErrorBlob->GetBufferPointer();
-			int s = strlen(pBuff);
+			int s = strlen((char*)pErrorBlob->GetBufferPointer());
 			char *str = (char*)alloca(s + 33);
-			sprintf(str, "Unable to create vertex shader: %s", pBuff);
+			sprintf(str, "Unable to create pixel shader: %s", (char*)pErrorBlob->GetBufferPointer());
 			debugMessage(GX_LOG_ERROR, str);
+			mem_release(pErrorBlob);
+			return(NULL);
 		}
-		mem_release(pErrorBlob);
-		return(NULL);
 	}
 	mem_release(pErrorBlob);
 
-	CGXPixelShader *pShader = new CGXPixelShader(this);
-
-	DX_CALL(m_pDevice->CreatePixelShader((DWORD*)pShaderBlob->GetBufferPointer(), &(pShader->m_pShader)));
-
-	pShader->parseConstantTable(pConstTable);
+	IGXPixelShader *pShader = createPixelShader(pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
-	mem_release(pConstTable);
 
 	return(pShader);
 }
 void CGXContext::destroyPixelShader(IGXPixelShader * pSH)
 {
 	mem_delete(pSH);
+}
+void CGXContext::setPixelShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot)
+{
+	//@TODO: defer this
+	ID3D11Buffer *pBuf = NULL;
+	if(pBuffer)
+	{
+		pBuf = ((CGXConstantBuffer*)pBuffer)->m_pBuffer;
+	}
+	m_pDeviceContext->PSSetConstantBuffers(uSlot, 1, &pBuf);
 }
 
 IGXShader *CGXContext::createShader(IGXVertexShader *pVS, IGXPixelShader *pPS)
@@ -1247,16 +1168,15 @@ IGXDepthStencilSurface *CGXContext::createDepthStencilSurface(UINT uWidth, UINT 
 	pDescTex->MipLevels = 1;
 	pDescTex->ArraySize = 1;
 	pDescTex->Format = getDXFormat(format);
-	//@TODO: fix that values
-	//pDescTex->SampleDesc.Count = 1;
-	//pDescTex->SampleDesc.Quality = 0;
+	pDescTex->SampleDesc.Count = max(multisampleType, 1);
+	pDescTex->SampleDesc.Quality = 0;
 	pDescTex->Usage = D3D11_USAGE_DEFAULT;
 	pDescTex->BindFlags = D3D11_BIND_DEPTH_STENCIL;
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC *pDSVDesc = &pDSSurface->m_desc;
 	memset(pDSVDesc, 0, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
 	pDSVDesc->Format = pDescTex->Format;
-	pDSVDesc->ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	pDSVDesc->ViewDimension = pDescTex->SampleDesc.Count > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
 	pDSVDesc->Texture2D.MipSlice = 0;
 
 	pDSSurface->onDevRst(m_uWindowWidth, m_uWindowHeight);
@@ -1331,8 +1251,8 @@ IGXSurface *CGXContext::createColorTarget(UINT uWidth, UINT uHeight, GXFORMAT fo
 	pColorSurface->m_descTex2D.Format = getDXFormat(format);
 	pColorSurface->m_descTex2D.Height = uHeight;
 	pColorSurface->m_descTex2D.MipLevels = 1;
-	//@TODO: fill that value
-	pColorSurface->m_descTex2D.SampleDesc.Count = 1;
+	pColorSurface->m_descTex2D.SampleDesc.Count = max(multisampleType, 1);
+	pColorSurface->m_descTex2D.SampleDesc.Quality = 0;
 	pColorSurface->m_descTex2D.Width = uWidth;
 	pColorSurface->m_descTex2D.Usage = D3D11_USAGE_DEFAULT;
 
@@ -1372,7 +1292,7 @@ void CGXContext::downsampleColorTarget(IGXSurface *pSource, IGXSurface *pTarget)
 	CGXSurface *pSrcSurface = (CGXSurface*)pSource;
 	CGXSurface *pTgtSurface = (CGXSurface*)pTarget;
 
-	syncronize(GX_SYNCFLAG_NO_SHADER);
+	//syncronize(GX_SYNCFLAG_NO_SHADER);
 	m_pDeviceContext->ResolveSubresource(pTgtSurface->m_pSurface, 0, pSrcSurface->m_pSurface, 0, pSrcSurface->m_descTex2D.Format);
 }
 void CGXContext::setColorTarget(IGXSurface *pSurf, UINT idx)
@@ -1458,6 +1378,7 @@ IGXTexture2D *CGXContext::createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLe
 	pTex->m_descTex2D.MipLevels = uMipLevels;
 	pTex->m_descTex2D.Format = getDXFormat(format);
 	pTex->m_descTex2D.SampleDesc.Count = 1;
+	pTex->m_descTex2D.SampleDesc.Quality = 0;
 	pTex->m_descTex2D.Usage = D3D11_USAGE_DEFAULT;
 	pTex->m_descTex2D.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	if(uTexUsageFlags & GX_TEXUSAGE_RENDERTARGET)
@@ -1479,15 +1400,24 @@ IGXTexture2D *CGXContext::createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLe
 
 	if(!(uTexUsageFlags & GX_TEXUSAGE_RENDERTARGET) && pInitData)
 	{
+		pTex->m_bWasReset = false;
+
 		D3D11_SUBRESOURCE_DATA initData;
 		initData.pSysMem = pInitData;
 		initData.SysMemSlicePitch = NULL;
 		initData.SysMemPitch = getTextureMemPitch(uWidth, format);
-		pTex->m_bWasReset = false;
+		addBytesTextures(initData.SysMemPitch * uHeight);
 
-		assert(pTex->m_descTex2D.MipLevels <= 1);
+		if(pTex->m_descTex2D.MipLevels == 1)
+		{
+			DX_CALL(m_pDevice->CreateTexture2D(&pTex->m_descTex2D, &initData, &pTex->m_pTexture));
+		}
+		else
+		{
+			DX_CALL(m_pDevice->CreateTexture2D(&pTex->m_descTex2D, NULL, &pTex->m_pTexture));
 
-		DX_CALL(m_pDevice->CreateTexture2D(&pTex->m_descTex2D, &initData, &pTex->m_pTexture));
+			m_pDeviceContext->UpdateSubresource(pTex->m_pTexture, 0, NULL, pInitData, initData.SysMemPitch, 0);
+		}		
 	}
 	else
 	{
@@ -1498,6 +1428,16 @@ IGXTexture2D *CGXContext::createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLe
 	pTex->m_descSRV.Format = pTex->m_descTex2D.Format;
 	pTex->m_descSRV.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	pTex->m_descSRV.Texture2D.MipLevels = pTex->m_descTex2D.MipLevels;
+
+	if(!pTex->m_descSRV.Texture2D.MipLevels)
+	{
+		UINT uSize = max(pTex->m_uHeight, pTex->m_uWidth);
+		do
+		{
+			++pTex->m_descSRV.Texture2D.MipLevels;
+		}
+		while(uSize >>= 1);
+	}
 
 	DX_CALL(m_pDevice->CreateShaderResourceView(pTex->m_pTexture, &pTex->m_descSRV, &pTex->m_pSRV));
 
@@ -1524,8 +1464,10 @@ IGXTextureCube *CGXContext::createTextureCube(UINT uSize, UINT uMipLevels, UINT 
 	pTex->m_descTex2D.MipLevels = uMipLevels;
 	pTex->m_descTex2D.Format = getDXFormat(format);
 	pTex->m_descTex2D.SampleDesc.Count = 1;
+	pTex->m_descTex2D.SampleDesc.Quality = 0;
 	pTex->m_descTex2D.Usage = D3D11_USAGE_DEFAULT;
 	pTex->m_descTex2D.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	pTex->m_descTex2D.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
 	if(uTexUsageFlags & GX_TEXUSAGE_RENDERTARGET)
 	{
 		pTex->m_descTex2D.BindFlags |= D3D11_BIND_RENDER_TARGET;
@@ -1812,11 +1754,90 @@ IGXTextureCube *CGXContext::createTextureCubeFromFile(const char *szFileName, UI
 
 DXGI_FORMAT CGXContext::getDXFormat(GXFORMAT format)
 {
-	return((D3DFORMAT)format);
+	switch(format)
+	{
+	case GXFMT_R8G8B8:
+		assert(!"GXFMT_R8G8B8 is unavailable!");
+		return(DXGI_FORMAT_R8G8B8A8_UNORM);
+	case GXFMT_A8R8G8B8:
+		return(DXGI_FORMAT_B8G8R8A8_UNORM);
+	case GXFMT_X8R8G8B8:
+		return(DXGI_FORMAT_B8G8R8X8_UNORM);
+	case GXFMT_R5G6B5:
+		return(DXGI_FORMAT_B5G6R5_UNORM);
+	case GXFMT_A16B16G16R16:
+		return(DXGI_FORMAT_R16G16B16A16_UNORM);
+	case GXFMT_DXT1:
+		return(DXGI_FORMAT_BC1_UNORM);
+	case GXFMT_DXT3:
+		return(DXGI_FORMAT_BC2_UNORM);
+	case GXFMT_DXT5:
+		return(DXGI_FORMAT_BC3_UNORM);
+	case GXFMT_D32:
+		return(DXGI_FORMAT_D32_FLOAT);
+	case GXFMT_D24S8:
+		return(DXGI_FORMAT_D24_UNORM_S8_UINT);
+	case GXFMT_D24X8:
+		assert(!"GXFMT_D24X8 is unavailable!");
+		return(DXGI_FORMAT_D24_UNORM_S8_UINT);
+	case GXFMT_D16:
+		return(DXGI_FORMAT_D16_UNORM);
+	case GXFMT_R16F:
+		return(DXGI_FORMAT_R16_FLOAT);
+	case GXFMT_G16R16F:
+		return(DXGI_FORMAT_R16G16_FLOAT);
+	case GXFMT_A16B16G16R16F:
+		return(DXGI_FORMAT_R16G16B16A16_FLOAT);
+	case GXFMT_R32F:
+		return(DXGI_FORMAT_R32_FLOAT);
+	case GXFMT_G32R32F:
+		return(DXGI_FORMAT_R32G32_FLOAT);
+	case GXFMT_A32B32G32R32F:
+		return(DXGI_FORMAT_R32G32B32A32_FLOAT);
+	}
+	assert(!"Unknown format!");
+	return(DXGI_FORMAT_UNKNOWN);
 }
 GXFORMAT CGXContext::getGXFormat(DXGI_FORMAT format)
 {
-	return((GXFORMAT)(D3DFORMAT)format);
+	switch(format)
+	{
+	case DXGI_FORMAT_B8G8R8A8_UNORM:
+	case DXGI_FORMAT_R8G8B8A8_UNORM:
+		return(GXFMT_A8R8G8B8);
+	case DXGI_FORMAT_B8G8R8X8_UNORM:
+		return(GXFMT_X8R8G8B8);
+	case DXGI_FORMAT_B5G6R5_UNORM:
+		return(GXFMT_R5G6B5);
+	case DXGI_FORMAT_R16G16B16A16_UNORM:
+		return(GXFMT_A16B16G16R16);
+	case DXGI_FORMAT_BC1_UNORM:
+		return(GXFMT_DXT1);
+	case DXGI_FORMAT_BC2_UNORM:
+		return(GXFMT_DXT3);
+	case DXGI_FORMAT_BC3_UNORM:
+		return(GXFMT_DXT5);
+	case DXGI_FORMAT_D32_FLOAT:
+		return(GXFMT_D32);
+	case DXGI_FORMAT_D24_UNORM_S8_UINT:
+		return(GXFMT_D24S8);
+	case DXGI_FORMAT_D16_UNORM:
+		return(GXFMT_D16);
+	case DXGI_FORMAT_R16_FLOAT:
+		return(GXFMT_R16F);
+	case DXGI_FORMAT_R16G16_FLOAT:
+		return(GXFMT_G16R16F);
+	case DXGI_FORMAT_R16G16B16A16_FLOAT:
+		return(GXFMT_A16B16G16R16F);
+	case DXGI_FORMAT_R32_FLOAT:
+		return(GXFMT_R32F);
+	case DXGI_FORMAT_R32G32_FLOAT:
+		return(GXFMT_G32R32F);
+	case DXGI_FORMAT_R32G32B32A32_FLOAT:
+		return(GXFMT_A32B32G32R32F);
+	}
+	assert(!"Unknown format!");
+	return(GXFMT_UNKNOWN);
 }
 
 ID3D11Device *CGXContext::getDXDevice()
@@ -1865,4 +1886,53 @@ bool CGXContext::saveTextureToFile(const char *szTarget, IGXBaseTexture *pTextur
 		break;
 	}
 	return(!FAILED(D3DX11SaveTextureToFileA(m_pDeviceContext, pTex, D3DX11_IFF_PNG, szTarget)));
+}
+
+void CGXContext::_updateStats(UINT uPrimCount)
+{
+	++m_frameStats.uDIPcount;
+	switch(m_drawPT)
+	{
+	case D3D_PRIMITIVE_TOPOLOGY_POINTLIST:
+		m_frameStats.uPointCount += uPrimCount;
+		break;
+	case D3D_PRIMITIVE_TOPOLOGY_LINELIST:
+	case D3D_PRIMITIVE_TOPOLOGY_LINESTRIP:
+		m_frameStats.uLineCount += uPrimCount;
+		break;
+	case D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST:
+	case D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP:
+		m_frameStats.uPolyCount += uPrimCount;
+		break;
+	}
+}
+
+IDXGIFactory *CGXContext::getDXGIFactory()
+{
+	return(m_pDXGIFactory);
+}
+
+UINT CGXContext::getIDXcount(UINT ptCount)
+{
+	switch(m_drawPT)
+	{
+	case D3D_PRIMITIVE_TOPOLOGY_POINTLIST:
+		return(ptCount);
+	case D3D_PRIMITIVE_TOPOLOGY_LINELIST:
+		return(ptCount * 2);
+	case D3D_PRIMITIVE_TOPOLOGY_LINESTRIP:
+		return(ptCount + 1);
+	case D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST:
+		return(ptCount * 3);
+	case D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP:
+		return(ptCount + 2);
+	}
+	return(0);
+}
+
+IGXConstantBuffer *CGXContext::createConstantBuffer(UINT uSize)
+{
+	assert(uSize);
+
+	return(new CGXConstantBuffer(this, uSize));
 }

@@ -7,7 +7,7 @@ class CGXSwapChain: public IGXSwapChain
 {
 	friend class CGXContext;
 
-	CGXSwapChain(CGXContext * pRender, int iWidth, int iHeight, SXWINDOW wnd, bool isFullscreen=false);
+	CGXSwapChain(CGXContext * pRender, int iWidth, int iHeight, SXWINDOW wnd, bool isWindowed=true);
 	~CGXSwapChain();
 
 	CGXContext * m_pRender;
@@ -18,6 +18,8 @@ class CGXSwapChain: public IGXSwapChain
 
 	void onDevLost();
 	void onDevRst();
+
+	void resize(int iWidth, int iHeight, bool isWindowed = true);
 
 public:
 	void Release();

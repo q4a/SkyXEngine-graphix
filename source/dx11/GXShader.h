@@ -15,18 +15,9 @@ class CGXVertexShader: public IGXVertexShader
 	~CGXVertexShader();
 
 	CGXContext * m_pRender;
-	IDirect3DVertexShader9 *m_pShader;
-	AssotiativeArray<AAString, D3DXCONSTANT_DESC> m_mConstLocations;
+	ID3D11VertexShader *m_pShader = NULL;
+	ID3DBlob *m_pShaderBlob = NULL;
 
-	void parseConstantTable(ID3DXConstantTable *pConstTable);
-
-	float *m_pConstBufferF = NULL;
-	int *m_pConstBufferI = NULL;
-	UINT m_uConstBuffRegCountI = 0;
-	UINT m_uConstBuffRegCountF = 0;
-
-	bool m_isConstantDirtyF = false;
-	bool m_isConstantDirtyI = false;
 public:
 	void Release();
 
@@ -35,6 +26,7 @@ public:
 	UINT getConstantCount();
 	UINT getConstantLocation(const char *szConstName);
 	UINT getConstantSizeV4(const char *szConstName);
+
 	void getData(void *pData, UINT *pSize);
 };
 
@@ -48,18 +40,9 @@ class CGXPixelShader: public IGXPixelShader
 	~CGXPixelShader();
 
 	CGXContext * m_pRender;
-	IDirect3DPixelShader9 *m_pShader;
-	AssotiativeArray<AAString, D3DXCONSTANT_DESC> m_mConstLocations;
+	ID3D11PixelShader *m_pShader = NULL;
+	ID3DBlob *m_pShaderBlob = NULL;
 
-	void parseConstantTable(ID3DXConstantTable *pConstTable);
-
-	float *m_pConstBufferF = NULL;
-	int *m_pConstBufferI = NULL;
-	UINT m_uConstBuffRegCountI = 0;
-	UINT m_uConstBuffRegCountF = 0;
-
-	bool m_isConstantDirtyF = false;
-	bool m_isConstantDirtyI = false;
 public:
 	void Release();
 

@@ -24,6 +24,8 @@ bool CGXVertexBuffer::lock(void **ppData, GXBUFFERLOCK mode)
 	if(!FAILED(DX_CALL(m_pRender->getDXDeviceContext()->Map(m_pBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &srs))))
 	{
 		m_wasReset = false;
+		m_pRender->addBytesVertices(m_uSize);
+		*ppData = srs.pData;
 		return(true);
 	}
 	return(false);

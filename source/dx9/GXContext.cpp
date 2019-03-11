@@ -1884,6 +1884,7 @@ IGXTexture2D *CGXContext::createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLe
 
 				if(!FAILED(DX_CALL(tex->LockRect(0, &lr, NULL, NULL))))
 				{
+					addBytesTextures(getTextureDataSize(lr.Pitch, uHeight, format));
 					memcpy(lr.pBits, pInitData, getTextureDataSize(lr.Pitch, uHeight, format));
 					tex->UnlockRect(0);
 
