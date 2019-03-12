@@ -86,10 +86,17 @@ public:
 	void destroyPixelShader(IGXPixelShader * pSH); 
 	void setPixelShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0);
 
+	IGXGeometryShader * createGeometryShader(const char * szFile, GXMACRO *pDefs = NULL);
+	IGXGeometryShader * createGeometryShaderFromString(const char * szCode, GXMACRO *pDefs = NULL);
+	IGXGeometryShader * createGeometryShader(void *pData, UINT uSize);
+	void destroyGeometryShader(IGXGeometryShader * pSH);
+	void setGeometryShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0);
+
+
 	//void setVertexShader(IGXVertexShader * pSH);
 	//void setPixelShader(IGXPixelShader * pSH);
 
-	IGXShader *createShader(IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL);
+	IGXShader *createShader(IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL, IGXGeometryShader *pGS = NULL);
 	void destroyShader(IGXShader *pSH);
 	void setShader(IGXShader *pSH);
 	IGXShader *getShader();

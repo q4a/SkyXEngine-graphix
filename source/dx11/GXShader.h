@@ -2,8 +2,6 @@
 #define _IDSGshaderOgl_H_
 
 #include "GXContext.h"
-#include <common/assotiativearray.h>
-#include <common/AAString.h>
 
 class CGXVertexShader: public IGXVertexShader
 {
@@ -27,6 +25,23 @@ public:
 	UINT getConstantLocation(const char *szConstName);
 	UINT getConstantSizeV4(const char *szConstName);
 
+	void getData(void *pData, UINT *pSize);
+};
+
+class CGXGeometryShader: public IGXGeometryShader
+{
+	friend class CGXContext;
+
+	CGXGeometryShader(CGXContext * pRender):m_pRender(pRender)
+	{}
+	~CGXGeometryShader();
+
+	CGXContext * m_pRender;
+	ID3D11GeometryShader *m_pShader = NULL;
+	ID3DBlob *m_pShaderBlob = NULL;
+
+public:
+	void Release();
 	void getData(void *pData, UINT *pSize);
 };
 
@@ -59,10 +74,11 @@ class CGXShader: public IGXShader
 {
 	friend class CGXContext;
 
-	CGXShader(CGXContext * pRender, IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL):
+	CGXShader(CGXContext * pRender, IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL, IGXGeometryShader *pGS = NULL):
 		m_pRender(pRender),
 		m_pVShader(pVS),
-		m_pPShader(pPS)
+		m_pPShader(pPS),
+		m_pGShader(pGS)
 	{
 		if(pVS)
 		{
@@ -77,6 +93,7 @@ class CGXShader: public IGXShader
 	CGXContext * m_pRender;
 	IGXVertexShader *m_pVShader;
 	IGXPixelShader *m_pPShader;
+	IGXGeometryShader *m_pGShader;
 public:
 	void Release()
 	{
@@ -85,6 +102,7 @@ public:
 		{
 			mem_release(m_pVShader);
 			mem_release(m_pPShader);
+			mem_release(m_pGShader);
 			m_pRender->destroyShader(this);
 		}
 	}
@@ -96,6 +114,14 @@ public:
 			m_pPShader->AddRef();
 		}
 		return(m_pPShader);
+	}
+	IGXGeometryShader *getGeometryShader()
+	{
+		if(m_pGShader)
+		{
+			m_pGShader->AddRef();
+		}
+		return(m_pGShader);
 	}
 	IGXVertexShader *getVertexShader()
 	{
@@ -110,6 +136,15 @@ public:
 	{
 		mem_release(m_pPShader);
 		m_pPShader = pShader;
+		if(pShader)
+		{
+			pShader->AddRef();
+		}
+	}
+	void setGeometryShader(IGXGeometryShader *pShader)
+	{
+		mem_release(m_pGShader);
+		m_pGShader = pShader;
 		if(pShader)
 		{
 			pShader->AddRef();

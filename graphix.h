@@ -548,6 +548,12 @@ public:
 	virtual void getData(void *pData, UINT *pSize) = 0;
 };
 
+class IGXGeometryShader: public IGXBaseInterface
+{
+public:
+	virtual void getData(void *pData, UINT *pSize) = 0;
+};
+
 class IGXPixelShader: public IGXBaseInterface
 {
 public:
@@ -563,9 +569,11 @@ class IGXShader: public IGXBaseInterface
 {
 public:
 	virtual IGXPixelShader *getPixelShader() = 0;
+	virtual IGXGeometryShader *getGeometryShader() = 0;
 	virtual IGXVertexShader *getVertexShader() = 0;
 
 	virtual void setPixelShader(IGXPixelShader *pShader) = 0;
+	virtual void setGeometryShader(IGXGeometryShader *pShader) = 0;
 	virtual void setVertexShader(IGXVertexShader *pShader) = 0;
 };
 
@@ -708,16 +716,16 @@ public:
 	virtual IGXPixelShader * createPixelShader(void *pData, UINT uSize) = 0;
 	virtual void setPixelShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) = 0;
 
-	//virtual IGXPixelShader * createGeometryShader(const char * szFile, GXMACRO *pDefs = NULL) = 0;
-	//virtual IGXPixelShader * createGeometryShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) = 0;
-	//virtual IGXPixelShader * createGeometryShader(void *pData, UINT uSize) = 0;
-	//virtual void setGeometryShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) = 0;
+	virtual IGXGeometryShader * createGeometryShader(const char * szFile, GXMACRO *pDefs = NULL) = 0;
+	virtual IGXGeometryShader * createGeometryShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) = 0;
+	virtual IGXGeometryShader * createGeometryShader(void *pData, UINT uSize) = 0;
+	virtual void setGeometryShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) = 0;
 
 
 	// virtual void setVertexShader(IGXVertexShader * pSH) = 0;
 	// virtual void setPixelShader(IGXPixelShader * pSH) = 0;
 
-	virtual IGXShader *createShader(IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL) = 0;
+	virtual IGXShader *createShader(IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL, IGXGeometryShader *pGS = NULL) = 0;
 	virtual void setShader(IGXShader *pSH) = 0;
 	virtual IGXShader *getShader() = 0;
 

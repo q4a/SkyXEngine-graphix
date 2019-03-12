@@ -854,9 +854,87 @@ void CGXContext::setPixelShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot)
 	m_pDeviceContext->PSSetConstantBuffers(uSlot, 1, &pBuf);
 }
 
-IGXShader *CGXContext::createShader(IGXVertexShader *pVS, IGXPixelShader *pPS)
+IGXGeometryShader * CGXContext::createGeometryShader(const char * szFile, GXMACRO *pDefs)
 {
-	return(new CGXShader(this, pVS, pPS));
+	ID3DBlob *pShaderBlob = NULL;
+	ID3DBlob *pErrorBlob = NULL;
+	if(FAILED(DX_CALL(D3DX11CompileFromFileA(szFile, (D3D_SHADER_MACRO*)pDefs, NULL, "main", "gs_4_0", SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL))))
+	{
+		if(pErrorBlob)
+		{
+			int s = strlen((char*)pErrorBlob->GetBufferPointer());
+			char *str = (char*)alloca(s + 33);
+			sprintf(str, "Unable to create geometry shader: %s", (char*)pErrorBlob->GetBufferPointer());
+			debugMessage(GX_LOG_ERROR, str);
+			mem_release(pErrorBlob);
+			return(NULL);
+		}
+	}
+	mem_release(pErrorBlob);
+
+	IGXGeometryShader *pShader = createGeometryShader(pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize());
+
+	mem_release(pShaderBlob);
+
+	return(pShader);
+}
+IGXGeometryShader * CGXContext::createGeometryShader(void *_pData, UINT uSize)
+{
+	CGXGeometryShader *pShader = new CGXGeometryShader(this);
+
+	DX_CALL(D3DCreateBlob(uSize, &pShader->m_pShaderBlob));
+	memcpy(pShader->m_pShaderBlob->GetBufferPointer(), _pData, uSize);
+
+	if(FAILED(DX_CALL(m_pDevice->CreateGeometryShader(pShader->m_pShaderBlob->GetBufferPointer(), uSize, NULL, &pShader->m_pShader))))
+	{
+		mem_delete(pShader);
+		return(NULL);
+	}
+
+	return(pShader);
+}
+IGXGeometryShader * CGXContext::createGeometryShaderFromString(const char * szCode, GXMACRO *pDefs)
+{
+	ID3DBlob *pShaderBlob = NULL;
+	ID3DBlob *pErrorBlob = NULL;
+	if(FAILED(DX_CALL(D3DX11CompileFromMemory(szCode, strlen(szCode), "memory.gs", (D3D_SHADER_MACRO*)pDefs, NULL, "main", "gs_4_0", SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL))))
+	{
+		if(pErrorBlob)
+		{
+			int s = strlen((char*)pErrorBlob->GetBufferPointer());
+			char *str = (char*)alloca(s + 33);
+			sprintf(str, "Unable to create geometry shader: %s", (char*)pErrorBlob->GetBufferPointer());
+			debugMessage(GX_LOG_ERROR, str);
+			mem_release(pErrorBlob);
+			return(NULL);
+		}
+	}
+	mem_release(pErrorBlob);
+
+	IGXGeometryShader *pShader = createGeometryShader(pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize());
+
+	mem_release(pShaderBlob);
+
+	return(pShader);
+}
+void CGXContext::destroyGeometryShader(IGXGeometryShader * pSH)
+{
+	mem_delete(pSH);
+}
+void CGXContext::setGeometryShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot)
+{
+	//@TODO: defer this
+	ID3D11Buffer *pBuf = NULL;
+	if(pBuffer)
+	{
+		pBuf = ((CGXConstantBuffer*)pBuffer)->m_pBuffer;
+	}
+	m_pDeviceContext->GSSetConstantBuffers(uSlot, 1, &pBuf);
+}
+
+IGXShader *CGXContext::createShader(IGXVertexShader *pVS, IGXPixelShader *pPS, IGXGeometryShader *pGS)
+{
+	return(new CGXShader(this, pVS, pPS, pGS));
 }
 void CGXContext::destroyShader(IGXShader *pSH)
 {

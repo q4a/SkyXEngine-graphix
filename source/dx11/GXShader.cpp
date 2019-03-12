@@ -115,3 +115,34 @@ void CGXPixelShader::getData(void *_pData, UINT *pSize)
 		*pSize = m_pShaderBlob->GetBufferSize();
 	}
 }
+
+//##########################################################################
+
+void CGXGeometryShader::Release()
+{
+	--m_uRefCount;
+	if(!m_uRefCount)
+	{
+		m_pRender->destroyGeometryShader(this);
+	}
+}
+
+CGXGeometryShader::~CGXGeometryShader()
+{
+	mem_release(m_pShaderBlob);
+	mem_release(m_pShader);
+}
+
+void CGXGeometryShader::getData(void *_pData, UINT *pSize)
+{
+	byte *pData = (byte*)_pData;
+	if(pData)
+	{
+		*pSize = m_pShaderBlob->GetBufferSize();
+		memcpy(_pData, m_pShaderBlob->GetBufferPointer(), *pSize);
+	}
+	else
+	{
+		*pSize = m_pShaderBlob->GetBufferSize();
+	}
+}
