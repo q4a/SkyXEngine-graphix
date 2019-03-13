@@ -81,6 +81,11 @@ void CGXTexture2D::unlock()
 	m_pRender->getDXDeviceContext()->Unmap(m_pTexture, 0);
 }
 
+void CGXTexture2D::update(void *pData)
+{
+	m_pRender->getDXDeviceContext()->UpdateSubresource(m_pTexture, 0, NULL, pData, m_pRender->getTextureMemPitch(m_uWidth, m_format), 0);
+}
+
 ID3D11ShaderResourceView *CGXTexture2D::getDXTexture()
 {
 	return(m_pSRV);

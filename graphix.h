@@ -610,8 +610,12 @@ public:
 	virtual UINT getWidth() = 0;
 	virtual UINT getHeight() = 0;
 
+	//@DEPRECATED: 
 	virtual bool lock(void **ppData, GXTEXLOCK mode) = 0;
+	//@DEPRECATED: 
 	virtual void unlock() = 0;
+
+	virtual void update(void *pData) = 0;
 };
 
 class IGXTextureCube: public IGXBaseTexture
@@ -621,7 +625,9 @@ public:
 
 	virtual UINT getSize() = 0;
 
+	//@DEPRECATED: 
 	virtual bool lock(void **ppData, GXCUBEMAP_FACES face, GXTEXLOCK mode) = 0;
+	//@DEPRECATED: 
 	virtual void unlock() = 0;
 };
 

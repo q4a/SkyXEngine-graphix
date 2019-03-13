@@ -565,8 +565,8 @@ void CGXContext::syncronize(UINT flags)
 		m_pDeviceContext->OMSetRenderTargets(uMaxIdx + 1, m_pDXColorTarget, ((CGXDepthStencilSurface*)m_pDepthStencilSurface)->m_pSurface);
 
 		D3D11_VIEWPORT vp;
-		vp.Width = (float)m_pColorTarget[0]->getWidth() + 0.5f;
-		vp.Height = (float)m_pColorTarget[0]->getHeight() + 0.5f;
+		vp.Width = (float)m_pColorTarget[0]->getWidth();
+		vp.Height = (float)m_pColorTarget[0]->getHeight();
 		vp.MinDepth = 0.0f;
 		vp.MaxDepth = 1.0f;
 		vp.TopLeftX = 0.5f;
@@ -2010,7 +2010,7 @@ UINT CGXContext::getIDXcount(UINT ptCount)
 
 IGXConstantBuffer *CGXContext::createConstantBuffer(UINT uSize)
 {
-	assert(uSize);
+	assert(uSize && (uSize % 16 == 0));
 
 	return(new CGXConstantBuffer(this, uSize));
 }

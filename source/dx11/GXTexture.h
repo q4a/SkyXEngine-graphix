@@ -43,6 +43,8 @@ public:
 	bool lock(void **ppData, GXTEXLOCK mode);
 	void unlock();
 
+	void update(void *pData);
+
 	GXFORMAT getFormat();
 	bool wasReset();
 
