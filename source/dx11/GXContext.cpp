@@ -608,6 +608,17 @@ void CGXContext::syncronize(UINT flags)
 			{
 				m_pDeviceContext->PSSetShader(NULL, NULL, 0);
 			}
+
+			if(pShader->m_pGShader)
+			{
+				CGXGeometryShader *pGS = (CGXGeometryShader*)pShader->m_pGShader;
+
+				m_pDeviceContext->GSSetShader(pGS->m_pShader, NULL, 0);
+			}
+			else
+			{
+				m_pDeviceContext->GSSetShader(NULL, NULL, 0);
+			}
 			m_sync_state.bShader = FALSE;
 		}
 	}
@@ -863,8 +874,8 @@ IGXGeometryShader * CGXContext::createGeometryShader(const char * szFile, GXMACR
 		if(pErrorBlob)
 		{
 			int s = strlen((char*)pErrorBlob->GetBufferPointer());
-			char *str = (char*)alloca(s + 33);
-			sprintf(str, "Unable to create geometry shader: %s", (char*)pErrorBlob->GetBufferPointer());
+			char *str = (char*)alloca(s + 35);
+			sprintf(str, "Unable to create geometry shader!\n%s", (char*)pErrorBlob->GetBufferPointer());
 			debugMessage(GX_LOG_ERROR, str);
 			mem_release(pErrorBlob);
 			return(NULL);
