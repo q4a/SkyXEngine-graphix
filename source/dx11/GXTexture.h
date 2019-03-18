@@ -53,6 +53,49 @@ public:
 	GXTEXTURE_TYPE getType();
 };
 
+class CGXTexture3D: public IGXTexture3D
+{
+	friend class CGXContext;
+
+protected:
+	CGXContext * m_pRender;
+	CGXTexture3D(CGXContext * pRender): m_pRender(pRender)
+	{
+	}
+	~CGXTexture3D();
+	GXFORMAT m_format;
+	bool m_bWasReset;
+	bool m_isResettable = false;
+
+	UINT m_uWidth;
+	UINT m_uHeight;
+	UINT m_uDepth;
+	D3D11_TEXTURE3D_DESC m_descTex3D;
+	ID3D11Texture3D *m_pTexture = NULL;
+	D3D11_SHADER_RESOURCE_VIEW_DESC m_descSRV;
+	ID3D11ShaderResourceView *m_pSRV = NULL;
+	UINT m_uMipLevels;
+
+	IGXSurface *m_pSurfaceRT = NULL;
+public:
+	void Release();
+
+	UINT getWidth();
+	UINT getHeight();
+	UINT getDepth();
+
+	IGXSurface *asRenderTarget();
+
+	void update(void *pData);
+
+	GXFORMAT getFormat();
+	bool wasReset();
+
+	ID3D11ShaderResourceView *getDXTexture();
+
+	GXTEXTURE_TYPE getType();
+};
+
 class CGXTextureCube: public IGXTextureCube
 {
 	friend class CGXContext;

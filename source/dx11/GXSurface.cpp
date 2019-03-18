@@ -70,3 +70,14 @@ void CGXSurface::releaseRT()
 {
 	mem_release(m_pRTV);
 }
+
+//##########################################################################
+
+void CGXSurface3D::initRT()
+{
+	memset(&m_descRTV, 0, sizeof(m_descRTV));
+	m_descRTV.Format = m_descTex3D.Format;
+	m_descRTV.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE3D;
+	m_descRTV.Texture3D.MipSlice = 0;
+	DX_CALL(m_pRender->getDXDevice()->CreateRenderTargetView(m_pSurface, &m_descRTV, &m_pRTV));
+}

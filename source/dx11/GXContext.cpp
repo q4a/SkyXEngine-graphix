@@ -40,6 +40,8 @@ CGXContext::CGXContext():
 	memset(&m_pColorTarget, 0, sizeof(m_pColorTarget));
 	memset(&m_pDXColorTarget, 0, sizeof(m_pDXColorTarget));
 	memset(&m_pTextures, 0, sizeof(m_pTextures));
+	memset(&m_memoryStats, 0, sizeof(m_memoryStats));
+	memset(&m_adapterDesc, 0, sizeof(m_adapterDesc));
 }
 
 void CGXContext::Release()
@@ -185,6 +187,18 @@ BOOL CGXContext::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindo
 	{
 		return(FALSE);
 	}
+
+	DXGI_ADAPTER_DESC adapterDesc;
+	if(!FAILED(DX_CALL(pDXGIAdapter->GetDesc(&adapterDesc))))
+	{
+		lstrcpyW(m_adapterDesc.szDescription, adapterDesc.Description);
+		m_adapterDesc.uTotalGPUMemory = adapterDesc.DedicatedVideoMemory;
+	}
+	else
+	{
+		lstrcpyW(m_adapterDesc.szDescription, L"Unknown device");
+	}
+
 	mem_release(pDXGIAdapter);
 
 	m_uWindowWidth = iWidth;
@@ -286,7 +300,7 @@ IGXVertexBuffer * CGXContext::createVertexBuffer(size_t size, UINT flags, void *
 		bd.Usage = D3D11_USAGE_DYNAMIC;
 		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	}
-	bd.ByteWidth = size;
+	bd.ByteWidth = (UINT)size;
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
 	D3D11_SUBRESOURCE_DATA *pSubresourceData = NULL;
@@ -298,7 +312,7 @@ IGXVertexBuffer * CGXContext::createVertexBuffer(size_t size, UINT flags, void *
 		initData.SysMemPitch = bd.ByteWidth;
 		pSubresourceData = &initData;
 
-		addBytesVertices(size);
+		addBytesVertices((UINT)size);
 	}
 
 	if(FAILED(DX_CALL(m_pDevice->CreateBuffer(&bd, pSubresourceData, &pBuff->m_pBuffer))))
@@ -307,7 +321,8 @@ IGXVertexBuffer * CGXContext::createVertexBuffer(size_t size, UINT flags, void *
 		return(NULL);
 	}
 
-	pBuff->m_uSize = size;
+	pBuff->m_uSize = (UINT)size;
+	m_memoryStats.uVertexBufferBytes += pBuff->m_uSize;
 
 	return(pBuff);
 }
@@ -328,7 +343,7 @@ IGXIndexBuffer * CGXContext::createIndexBuffer(size_t size, UINT flags, GXINDEXT
 		bd.Usage = D3D11_USAGE_DYNAMIC;
 		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	}
-	bd.ByteWidth = size;
+	bd.ByteWidth = (UINT)size;
 	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 
 	D3D11_SUBRESOURCE_DATA *pSubresourceData = NULL;
@@ -340,7 +355,7 @@ IGXIndexBuffer * CGXContext::createIndexBuffer(size_t size, UINT flags, GXINDEXT
 		initData.SysMemPitch = bd.ByteWidth;
 		pSubresourceData = &initData;
 
-		addBytesIndices(size);
+		addBytesIndices((UINT)size);
 	}
 
 	if(FAILED(DX_CALL(m_pDevice->CreateBuffer(&bd, pSubresourceData, &pBuff->m_pBuffer))))
@@ -359,7 +374,8 @@ IGXIndexBuffer * CGXContext::createIndexBuffer(size_t size, UINT flags, GXINDEXT
 		break;
 	}
 
-	pBuff->m_uSize = size;
+	pBuff->m_uSize = (UINT)size;
+	m_memoryStats.uIndexBufferBytes += pBuff->m_uSize;
 		
 	return(pBuff);
 }
@@ -373,6 +389,7 @@ void CGXContext::destroyIndexBuffer(IGXIndexBuffer * pBuff)
 			m_pCurIndexBuffer = NULL;
 			m_sync_state.bIndexBuffer = TRUE;
 		}
+		m_memoryStats.uIndexBufferBytes -= ((CGXIndexBuffer*)pBuff)->m_uSize;
 	}
 	mem_delete(pBuff);
 }
@@ -387,6 +404,7 @@ void CGXContext::destroyVertexBuffer(IGXVertexBuffer * pBuff)
 			m_sync_state.bIndexBuffer = TRUE;
 		}*/
 
+		m_memoryStats.uVertexBufferBytes -= ((CGXVertexBuffer*)pBuff)->m_uSize;
 	}
 	mem_delete(pBuff);
 }
@@ -635,6 +653,9 @@ void CGXContext::syncronize(UINT flags)
 				case GXTEXTURE_TYPE_2D:
 					pTex = ((CGXTexture2D*)m_pTextures[i])->getDXTexture();
 					break;
+				case GXTEXTURE_TYPE_3D:
+					pTex = ((CGXTexture3D*)m_pTextures[i])->getDXTexture();
+					break;
 				case GXTEXTURE_TYPE_CUBE:
 					pTex = ((CGXTextureCube*)m_pTextures[i])->getDXTexture();
 					break;
@@ -717,7 +738,7 @@ IGXVertexShader * CGXContext::createVertexShader(const char * szFile, GXMACRO *p
 	{
 		if(pErrorBlob)
 		{
-			int s = strlen((char*)pErrorBlob->GetBufferPointer());
+			size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
 			char *str = (char*)alloca(s + 33);
 			sprintf(str, "Unable to create vertex shader: %s", (char*)pErrorBlob->GetBufferPointer());
 			debugMessage(GX_LOG_ERROR, str);
@@ -727,7 +748,7 @@ IGXVertexShader * CGXContext::createVertexShader(const char * szFile, GXMACRO *p
 	}
 	mem_release(pErrorBlob);
 
-	IGXVertexShader *pShader = createVertexShader(pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize());
+	IGXVertexShader *pShader = createVertexShader(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
 	
@@ -741,7 +762,7 @@ IGXVertexShader * CGXContext::createVertexShaderFromString(const char * szCode, 
 	{
 		if(pErrorBlob)
 		{
-			int s = strlen((char*)pErrorBlob->GetBufferPointer());
+			size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
 			char *str = (char*)alloca(s + 33);
 			sprintf(str, "Unable to create vertex shader: %s", (char*)pErrorBlob->GetBufferPointer());
 			debugMessage(GX_LOG_ERROR, str);
@@ -751,7 +772,7 @@ IGXVertexShader * CGXContext::createVertexShaderFromString(const char * szCode, 
 	}
 	mem_release(pErrorBlob);
 
-	IGXVertexShader *pShader = createVertexShader(pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize());
+	IGXVertexShader *pShader = createVertexShader(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
 
@@ -795,7 +816,7 @@ IGXPixelShader * CGXContext::createPixelShader(const char * szFile, GXMACRO *pDe
 	{
 		if(pErrorBlob)
 		{
-			int s = strlen((char*)pErrorBlob->GetBufferPointer());
+			size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
 			char *str = (char*)alloca(s + 33);
 			sprintf(str, "Unable to create pixel shader: %s", (char*)pErrorBlob->GetBufferPointer());
 			debugMessage(GX_LOG_ERROR, str);
@@ -805,7 +826,7 @@ IGXPixelShader * CGXContext::createPixelShader(const char * szFile, GXMACRO *pDe
 	}
 	mem_release(pErrorBlob);
 
-	IGXPixelShader *pShader = createPixelShader(pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize());
+	IGXPixelShader *pShader = createPixelShader(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
 
@@ -834,7 +855,7 @@ IGXPixelShader * CGXContext::createPixelShaderFromString(const char * szCode, GX
 	{
 		if(pErrorBlob)
 		{
-			int s = strlen((char*)pErrorBlob->GetBufferPointer());
+			size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
 			char *str = (char*)alloca(s + 33);
 			sprintf(str, "Unable to create pixel shader: %s", (char*)pErrorBlob->GetBufferPointer());
 			debugMessage(GX_LOG_ERROR, str);
@@ -844,7 +865,7 @@ IGXPixelShader * CGXContext::createPixelShaderFromString(const char * szCode, GX
 	}
 	mem_release(pErrorBlob);
 
-	IGXPixelShader *pShader = createPixelShader(pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize());
+	IGXPixelShader *pShader = createPixelShader(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
 
@@ -873,7 +894,7 @@ IGXGeometryShader * CGXContext::createGeometryShader(const char * szFile, GXMACR
 	{
 		if(pErrorBlob)
 		{
-			int s = strlen((char*)pErrorBlob->GetBufferPointer());
+			size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
 			char *str = (char*)alloca(s + 35);
 			sprintf(str, "Unable to create geometry shader!\n%s", (char*)pErrorBlob->GetBufferPointer());
 			debugMessage(GX_LOG_ERROR, str);
@@ -883,7 +904,7 @@ IGXGeometryShader * CGXContext::createGeometryShader(const char * szFile, GXMACR
 	}
 	mem_release(pErrorBlob);
 
-	IGXGeometryShader *pShader = createGeometryShader(pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize());
+	IGXGeometryShader *pShader = createGeometryShader(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
 
@@ -912,7 +933,7 @@ IGXGeometryShader * CGXContext::createGeometryShaderFromString(const char * szCo
 	{
 		if(pErrorBlob)
 		{
-			int s = strlen((char*)pErrorBlob->GetBufferPointer());
+			size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
 			char *str = (char*)alloca(s + 33);
 			sprintf(str, "Unable to create geometry shader: %s", (char*)pErrorBlob->GetBufferPointer());
 			debugMessage(GX_LOG_ERROR, str);
@@ -922,7 +943,7 @@ IGXGeometryShader * CGXContext::createGeometryShaderFromString(const char * szCo
 	}
 	mem_release(pErrorBlob);
 
-	IGXGeometryShader *pShader = createGeometryShader(pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize());
+	IGXGeometryShader *pShader = createGeometryShader(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
 
@@ -1530,6 +1551,86 @@ IGXTexture2D *CGXContext::createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLe
 
 	DX_CALL(m_pDevice->CreateShaderResourceView(pTex->m_pTexture, &pTex->m_descSRV, &pTex->m_pSRV));
 
+	addBytesTextures(getTextureMemPitch(pTex->m_uWidth, pTex->m_format) * pTex->m_uHeight, true, pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
+
+	return(pTex);
+}
+IGXTexture3D *CGXContext::createTexture3D(UINT uWidth, UINT uHeight, UINT uDepth, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData)
+{
+	assert(!(uTexUsageFlags & GX_TEXUSAGE_AUTORESIZE) && "GX_TEXUSAGE_AUTORESIZE is not supported on 3D textures");
+
+	CGXTexture3D *pTex = new CGXTexture3D(this);
+
+	pTex->m_format = format;
+	pTex->m_uHeight = uHeight;
+	pTex->m_uWidth = uWidth;
+	pTex->m_uDepth = uDepth;
+	pTex->m_bWasReset = true;
+	
+	memset(&pTex->m_descTex3D, 0, sizeof(pTex->m_descTex3D));
+	pTex->m_descTex3D.Width = uWidth;
+	pTex->m_descTex3D.Height = uHeight;
+	pTex->m_descTex3D.Depth = uDepth;
+	pTex->m_descTex3D.MipLevels = uMipLevels;
+	pTex->m_descTex3D.Format = getDXFormat(format);
+	pTex->m_descTex3D.Usage = D3D11_USAGE_DEFAULT;
+	pTex->m_descTex3D.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	if(uTexUsageFlags & GX_TEXUSAGE_RENDERTARGET)
+	{
+		pTex->m_descTex3D.BindFlags |= D3D11_BIND_RENDER_TARGET;
+	}
+	if(uTexUsageFlags & GX_TEXUSAGE_AUTOGENMIPMAPS)
+	{
+		pTex->m_descTex3D.MipLevels = 0;
+	}
+	pTex->m_uMipLevels = pTex->m_descTex3D.MipLevels;
+	
+	if(/*!(uTexUsageFlags & GX_TEXUSAGE_RENDERTARGET) && */pInitData)
+	{
+		pTex->m_bWasReset = false;
+
+		D3D11_SUBRESOURCE_DATA initData;
+		initData.pSysMem = pInitData;
+		initData.SysMemSlicePitch = getTextureMemPitch(uDepth, format) * uWidth;
+		initData.SysMemPitch = getTextureMemPitch(uWidth, format);
+		addBytesTextures(/*initData.SysMemPitch * */initData.SysMemSlicePitch * uHeight);
+
+		if(pTex->m_descTex3D.MipLevels == 1)
+		{
+			DX_CALL(m_pDevice->CreateTexture3D(&pTex->m_descTex3D, &initData, &pTex->m_pTexture));
+		}
+		else
+		{
+			DX_CALL(m_pDevice->CreateTexture3D(&pTex->m_descTex3D, NULL, &pTex->m_pTexture));
+
+			m_pDeviceContext->UpdateSubresource(pTex->m_pTexture, 0, NULL, pInitData, initData.SysMemPitch, initData.SysMemSlicePitch);
+		}
+	}
+	else
+	{
+		DX_CALL(m_pDevice->CreateTexture3D(&pTex->m_descTex3D, NULL, &pTex->m_pTexture));
+	}
+
+	memset(&pTex->m_descSRV, 0, sizeof(pTex->m_descSRV));
+	pTex->m_descSRV.Format = pTex->m_descTex3D.Format;
+	pTex->m_descSRV.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
+	pTex->m_descSRV.Texture3D.MipLevels = pTex->m_descTex3D.MipLevels;
+
+	if(!pTex->m_descSRV.Texture3D.MipLevels)
+	{
+		UINT uSize = max(pTex->m_uHeight, pTex->m_uWidth);
+		uSize = max(uSize, pTex->m_uDepth);
+		do
+		{
+			++pTex->m_descSRV.Texture3D.MipLevels;
+		}
+		while(uSize >>= 1);
+	}
+
+	DX_CALL(m_pDevice->CreateShaderResourceView(pTex->m_pTexture, &pTex->m_descSRV, &pTex->m_pSRV));
+
+	addBytesTextures(getTextureMemPitch(pTex->m_uDepth, pTex->m_format) * pTex->m_uWidth * pTex->m_uHeight, true, pTex->m_descTex3D.BindFlags & D3D11_BIND_RENDER_TARGET);
+
 	return(pTex);
 }
 IGXTextureCube *CGXContext::createTextureCube(UINT uSize, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData)
@@ -1585,6 +1686,8 @@ IGXTextureCube *CGXContext::createTextureCube(UINT uSize, UINT uMipLevels, UINT 
 	pTex->m_descSRV.TextureCube.MipLevels = pTex->m_descTex2D.MipLevels;
 
 	DX_CALL(m_pDevice->CreateShaderResourceView(pTex->m_pTexture, &pTex->m_descSRV, &pTex->m_pSRV));
+
+	addBytesTextures(getTextureMemPitch(pTex->m_uSize, pTex->m_format) * pTex->m_uSize * 6, true, pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
 
 	return(pTex);
 }
@@ -1807,6 +1910,8 @@ IGXTexture2D *CGXContext::createTexture2DFromFile(const char *szFileName, UINT u
 	pTex->m_descSRV.Texture2D.MipLevels = pTex->m_descTex2D.MipLevels;
 
 	DX_CALL(m_pDevice->CreateShaderResourceView(pTex->m_pTexture, &pTex->m_descSRV, &pTex->m_pSRV));
+	
+	addBytesTextures(getTextureMemPitch(pTex->m_uWidth, pTex->m_format) * pTex->m_uHeight, true, pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
 
 	return(pTex);
 }
@@ -1832,6 +1937,9 @@ IGXTextureCube *CGXContext::createTextureCubeFromFile(const char *szFileName, UI
 	pTex->m_descSRV.Texture2D.MipLevels = pTex->m_descTex2D.MipLevels;
 
 	DX_CALL(m_pDevice->CreateShaderResourceView(pTex->m_pTexture, &pTex->m_descSRV, &pTex->m_pSRV));
+
+	addBytesTextures(getTextureMemPitch(pTex->m_uSize, pTex->m_format) * pTex->m_uSize, true, pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
+
 
 	return(pTex);
 }

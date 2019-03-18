@@ -3,6 +3,7 @@
 
 CGXTexture2D::~CGXTexture2D()
 {
+	m_pRender->addBytesTextures(-m_pRender->getTextureMemPitch(m_uWidth, m_format) * m_uHeight, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
 	mem_release(m_pTexture);
 	mem_release(m_pSRV);
 }
@@ -50,9 +51,10 @@ IGXSurface *CGXTexture2D::getMipmap(UINT n)
 			return(m_apSurfaces[i]);
 		}
 	}
-	
+
 	CGXSurface *pSurface = new CGXSurface(m_pRender, max(1, m_uWidth >> n), max(1, m_uHeight >> n), m_format, m_pTexture);
 	pSurface->m_uMipmapNumber = n;
+	pSurface->m_descTex2D.SampleDesc = m_descTex2D.SampleDesc;
 	if(m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET)
 	{
 		pSurface->initRT();
@@ -103,6 +105,8 @@ void CGXTexture2D::onDevLost()
 			((CGXSurface*)m_apSurfaces[i])->releaseRT();
 		}
 	}
+
+	m_pRender->addBytesTextures(-m_pRender->getTextureMemPitch(m_uWidth, m_format) * m_uHeight, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
 }
 void CGXTexture2D::onDevRst(UINT uScreenWidth, UINT uScreenHeight)
 {
@@ -137,6 +141,8 @@ void CGXTexture2D::onDevRst(UINT uScreenWidth, UINT uScreenHeight)
 	DX_CALL(m_pRender->getDXDevice()->CreateTexture2D(&m_descTex2D, NULL, &m_pTexture));
 	DX_CALL(m_pRender->getDXDevice()->CreateShaderResourceView(m_pTexture, &m_descSRV, &m_pSRV));
 
+	m_pRender->addBytesTextures(m_pRender->getTextureMemPitch(m_uWidth, m_format) * m_uHeight, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
+
 	for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
 	{
 		CGXSurface *pSurf = (CGXSurface*)m_apSurfaces[i];
@@ -159,8 +165,92 @@ GXTEXTURE_TYPE CGXTexture2D::getType()
 
 //##########################################################################
 
+CGXTexture3D::~CGXTexture3D()
+{
+	m_pRender->addBytesTextures(-m_pRender->getTextureMemPitch(m_uDepth, m_format) * m_uWidth * m_uHeight, true, m_descTex3D.BindFlags & D3D11_BIND_RENDER_TARGET);
+	mem_release(m_pTexture);
+	mem_release(m_pSRV);
+	mem_release(m_pSurfaceRT);
+}
+
+GXFORMAT CGXTexture3D::getFormat()
+{
+	return(m_format);
+}
+
+bool CGXTexture3D::wasReset()
+{
+	return(m_bWasReset);
+}
+
+UINT CGXTexture3D::getWidth()
+{
+	return(m_uWidth);
+}
+
+UINT CGXTexture3D::getHeight()
+{
+	return(m_uHeight);
+}
+
+UINT CGXTexture3D::getDepth()
+{
+	return(m_uDepth);
+}
+
+void CGXTexture3D::Release()
+{
+	--m_uRefCount;
+	if(!m_uRefCount)
+	{
+		delete this;
+	}
+}
+
+IGXSurface *CGXTexture3D::asRenderTarget()
+{
+	if(!(m_descTex3D.BindFlags & D3D11_BIND_RENDER_TARGET))
+	{
+		m_pRender->debugMessage(GX_LOG_ERROR, "Unable to use CGXTexture3D::asRenderTarget() on texture created without GX_TEXUSAGE_RENDERTARGET flag!");
+		return(NULL);
+	}
+	if(m_pSurfaceRT)
+	{
+		m_pSurfaceRT->AddRef();
+		return(m_pSurfaceRT);
+	}
+
+	CGXSurface3D *pSurface = new CGXSurface3D(m_pRender, m_uWidth, m_uHeight, m_uDepth, m_format, m_pTexture);
+	if(m_descTex3D.BindFlags & D3D11_BIND_RENDER_TARGET)
+	{
+		pSurface->initRT();
+	}
+	m_pSurfaceRT = pSurface;
+	pSurface->AddRef();
+	return(pSurface);
+}
+
+void CGXTexture3D::update(void *pData)
+{
+	m_pRender->addBytesTextures(m_pRender->getTextureMemPitch(m_uDepth, m_format) * m_uWidth * m_uHeight);
+	m_pRender->getDXDeviceContext()->UpdateSubresource(m_pTexture, 0, NULL, pData, m_pRender->getTextureMemPitch(m_uWidth, m_format), m_pRender->getTextureMemPitch(m_uDepth, m_format) * m_uWidth);
+}
+
+ID3D11ShaderResourceView *CGXTexture3D::getDXTexture()
+{
+	return(m_pSRV);
+}
+
+GXTEXTURE_TYPE CGXTexture3D::getType()
+{
+	return(GXTEXTURE_TYPE_3D);
+}
+
+//##########################################################################
+
 CGXTextureCube::~CGXTextureCube()
 {
+	m_pRender->addBytesTextures(-m_pRender->getTextureMemPitch(m_uSize, m_format) * m_uSize * 6, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
 	mem_release(m_pTexture);
 	mem_release(m_pSRV);
 }
@@ -245,6 +335,7 @@ void CGXTextureCube::onDevLost()
 			((CGXSurface*)m_apSurfaces[i])->releaseRT();
 		}
 	}
+	m_pRender->addBytesTextures(-m_pRender->getTextureMemPitch(m_uSize, m_format) * m_uSize * 6, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
 }
 void CGXTextureCube::onDevRst(UINT uScreenHeight)
 {
@@ -262,6 +353,8 @@ void CGXTextureCube::onDevRst(UINT uScreenHeight)
 
 	DX_CALL(m_pRender->getDXDevice()->CreateTexture2D(&m_descTex2D, NULL, &m_pTexture));
 	DX_CALL(m_pRender->getDXDevice()->CreateShaderResourceView(m_pTexture, &m_descSRV, &m_pSRV));
+
+	m_pRender->addBytesTextures(m_pRender->getTextureMemPitch(m_uSize, m_format) * m_uSize * 6, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
 
 	for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
 	{

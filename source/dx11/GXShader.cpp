@@ -48,12 +48,12 @@ void CGXVertexShader::getData(void *_pData, UINT *pSize)
 	byte *pData = (byte*)_pData;
 	if(pData)
 	{
-		*pSize = m_pShaderBlob->GetBufferSize();
+		*pSize = (UINT)m_pShaderBlob->GetBufferSize();
 		memcpy(_pData, m_pShaderBlob->GetBufferPointer(), *pSize);
 	}
 	else
 	{
-		*pSize = m_pShaderBlob->GetBufferSize();
+		*pSize = (UINT)m_pShaderBlob->GetBufferSize();
 	}
 }
 
@@ -107,12 +107,12 @@ void CGXPixelShader::getData(void *_pData, UINT *pSize)
 	byte *pData = (byte*)_pData;
 	if(pData)
 	{
-		*pSize = m_pShaderBlob->GetBufferSize();
+		*pSize = (UINT)m_pShaderBlob->GetBufferSize();
 		memcpy(_pData, m_pShaderBlob->GetBufferPointer(), *pSize);
 	}
 	else
 	{
-		*pSize = m_pShaderBlob->GetBufferSize();
+		*pSize = (UINT)m_pShaderBlob->GetBufferSize();
 	}
 }
 
@@ -138,11 +138,11 @@ void CGXGeometryShader::getData(void *_pData, UINT *pSize)
 	byte *pData = (byte*)_pData;
 	if(pData)
 	{
-		*pSize = m_pShaderBlob->GetBufferSize();
+		*pSize = (UINT)m_pShaderBlob->GetBufferSize();
 		memcpy(_pData, m_pShaderBlob->GetBufferPointer(), *pSize);
 	}
 	else
 	{
-		*pSize = m_pShaderBlob->GetBufferSize();
+		*pSize = (UINT)m_pShaderBlob->GetBufferSize();
 	}
 }

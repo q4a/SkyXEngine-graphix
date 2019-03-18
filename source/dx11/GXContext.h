@@ -27,6 +27,15 @@ enum GX_LOG
 
 #define DX_CALL(code) ([](HRESULT hr, const char *szCode){if(FAILED(hr)){CGXContext::logDXcall(szCode, hr);}return(hr);})((code), #code)
 
+/*
+Applications are also free to request that Visual Studio 
+not support capturing them via an API, which is possible 
+here as well. This is done via the D3DPerf_SetOptions(1) 
+method, use of the D3D11_CREATE_DEVICE_PREVENT_ALTERING_LAYER_SETTINGS_FROM_REGISTRY 
+flag, or by reacting to the value returned from 
+IsAnnotationEnabled:GetStatus or ID3D11DeviceContext2::IsAnnotationEnabled.
+*/
+
 class CGXContext: public IGXContext
 {
 protected:
@@ -117,6 +126,7 @@ public:
 	IGXSurface *getColorTarget(UINT idx = 0);
 
 	IGXTexture2D *createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData = NULL);
+	IGXTexture3D *createTexture3D(UINT uWidth, UINT uHeight, UINT uDepth, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData = NULL);
 	IGXTextureCube *createTextureCube(UINT uSize, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData = NULL);
 	void destroyTexture2D(IGXTexture2D * pTexture);
 	void destroyTextureCube(IGXTextureCube * pTexture);
@@ -179,18 +189,55 @@ public:
 	{
 		return(&m_frameStats);
 	}
-
-	void addBytesTextures(UINT uBytes)
+	const GX_MEMORY_STATS *getMemoryStats()
 	{
+		return(&m_memoryStats);
+	}
+	const GX_ADAPTER_DESC *getAdapterDesc()
+	{
+		return(&m_adapterDesc);
+	}
+
+	void addBytesTextures(int uBytes, bool bTotal = false, bool isRT = false)
+	{
+		if(bTotal)
+		{
+			if(isRT)
+			{
+				m_memoryStats.uRenderTargetBytes += uBytes;
+			}
+			else
+			{
+				m_memoryStats.uTextureBytes += uBytes;
+			}
+
+			if(uBytes < 0)
+			{
+				uBytes = 0;
+			}
+		}
 		m_frameStats.uUploadedBuffersTextures += uBytes;
 	}
-	void addBytesVertices(UINT uBytes)
+	void addBytesVertices(int uBytes)
 	{
 		m_frameStats.uUploadedBuffersVertexes += uBytes;
 	}
 	void addBytesIndices(UINT uBytes)
 	{
 		m_frameStats.uUploadedBuffersIndices += uBytes;
+	}
+	void addBytesShaderConst(int uBytes, bool bTotal = false)
+	{
+		if(bTotal)
+		{
+			m_memoryStats.uShaderConstBytes += uBytes;
+
+			if(uBytes < 0)
+			{
+				uBytes = 0;
+			}
+		}
+		m_frameStats.uUploadedBuffersShaderConst += uBytes;
 	}
 protected:
 	
@@ -208,6 +255,8 @@ protected:
 	void onResetDevice();
 
 	GX_FRAME_STATS m_frameStats;
+	GX_MEMORY_STATS m_memoryStats;
+	GX_ADAPTER_DESC m_adapterDesc;
 
 	HWND m_hWnd;
 

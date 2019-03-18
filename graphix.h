@@ -481,6 +481,7 @@ typedef enum _GXTEXTURE_TYPE
 {
 	GXTEXTURE_TYPE_2D,
 	GXTEXTURE_TYPE_CUBE,
+	GXTEXTURE_TYPE_3D,
 
 	GXTEXTURE_TYPE_UNKNOWN
 } GXTEXTURE_TYPE;
@@ -494,6 +495,23 @@ struct GX_FRAME_STATS
 	UINT uUploadedBuffersTextures;
 	UINT uUploadedBuffersVertexes;
 	UINT uUploadedBuffersIndices;
+	UINT uUploadedBuffersShaderConst;
+};
+
+struct GX_MEMORY_STATS
+{
+	//@FIXME: Handle mipmaps properly!
+	UINT uTextureBytes;
+	UINT uRenderTargetBytes;
+	UINT uVertexBufferBytes;
+	UINT uIndexBufferBytes;
+	UINT uShaderConstBytes;
+};
+
+struct GX_ADAPTER_DESC
+{
+	wchar_t szDescription[128];
+	size_t uTotalGPUMemory;
 };
 
 //##########################################################################
@@ -614,6 +632,18 @@ public:
 	virtual bool lock(void **ppData, GXTEXLOCK mode) = 0;
 	//@DEPRECATED: 
 	virtual void unlock() = 0;
+
+	virtual void update(void *pData) = 0;
+};
+
+class IGXTexture3D: public IGXBaseTexture
+{
+public:
+	virtual IGXSurface *asRenderTarget() = 0;
+
+	virtual UINT getWidth() = 0;
+	virtual UINT getHeight() = 0;
+	virtual UINT getDepth() = 0;
 
 	virtual void update(void *pData) = 0;
 };
@@ -748,6 +778,7 @@ public:
 	virtual IGXSurface *getColorTarget(UINT idx = 0) = 0;
 
 	virtual IGXTexture2D *createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData = NULL) = 0;
+	virtual IGXTexture3D *createTexture3D(UINT uWidth, UINT uHeight, UINT uDepth, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData = NULL) = 0;
 	virtual IGXTextureCube *createTextureCube(UINT uSize, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData = NULL) = 0;
 
 	virtual IGXTexture2D *createTexture2DFromFile(const char *szFileName, UINT uTexUsageFlags, bool bAllowNonPowerOf2 = false) = 0;
@@ -778,6 +809,8 @@ public:
 	virtual IGXSwapChain *createSwapChain(UINT uWidth, UINT uHeight, SXWINDOW wnd) = 0;
 
 	virtual const GX_FRAME_STATS *getFrameStats() = 0;
+	virtual const GX_MEMORY_STATS *getMemoryStats() = 0;
+	virtual const GX_ADAPTER_DESC *getAdapterDesc() = 0;
 
 	virtual GXTEXTURE_TYPE getTextureTypeFromFile(const char *szFile) = 0;
 	virtual bool saveTextureToFile(const char *szTarget, IGXBaseTexture *pTexture) = 0;
