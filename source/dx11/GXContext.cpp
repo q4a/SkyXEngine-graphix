@@ -1957,7 +1957,8 @@ DXGI_FORMAT CGXContext::getDXFormat(GXFORMAT format)
 		assert(!"GXFMT_R8G8B8 is unavailable!");
 		return(DXGI_FORMAT_R8G8B8A8_UNORM);
 	case GXFMT_A8R8G8B8:
-		return(DXGI_FORMAT_B8G8R8A8_UNORM);
+		//return(DXGI_FORMAT_B8G8R8A8_UNORM);
+		return(DXGI_FORMAT_R8G8B8A8_UNORM);
 	case GXFMT_X8R8G8B8:
 		return(DXGI_FORMAT_B8G8R8X8_UNORM);
 	case GXFMT_R5G6B5:
@@ -2082,7 +2083,7 @@ bool CGXContext::saveTextureToFile(const char *szTarget, IGXBaseTexture *pTextur
 		pTex = ((CGXTextureCube*)pTexture)->m_pTexture;
 		break;
 	}
-	return(!FAILED(D3DX11SaveTextureToFileA(m_pDeviceContext, pTex, D3DX11_IFF_PNG, szTarget)));
+	return(!FAILED(DX_CALL(D3DX11SaveTextureToFileA(m_pDeviceContext, pTex, D3DX11_IFF_DDS, szTarget))));
 }
 
 void CGXContext::_updateStats(UINT uPrimCount)
