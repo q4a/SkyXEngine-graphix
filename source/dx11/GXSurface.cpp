@@ -79,5 +79,18 @@ void CGXSurface3D::initRT()
 	m_descRTV.Format = m_descTex3D.Format;
 	m_descRTV.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE3D;
 	m_descRTV.Texture3D.MipSlice = 0;
+	m_descRTV.Texture3D.WSize = -1;
+	DX_CALL(m_pRender->getDXDevice()->CreateRenderTargetView(m_pSurface, &m_descRTV, &m_pRTV));
+}
+
+//##########################################################################
+
+void CGXSurfaceCube::initRT()
+{
+	memset(&m_descRTV, 0, sizeof(m_descRTV));
+	m_descRTV.Format = m_descTex2D.Format;
+	m_descRTV.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+	m_descRTV.Texture2DArray.MipSlice = 0;
+	m_descRTV.Texture2DArray.ArraySize = 6;
 	DX_CALL(m_pRender->getDXDevice()->CreateRenderTargetView(m_pSurface, &m_descRTV, &m_pRTV));
 }

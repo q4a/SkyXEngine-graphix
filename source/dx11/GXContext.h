@@ -77,6 +77,8 @@ public:
 	void drawPrimitive(UINT uStartVertex, UINT uPrimitiveCount);
 	void drawPrimitiveInstanced(UINT uInstanceCount, UINT uStartVertex, UINT uPrimitiveCount);
 
+	void computeDispatch(UINT uThreadGroupCountX, UINT uThreadGroupCountY, UINT uThreadGroupCountZ);
+
 	void setPrimitiveTopology(GXPT pt);
 
 	//IGXShader * createShader(const char * pName, UINT flags = 0);
@@ -86,27 +88,28 @@ public:
 	IGXVertexShader * createVertexShader(const char * szFile, GXMACRO *pDefs = NULL);
 	IGXVertexShader * createVertexShaderFromString(const char * szCode, GXMACRO *pDefs = NULL);
 	IGXVertexShader * createVertexShader(void *pData, UINT uSize);
-	void destroyVertexShader(IGXVertexShader * pSH);
 	void setVertexShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0);
 
 	IGXPixelShader * createPixelShader(const char * szFile, GXMACRO *pDefs = NULL);
 	IGXPixelShader * createPixelShaderFromString(const char * szCode, GXMACRO *pDefs = NULL);
 	IGXPixelShader * createPixelShader(void *pData, UINT uSize);
-	void destroyPixelShader(IGXPixelShader * pSH); 
 	void setPixelShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0);
 
 	IGXGeometryShader * createGeometryShader(const char * szFile, GXMACRO *pDefs = NULL);
 	IGXGeometryShader * createGeometryShaderFromString(const char * szCode, GXMACRO *pDefs = NULL);
 	IGXGeometryShader * createGeometryShader(void *pData, UINT uSize);
-	void destroyGeometryShader(IGXGeometryShader * pSH);
 	void setGeometryShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0);
+
+	IGXComputeShader * createComputeShader(const char * szFile, GXMACRO *pDefs = NULL);
+	IGXComputeShader * createComputeShaderFromString(const char * szCode, GXMACRO *pDefs = NULL);
+	IGXComputeShader * createComputeShader(void *pData, UINT uSize);
+	void setComputeShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0);
 
 
 	//void setVertexShader(IGXVertexShader * pSH);
 	//void setPixelShader(IGXPixelShader * pSH);
 
-	IGXShader *createShader(IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL, IGXGeometryShader *pGS = NULL);
-	void destroyShader(IGXShader *pSH);
+	IGXShader *createShader(IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL, IGXGeometryShader *pGS = NULL, IGXComputeShader *pCS = NULL);
 	void setShader(IGXShader *pSH);
 	IGXShader *getShader();
 
@@ -114,8 +117,10 @@ public:
 	void destroyRenderBuffer(IGXRenderBuffer * pDecl);
 
 	IGXDepthStencilSurface *createDepthStencilSurface(UINT uWidth, UINT uHeight, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false);
+	IGXDepthStencilSurface *createDepthStencilSurfaceCube(UINT uSize, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false);
 	void destroyDepthStencilSurface(IGXDepthStencilSurface *pSurface);
 	void setDepthStencilSurface(IGXDepthStencilSurface *pSurface);
+	void setDepthStencilSurfaceNULL();
 	IGXDepthStencilSurface *getDepthStencilSurface();
 
 	IGXSurface *createColorTarget(UINT uWidth, UINT uHeight, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false);
@@ -136,7 +141,13 @@ public:
 
 	void setTexture(IGXBaseTexture *pTexture, UINT uStage = 0);
 	IGXBaseTexture *getTexture(UINT uStage = 0);
-
+	void setTextureVS(IGXBaseTexture *pTexture, UINT uStage = 0);
+	IGXBaseTexture *getTextureVS(UINT uStage = 0);
+	void setTextureCS(IGXBaseTexture *pTexture, UINT uStage = 0);
+	IGXBaseTexture *getTextureCS(UINT uStage = 0);
+	void setUnorderedAccessVeiwCS(IGXBaseTexture *pUAV, UINT uStage = 0);
+	IGXBaseTexture *getUnorderedAccessVeiwCS(UINT uStage = 0);
+	
 	IGXBlendState *createBlendState(GXBLEND_DESC *pBlendDesc);
 	void destroyBlendState(IGXBlendState *pState);
 	void setBlendState(IGXBlendState *pState);
@@ -292,6 +303,9 @@ protected:
 	IGXSwapChain *m_pDefaultSwapChain = NULL;
 
 	IGXBaseTexture *m_pTextures[MAXGXTEXTURES];
+	IGXBaseTexture *m_pTexturesVS[MAXGXTEXTURES];
+	IGXBaseTexture *m_pTexturesCS[MAXGXTEXTURES];
+	IGXBaseTexture *m_pUAVsCS[MAXGXUAVS];
 
 	IGXShader *m_pShader = NULL;
 
@@ -306,6 +320,9 @@ protected:
 		BOOL bBlendState;
 		BOOL bRenderTarget;
 		BOOL bTexture[MAXGXTEXTURES];
+		BOOL bTextureVS[MAXGXTEXTURES];
+		BOOL bTextureCS[MAXGXTEXTURES];
+		BOOL bUAVsCS[MAXGXUAVS];
 		BOOL bShader;
 		BOOL bScissorsRect;
 		//BOOL bVertexBuffers[MAXDSGVSTREAM];

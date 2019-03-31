@@ -5,7 +5,7 @@ void CGXVertexShader::Release()
 	--m_uRefCount;
 	if(!m_uRefCount)
 	{
-		m_pRender->destroyVertexShader(this);
+		delete this;
 	}
 }
 
@@ -64,7 +64,7 @@ void CGXPixelShader::Release()
 	--m_uRefCount;
 	if(!m_uRefCount)
 	{
-		m_pRender->destroyPixelShader(this);
+		delete this;
 	}
 }
 
@@ -123,7 +123,7 @@ void CGXGeometryShader::Release()
 	--m_uRefCount;
 	if(!m_uRefCount)
 	{
-		m_pRender->destroyGeometryShader(this);
+		delete this;
 	}
 }
 
@@ -134,6 +134,37 @@ CGXGeometryShader::~CGXGeometryShader()
 }
 
 void CGXGeometryShader::getData(void *_pData, UINT *pSize)
+{
+	byte *pData = (byte*)_pData;
+	if(pData)
+	{
+		*pSize = (UINT)m_pShaderBlob->GetBufferSize();
+		memcpy(_pData, m_pShaderBlob->GetBufferPointer(), *pSize);
+	}
+	else
+	{
+		*pSize = (UINT)m_pShaderBlob->GetBufferSize();
+	}
+}
+
+//##########################################################################
+
+void CGXComputeShader::Release()
+{
+	--m_uRefCount;
+	if(!m_uRefCount)
+	{
+		delete this;
+	}
+}
+
+CGXComputeShader::~CGXComputeShader()
+{
+	mem_release(m_pShaderBlob);
+	mem_release(m_pShader);
+}
+
+void CGXComputeShader::getData(void *_pData, UINT *pSize)
 {
 	byte *pData = (byte*)_pData;
 	if(pData)

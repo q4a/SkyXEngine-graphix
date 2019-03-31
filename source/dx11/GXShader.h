@@ -69,16 +69,35 @@ public:
 	void getData(void *pData, UINT *pSize);
 };
 
+class CGXComputeShader: public IGXComputeShader
+{
+	friend class CGXContext;
+
+	CGXComputeShader(CGXContext * pRender):m_pRender(pRender)
+	{
+	}
+	~CGXComputeShader();
+
+	CGXContext * m_pRender;
+	ID3D11ComputeShader *m_pShader = NULL;
+	ID3DBlob *m_pShaderBlob = NULL;
+
+public:
+	void Release();
+	void getData(void *pData, UINT *pSize);
+};
+
 
 class CGXShader: public IGXShader
 {
 	friend class CGXContext;
 
-	CGXShader(CGXContext * pRender, IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL, IGXGeometryShader *pGS = NULL):
+	CGXShader(CGXContext * pRender, IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL, IGXGeometryShader *pGS = NULL, IGXComputeShader *pCS = NULL):
 		m_pRender(pRender),
-		m_pVShader(pVS),
-		m_pPShader(pPS),
-		m_pGShader(pGS)
+		m_pVShader((CGXVertexShader*)pVS),
+		m_pPShader((CGXPixelShader*)pPS),
+		m_pGShader((CGXGeometryShader*)pGS),
+		m_pCShader((CGXComputeShader*)pCS)
 	{
 		if(pVS)
 		{
@@ -91,9 +110,10 @@ class CGXShader: public IGXShader
 	}
 
 	CGXContext * m_pRender;
-	IGXVertexShader *m_pVShader;
-	IGXPixelShader *m_pPShader;
-	IGXGeometryShader *m_pGShader;
+	CGXVertexShader *m_pVShader;
+	CGXPixelShader *m_pPShader;
+	CGXGeometryShader *m_pGShader;
+	CGXComputeShader *m_pCShader;
 public:
 	void Release()
 	{
@@ -103,7 +123,8 @@ public:
 			mem_release(m_pVShader);
 			mem_release(m_pPShader);
 			mem_release(m_pGShader);
-			m_pRender->destroyShader(this);
+			mem_release(m_pCShader);
+			delete this;
 		}
 	}
 
@@ -131,11 +152,19 @@ public:
 		}
 		return(m_pVShader);
 	}
+	IGXComputeShader *getComputeShader()
+	{
+		if(m_pCShader)
+		{
+			m_pCShader->AddRef();
+		}
+		return(m_pCShader);
+	}
 
 	void setPixelShader(IGXPixelShader *pShader)
 	{
 		mem_release(m_pPShader);
-		m_pPShader = pShader;
+		m_pPShader = (CGXPixelShader*)pShader;
 		if(pShader)
 		{
 			pShader->AddRef();
@@ -144,7 +173,7 @@ public:
 	void setGeometryShader(IGXGeometryShader *pShader)
 	{
 		mem_release(m_pGShader);
-		m_pGShader = pShader;
+		m_pGShader = (CGXGeometryShader*)pShader;
 		if(pShader)
 		{
 			pShader->AddRef();
@@ -153,7 +182,16 @@ public:
 	void setVertexShader(IGXVertexShader *pShader)
 	{
 		mem_release(m_pVShader);
-		m_pVShader = pShader;
+		m_pVShader = (CGXVertexShader*)pShader;
+		if(pShader)
+		{
+			pShader->AddRef();
+		}
+	}
+	void setComputeShader(IGXComputeShader *pShader)
+	{
+		mem_release(m_pCShader);
+		m_pCShader = (CGXComputeShader*)pShader;
 		if(pShader)
 		{
 			pShader->AddRef();

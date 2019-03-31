@@ -5,7 +5,7 @@ void CGXConstantBuffer::Release()
 	--m_uRefCount;
 	if(!m_uRefCount)
 	{
-		m_pRender->addBytesShaderConst(-m_uSize, true);
+		m_pRender->addBytesShaderConst(-(int)m_uSize, true);
 		delete this;
 	}
 }

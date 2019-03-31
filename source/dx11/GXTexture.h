@@ -24,6 +24,8 @@ protected:
 	ID3D11Texture2D *m_pTexture = NULL;
 	D3D11_SHADER_RESOURCE_VIEW_DESC m_descSRV;
 	ID3D11ShaderResourceView *m_pSRV = NULL;
+	D3D11_UNORDERED_ACCESS_VIEW_DESC m_descUAV;
+	ID3D11UnorderedAccessView *m_pUAV = NULL;
 	float m_fSizeCoeffW = 1.0f;
 	float m_fSizeCoeffH = 1.0f;
 	UINT m_uMipLevels;
@@ -74,6 +76,8 @@ protected:
 	ID3D11Texture3D *m_pTexture = NULL;
 	D3D11_SHADER_RESOURCE_VIEW_DESC m_descSRV;
 	ID3D11ShaderResourceView *m_pSRV = NULL;
+	D3D11_UNORDERED_ACCESS_VIEW_DESC m_descUAV;
+	ID3D11UnorderedAccessView *m_pUAV = NULL;
 	UINT m_uMipLevels;
 
 	IGXSurface *m_pSurfaceRT = NULL;
@@ -116,6 +120,8 @@ protected:
 	ID3D11Texture2D *m_pTexture = NULL;
 	D3D11_SHADER_RESOURCE_VIEW_DESC m_descSRV;
 	ID3D11ShaderResourceView *m_pSRV = NULL;
+	D3D11_UNORDERED_ACCESS_VIEW_DESC m_descUAV;
+	ID3D11UnorderedAccessView *m_pUAV = NULL;
 	float m_fSizeCoeff = 1.0f;
 
 	UINT m_uMipLevels;
@@ -126,6 +132,8 @@ protected:
 
 	void onDevLost();
 	void onDevRst(UINT uScreenHeight);
+
+	IGXSurface *m_pSurfaceRT = NULL;
 public:
 	void Release();
 
@@ -142,6 +150,8 @@ public:
 	ID3D11ShaderResourceView *getDXTexture();
 
 	GXTEXTURE_TYPE getType();
+
+	IGXSurface *asRenderTarget();
 };
 
 #endif

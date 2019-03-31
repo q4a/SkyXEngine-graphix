@@ -40,6 +40,9 @@ CGXContext::CGXContext():
 	memset(&m_pColorTarget, 0, sizeof(m_pColorTarget));
 	memset(&m_pDXColorTarget, 0, sizeof(m_pDXColorTarget));
 	memset(&m_pTextures, 0, sizeof(m_pTextures));
+	memset(&m_pTexturesVS, 0, sizeof(m_pTexturesVS));
+	memset(&m_pTexturesCS, 0, sizeof(m_pTexturesCS));
+	memset(&m_pUAVsCS, 0, sizeof(m_pUAVsCS));
 	memset(&m_memoryStats, 0, sizeof(m_memoryStats));
 	memset(&m_adapterDesc, 0, sizeof(m_adapterDesc));
 }
@@ -438,6 +441,13 @@ void CGXContext::setIndexBuffer(IGXIndexBuffer * pBuff)
 	m_sync_state.bIndexBuffer = TRUE;
 }
 
+void CGXContext::computeDispatch(UINT uThreadGroupCountX, UINT uThreadGroupCountY, UINT uThreadGroupCountZ)
+{
+	syncronize();
+
+	m_pDeviceContext->Dispatch(uThreadGroupCountX, uThreadGroupCountY, uThreadGroupCountZ);
+}
+
 void CGXContext::drawIndexed(UINT uVertexCount, UINT uPrimitiveCount, UINT uStartIndexLocation, int iBaseVertexLocation)
 {
 	syncronize();
@@ -451,7 +461,6 @@ void CGXContext::drawIndexed(UINT uVertexCount, UINT uPrimitiveCount, UINT uStar
 
 	_updateStats(uPrimitiveCount);
 }
-
 void CGXContext::drawPrimitive(UINT uStartVertex, UINT uPrimitiveCount)
 {
 	syncronize();
@@ -503,6 +512,13 @@ void CGXContext::syncronize(UINT flags)
 				m_pDeviceContext->IASetVertexBuffers(i, 1, &((CGXVertexBuffer*)pRB->m_ppVertexBuffers[i])->m_pBuffer, &stride, &offset);
 			}
 		}
+		else
+		{
+			ID3D11Buffer *pBuffer = NULL;
+			UINT tmp = 0;
+			m_pDeviceContext->IASetVertexBuffers(0, 1, &pBuffer, &tmp, &tmp);
+			m_pDeviceContext->IASetInputLayout(NULL);
+		}
 
 		m_sync_state.bRenderBuffer = FALSE;
 	}
@@ -512,6 +528,10 @@ void CGXContext::syncronize(UINT flags)
 		{
 			CGXIndexBuffer *pIB = (CGXIndexBuffer*)m_pCurIndexBuffer;
 			m_pDeviceContext->IASetIndexBuffer(pIB->m_pBuffer, pIB->m_format, 0);
+		}
+		else
+		{
+			m_pDeviceContext->IASetIndexBuffer(NULL, DXGI_FORMAT_R16_UINT, 0);
 		}
 		m_sync_state.bIndexBuffer = FALSE;
 	}
@@ -563,6 +583,38 @@ void CGXContext::syncronize(UINT flags)
 		m_sync_state.bBlendState = FALSE;
 	}
 
+	// Unbound textures first!
+	for(UINT i = 0; i < MAXGXTEXTURES; ++i)
+	{
+		if(m_sync_state.bTexture[i])
+		{
+			if(!m_pTextures[i])
+			{
+				ID3D11ShaderResourceView *pNull = NULL;
+				m_pDeviceContext->PSSetShaderResources(i, 1, &pNull);
+				m_sync_state.bTexture[i] = FALSE;
+			}
+		}
+		if(m_sync_state.bTextureVS[i])
+		{
+			if(!m_pTexturesVS[i])
+			{
+				ID3D11ShaderResourceView *pNull = NULL;
+				m_pDeviceContext->VSSetShaderResources(i, 1, &pNull);
+				m_sync_state.bTextureVS[i] = FALSE;
+			}
+		}
+		if(m_sync_state.bTextureCS[i])
+		{
+			if(!m_pTexturesCS[i])
+			{
+				ID3D11ShaderResourceView *pNull = NULL;
+				m_pDeviceContext->CSSetShaderResources(i, 1, &pNull);
+				m_sync_state.bTextureCS[i] = FALSE;
+			}
+		}
+	}
+
 	if(m_sync_state.bRenderTarget)
 	{
 		UINT uMaxIdx = 0;
@@ -580,7 +632,7 @@ void CGXContext::syncronize(UINT flags)
 				m_pDXColorTarget[i] = NULL;
 			}
 		}
-		m_pDeviceContext->OMSetRenderTargets(uMaxIdx + 1, m_pDXColorTarget, ((CGXDepthStencilSurface*)m_pDepthStencilSurface)->m_pSurface);
+		m_pDeviceContext->OMSetRenderTargets(uMaxIdx + 1, m_pDXColorTarget, m_pDepthStencilSurface ? ((CGXDepthStencilSurface*)m_pDepthStencilSurface)->m_pSurface : NULL);
 
 		D3D11_VIEWPORT vp;
 		vp.Width = (float)m_pColorTarget[0]->getWidth();
@@ -594,7 +646,36 @@ void CGXContext::syncronize(UINT flags)
 		m_sync_state.bRenderTarget = FALSE;
 	}
 
-	
+	for(UINT i = 0; i < MAXGXUAVS; ++i)
+	{
+		if(m_sync_state.bUAVsCS[i])
+		{
+			UINT uUAVInitialCounts = 0;
+			if(m_pUAVsCS[i])
+			{
+				ID3D11UnorderedAccessView *pTex = NULL;
+				switch(m_pUAVsCS[i]->getType())
+				{
+				case GXTEXTURE_TYPE_2D:
+					pTex = ((CGXTexture2D*)m_pUAVsCS[i])->m_pUAV;
+					break;
+				case GXTEXTURE_TYPE_3D:
+					pTex = ((CGXTexture3D*)m_pUAVsCS[i])->m_pUAV;
+					break;
+				case GXTEXTURE_TYPE_CUBE:
+					pTex = ((CGXTextureCube*)m_pUAVsCS[i])->m_pUAV;
+					break;
+				}
+				m_pDeviceContext->CSSetUnorderedAccessViews(i, 1, &pTex, &uUAVInitialCounts);
+			}
+			else
+			{
+				ID3D11UnorderedAccessView *pNull = NULL;
+				m_pDeviceContext->CSSetUnorderedAccessViews(i, 1, &pNull, &uUAVInitialCounts);
+			}
+			m_sync_state.bUAVsCS[i] = FALSE;
+		}
+	}
 	
 	
 	if(!m_pShader)
@@ -608,9 +689,7 @@ void CGXContext::syncronize(UINT flags)
 		{
 			if(pShader->m_pVShader)
 			{
-				CGXVertexShader *pVS = (CGXVertexShader*)pShader->m_pVShader;
-
-				m_pDeviceContext->VSSetShader(pVS->m_pShader, NULL, 0);
+				m_pDeviceContext->VSSetShader(pShader->m_pVShader->m_pShader, NULL, 0);
 			}
 			else
 			{
@@ -618,9 +697,7 @@ void CGXContext::syncronize(UINT flags)
 			}
 			if(pShader->m_pPShader)
 			{
-				CGXPixelShader *pPS = (CGXPixelShader*)pShader->m_pPShader;
-
-				m_pDeviceContext->PSSetShader(pPS->m_pShader, NULL, 0);
+				m_pDeviceContext->PSSetShader(pShader->m_pPShader->m_pShader, NULL, 0);
 			}
 			else
 			{
@@ -629,13 +706,20 @@ void CGXContext::syncronize(UINT flags)
 
 			if(pShader->m_pGShader)
 			{
-				CGXGeometryShader *pGS = (CGXGeometryShader*)pShader->m_pGShader;
-
-				m_pDeviceContext->GSSetShader(pGS->m_pShader, NULL, 0);
+				m_pDeviceContext->GSSetShader(pShader->m_pGShader->m_pShader, NULL, 0);
 			}
 			else
 			{
 				m_pDeviceContext->GSSetShader(NULL, NULL, 0);
+			}
+
+			if(pShader->m_pCShader)
+			{
+				m_pDeviceContext->CSSetShader(pShader->m_pCShader->m_pShader, NULL, 0);
+			}
+			else
+			{
+				m_pDeviceContext->CSSetShader(NULL, NULL, 0);
 			}
 			m_sync_state.bShader = FALSE;
 		}
@@ -662,15 +746,55 @@ void CGXContext::syncronize(UINT flags)
 				}
 				m_pDeviceContext->PSSetShaderResources(i, 1, &pTex);
 			}
-			else
-			{
-				ID3D11ShaderResourceView *pNull = NULL;
-				m_pDeviceContext->PSSetShaderResources(i, 1, &pNull);
-			}
 
 			m_sync_state.bTexture[i] = FALSE;
 		}
+		if(m_sync_state.bTextureVS[i])
+		{
+			if(m_pTexturesVS[i])
+			{
+				ID3D11ShaderResourceView *pTex = NULL;
+				switch(m_pTexturesVS[i]->getType())
+				{
+				case GXTEXTURE_TYPE_2D:
+					pTex = ((CGXTexture2D*)m_pTexturesVS[i])->getDXTexture();
+					break;
+				case GXTEXTURE_TYPE_3D:
+					pTex = ((CGXTexture3D*)m_pTexturesVS[i])->getDXTexture();
+					break;
+				case GXTEXTURE_TYPE_CUBE:
+					pTex = ((CGXTextureCube*)m_pTexturesVS[i])->getDXTexture();
+					break;
+				}
+				m_pDeviceContext->VSSetShaderResources(i, 1, &pTex);
+			}
+
+			m_sync_state.bTextureVS[i] = FALSE;
+		}
+		if(m_sync_state.bTextureCS[i])
+		{
+			if(m_pTexturesCS[i])
+			{
+				ID3D11ShaderResourceView *pTex = NULL;
+				switch(m_pTexturesCS[i]->getType())
+				{
+				case GXTEXTURE_TYPE_2D:
+					pTex = ((CGXTexture2D*)m_pTexturesCS[i])->getDXTexture();
+					break;
+				case GXTEXTURE_TYPE_3D:
+					pTex = ((CGXTexture3D*)m_pTexturesCS[i])->getDXTexture();
+					break;
+				case GXTEXTURE_TYPE_CUBE:
+					pTex = ((CGXTextureCube*)m_pTexturesCS[i])->getDXTexture();
+					break;
+				}
+				m_pDeviceContext->CSSetShaderResources(i, 1, &pTex);
+			}
+
+			m_sync_state.bTextureCS[i] = FALSE;
+		}
 	}
+
 
 	if(m_isScissorsEnable && m_sync_state.bScissorsRect)
 	{
@@ -793,10 +917,6 @@ IGXVertexShader * CGXContext::createVertexShader(void *_pData, UINT uSize)
 
 	return(pShader);
 }
-void CGXContext::destroyVertexShader(IGXVertexShader * pSH)
-{
-	mem_delete(pSH);
-}
 void CGXContext::setVertexShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot)
 {
 	//@TODO: defer this
@@ -871,10 +991,6 @@ IGXPixelShader * CGXContext::createPixelShaderFromString(const char * szCode, GX
 
 	return(pShader);
 }
-void CGXContext::destroyPixelShader(IGXPixelShader * pSH)
-{
-	mem_delete(pSH);
-}
 void CGXContext::setPixelShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot)
 {
 	//@TODO: defer this
@@ -934,7 +1050,7 @@ IGXGeometryShader * CGXContext::createGeometryShaderFromString(const char * szCo
 		if(pErrorBlob)
 		{
 			size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
-			char *str = (char*)alloca(s + 33);
+			char *str = (char*)alloca(s + 35);
 			sprintf(str, "Unable to create geometry shader: %s", (char*)pErrorBlob->GetBufferPointer());
 			debugMessage(GX_LOG_ERROR, str);
 			mem_release(pErrorBlob);
@@ -949,10 +1065,6 @@ IGXGeometryShader * CGXContext::createGeometryShaderFromString(const char * szCo
 
 	return(pShader);
 }
-void CGXContext::destroyGeometryShader(IGXGeometryShader * pSH)
-{
-	mem_delete(pSH);
-}
 void CGXContext::setGeometryShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot)
 {
 	//@TODO: defer this
@@ -964,18 +1076,87 @@ void CGXContext::setGeometryShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlo
 	m_pDeviceContext->GSSetConstantBuffers(uSlot, 1, &pBuf);
 }
 
-IGXShader *CGXContext::createShader(IGXVertexShader *pVS, IGXPixelShader *pPS, IGXGeometryShader *pGS)
+IGXComputeShader * CGXContext::createComputeShader(const char * szFile, GXMACRO *pDefs)
 {
-	return(new CGXShader(this, pVS, pPS, pGS));
-}
-void CGXContext::destroyShader(IGXShader *pSH)
-{
-	if(pSH && pSH == m_pShader)
+	ID3DBlob *pShaderBlob = NULL;
+	ID3DBlob *pErrorBlob = NULL;
+	// Prefer higher CS shader profile when possible as CS 5.0 provides better performance on 11-class hardware
+	D3D_FEATURE_LEVEL fl = m_pDevice->GetFeatureLevel();
+	const char *szVersion = m_pDevice->GetFeatureLevel() >= D3D_FEATURE_LEVEL_11_0 ? "cs_5_0" : "cs_4_0";
+	if(FAILED(DX_CALL(D3DX11CompileFromFileA(szFile, (D3D_SHADER_MACRO*)pDefs, NULL, "main", szVersion, SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL))))
 	{
-		m_pShader = NULL;
-		m_sync_state.bShader = TRUE;
+		if(pErrorBlob)
+		{
+			size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
+			char *str = (char*)alloca(s + 35);
+			sprintf(str, "Unable to create compute shader!\n%s", (char*)pErrorBlob->GetBufferPointer());
+			debugMessage(GX_LOG_ERROR, str);
+			mem_release(pErrorBlob);
+			return(NULL);
+		}
 	}
-	mem_delete(pSH);
+	mem_release(pErrorBlob);
+
+	IGXComputeShader *pShader = createComputeShader(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
+
+	mem_release(pShaderBlob);
+
+	return(pShader);
+}
+IGXComputeShader * CGXContext::createComputeShader(void *_pData, UINT uSize)
+{
+	CGXComputeShader *pShader = new CGXComputeShader(this);
+
+	DX_CALL(D3DCreateBlob(uSize, &pShader->m_pShaderBlob));
+	memcpy(pShader->m_pShaderBlob->GetBufferPointer(), _pData, uSize);
+
+	if(FAILED(DX_CALL(m_pDevice->CreateComputeShader(pShader->m_pShaderBlob->GetBufferPointer(), uSize, NULL, &pShader->m_pShader))))
+	{
+		mem_delete(pShader);
+		return(NULL);
+	}
+
+	return(pShader);
+}
+IGXComputeShader * CGXContext::createComputeShaderFromString(const char * szCode, GXMACRO *pDefs)
+{
+	ID3DBlob *pShaderBlob = NULL;
+	ID3DBlob *pErrorBlob = NULL;
+	// Prefer higher CS shader profile when possible as CS 5.0 provides better performance on 11-class hardware
+	if(FAILED(DX_CALL(D3DX11CompileFromMemory(szCode, strlen(szCode), "memory.cs", (D3D_SHADER_MACRO*)pDefs, NULL, "main", m_pDevice->GetFeatureLevel() >= D3D_FEATURE_LEVEL_11_0 ? "cs_5_0" : "cs_4_0", SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL))))
+	{
+		if(pErrorBlob)
+		{
+			size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
+			char *str = (char*)alloca(s + 35);
+			sprintf(str, "Unable to create compute shader: %s", (char*)pErrorBlob->GetBufferPointer());
+			debugMessage(GX_LOG_ERROR, str);
+			mem_release(pErrorBlob);
+			return(NULL);
+		}
+	}
+	mem_release(pErrorBlob);
+
+	IGXComputeShader *pShader = createComputeShader(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
+
+	mem_release(pShaderBlob);
+
+	return(pShader);
+}
+void CGXContext::setComputeShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot)
+{
+	//@TODO: defer this
+	ID3D11Buffer *pBuf = NULL;
+	if(pBuffer)
+	{
+		pBuf = ((CGXConstantBuffer*)pBuffer)->m_pBuffer;
+	}
+	m_pDeviceContext->CSSetConstantBuffers(uSlot, 1, &pBuf);
+}
+
+IGXShader *CGXContext::createShader(IGXVertexShader *pVS, IGXPixelShader *pPS, IGXGeometryShader *pGS, IGXComputeShader *pCS)
+{
+	return(new CGXShader(this, pVS, pPS, pGS, pCS));
 }
 void CGXContext::setShader(IGXShader *pSH)
 {
@@ -1303,6 +1484,47 @@ IGXDepthStencilSurface *CGXContext::createDepthStencilSurface(UINT uWidth, UINT 
 
 	return(pDSSurface);
 }
+IGXDepthStencilSurface *CGXContext::createDepthStencilSurfaceCube(UINT uSize, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize)
+{
+	CGXDepthStencilSurface *pDSSurface = new CGXDepthStencilSurface(this);
+
+	if(!uSize)
+	{
+		uSize = 1;
+	}
+
+	D3D11_TEXTURE2D_DESC *pDescTex = &pDSSurface->m_descTex;
+	memset(pDescTex, 0, sizeof(D3D11_TEXTURE2D_DESC));
+	pDescTex->Width = uSize;
+	pDescTex->Height = uSize;
+	pDescTex->MipLevels = 1;
+	pDescTex->ArraySize = 6;
+	pDescTex->Format = getDXFormat(format);
+	pDescTex->SampleDesc.Count = max(multisampleType, 1);
+	pDescTex->SampleDesc.Quality = 0;
+	pDescTex->Usage = D3D11_USAGE_DEFAULT;
+	pDescTex->BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC *pDSVDesc = &pDSSurface->m_desc;
+	memset(pDSVDesc, 0, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
+	pDSVDesc->Format = pDescTex->Format;
+	pDSVDesc->ViewDimension = pDescTex->SampleDesc.Count > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY : D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+	pDSVDesc->Texture2DArray.ArraySize = pDescTex->ArraySize;
+	pDSVDesc->Texture2DArray.MipSlice = 0;
+
+	pDSSurface->onDevRst(m_uWindowWidth, m_uWindowHeight);
+
+	m_aResettableDSSurfaces.push_back(pDSSurface);
+
+	if(bAutoResize)
+	{
+		pDSSurface->m_bAutoResize = true;
+
+		pDSSurface->m_fSizeCoeffW = pDSSurface->m_fSizeCoeffH = (float)uSize / (float)m_uWindowHeight;
+	}
+
+	return(pDSSurface);
+}
 void CGXContext::destroyDepthStencilSurface(IGXDepthStencilSurface *pSurface)
 {
 	if(pSurface)
@@ -1339,6 +1561,17 @@ void CGXContext::setDepthStencilSurface(IGXDepthStencilSurface *pSurface)
 	m_pDepthStencilSurface = pSurface;
 	pSurface->AddRef();
 
+	m_sync_state.bRenderTarget = TRUE;
+}
+void CGXContext::setDepthStencilSurfaceNULL()
+{
+	if(!m_pDepthStencilSurface)
+	{
+		return;
+	}
+	mem_release(m_pDepthStencilSurface);
+
+	m_pDepthStencilSurface = NULL;
 	m_sync_state.bRenderTarget = TRUE;
 }
 IGXDepthStencilSurface *CGXContext::getDepthStencilSurface()
@@ -1428,6 +1661,67 @@ void CGXContext::setColorTarget(IGXSurface *pSurf, UINT idx)
 	m_pColorTarget[idx] = pSurf;
 	
 	m_sync_state.bRenderTarget = TRUE;
+
+#if 0
+	bool bFound = false;
+	for(UINT i = 0; i < MAXGXTEXTURES && !bFound; ++i)
+	{
+		if(m_pTextures[i])
+		{
+			switch(m_pTextures[i]->getType())
+			{
+			case GXTEXTURE_TYPE_2D:
+			{
+				CGXTexture2D *pTex = (CGXTexture2D*)m_pTextures[i];
+				if(pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET)
+				{
+					IGXSurface *pTexSurf = pTex->getMipmap(0);
+					if(pTexSurf == pSurf)
+					{
+						m_pTextures[i] = NULL;
+						bFound = true;
+						break;
+					}
+					mem_release(pTexSurf);
+				}
+				break;
+			}
+			case GXTEXTURE_TYPE_3D:
+			{
+				CGXTexture3D *pTex = (CGXTexture3D*)m_pTextures[i];
+				if(pTex->m_descTex3D.BindFlags & D3D11_BIND_RENDER_TARGET)
+				{
+					IGXSurface *pTexSurf = pTex->asRenderTarget();
+					if(pTexSurf == pSurf)
+					{
+						m_pTextures[i] = NULL;
+						bFound = true;
+						break;
+					}
+					mem_release(pTexSurf);
+				}
+				break;
+			}
+			case GXTEXTURE_TYPE_CUBE:
+			{
+				CGXTextureCube *pTex = (CGXTextureCube*)m_pTextures[i];
+				if(pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET)
+				{
+					IGXSurface *pTexSurf = pTex->asRenderTarget();
+					if(pTexSurf == pSurf)
+					{
+						m_pTextures[i] = NULL;
+						bFound = true;
+						break;
+					}
+					mem_release(pTexSurf);
+				}
+				break;
+			}
+			}
+		}
+	}
+#endif
 }
 
 IGXSurface *CGXContext::getColorTarget(UINT idx)
@@ -1443,10 +1737,12 @@ IGXSurface *CGXContext::getColorTarget(UINT idx)
 void CGXContext::setTexture(IGXBaseTexture *pTexture, UINT uStage)
 {
 	assert(uStage < MAXGXTEXTURES);
+#if 0
 	if(m_pTextures[uStage] == pTexture)
 	{
 		return;
 	}
+#endif
 	mem_release(m_pTextures[uStage]);
 	m_pTextures[uStage] = pTexture;
 	if(pTexture)
@@ -1463,6 +1759,75 @@ IGXBaseTexture *CGXContext::getTexture(UINT uStage)
 		m_pTextures[uStage]->AddRef();
 	}
 	return(m_pTextures[uStage]);
+}
+
+void CGXContext::setTextureVS(IGXBaseTexture *pTexture, UINT uStage)
+{
+	assert(uStage < MAXGXTEXTURES);
+#if 0
+	if(m_pTexturesVS[uStage] == pTexture)
+	{
+		return;
+	}
+#endif
+	mem_release(m_pTexturesVS[uStage]);
+	m_pTexturesVS[uStage] = pTexture;
+	if(pTexture)
+	{
+		pTexture->AddRef();
+	}
+	m_sync_state.bTextureVS[uStage] = TRUE;
+}
+IGXBaseTexture *CGXContext::getTextureVS(UINT uStage)
+{
+	assert(uStage < MAXGXTEXTURES);
+	if(m_pTexturesVS[uStage])
+	{
+		m_pTexturesVS[uStage]->AddRef();
+	}
+	return(m_pTexturesVS[uStage]);
+}
+
+void CGXContext::setTextureCS(IGXBaseTexture *pTexture, UINT uStage)
+{
+	assert(uStage < MAXGXTEXTURES);
+	mem_release(m_pTexturesCS[uStage]);
+	m_pTexturesCS[uStage] = pTexture;
+	if(pTexture)
+	{
+		pTexture->AddRef();
+	}
+	m_sync_state.bTextureCS[uStage] = TRUE;
+}
+IGXBaseTexture *CGXContext::getTextureCS(UINT uStage)
+{
+	assert(uStage < MAXGXTEXTURES);
+	if(m_pTexturesCS[uStage])
+	{
+		m_pTexturesCS[uStage]->AddRef();
+	}
+	return(m_pTexturesCS[uStage]);
+}
+
+void CGXContext::setUnorderedAccessVeiwCS(IGXBaseTexture *pTexture, UINT uStage)
+{
+	assert(uStage < MAXGXUAVS);
+	mem_release(m_pUAVsCS[uStage]);
+	m_pUAVsCS[uStage] = pTexture;
+	if(pTexture)
+	{
+		pTexture->AddRef();
+	}
+	m_sync_state.bUAVsCS[uStage] = TRUE;
+}
+IGXBaseTexture *CGXContext::getUnorderedAccessVeiwCS(UINT uStage)
+{
+	assert(uStage < MAXGXUAVS);
+	if(m_pUAVsCS[uStage])
+	{
+		m_pUAVsCS[uStage]->AddRef();
+	}
+	return(m_pUAVsCS[uStage]);
 }
 
 IGXTexture2D *CGXContext::createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData)
@@ -1494,6 +1859,10 @@ IGXTexture2D *CGXContext::createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLe
 	if(uTexUsageFlags & GX_TEXUSAGE_RENDERTARGET)
 	{
 		pTex->m_descTex2D.BindFlags |= D3D11_BIND_RENDER_TARGET;
+	}
+	if(uTexUsageFlags & GX_TEXUSAGE_UNORDERED_ACCESS)
+	{
+		pTex->m_descTex2D.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
 	}
 	if(uTexUsageFlags & GX_TEXUSAGE_AUTOGENMIPMAPS)
 	{
@@ -1553,6 +1922,14 @@ IGXTexture2D *CGXContext::createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLe
 
 	addBytesTextures(getTextureMemPitch(pTex->m_uWidth, pTex->m_format) * pTex->m_uHeight, true, pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
 
+	if(uTexUsageFlags & GX_TEXUSAGE_UNORDERED_ACCESS)
+	{
+		memset(&pTex->m_descUAV, 0, sizeof(pTex->m_descUAV));
+		pTex->m_descUAV.Format = DXGI_FORMAT_UNKNOWN;
+		pTex->m_descUAV.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
+		DX_CALL(m_pDevice->CreateUnorderedAccessView(pTex->m_pTexture, &pTex->m_descUAV, &pTex->m_pUAV));
+	}
+
 	return(pTex);
 }
 IGXTexture3D *CGXContext::createTexture3D(UINT uWidth, UINT uHeight, UINT uDepth, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData)
@@ -1578,6 +1955,10 @@ IGXTexture3D *CGXContext::createTexture3D(UINT uWidth, UINT uHeight, UINT uDepth
 	if(uTexUsageFlags & GX_TEXUSAGE_RENDERTARGET)
 	{
 		pTex->m_descTex3D.BindFlags |= D3D11_BIND_RENDER_TARGET;
+	}
+	if(uTexUsageFlags & GX_TEXUSAGE_UNORDERED_ACCESS)
+	{
+		pTex->m_descTex3D.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
 	}
 	if(uTexUsageFlags & GX_TEXUSAGE_AUTOGENMIPMAPS)
 	{
@@ -1631,6 +2012,15 @@ IGXTexture3D *CGXContext::createTexture3D(UINT uWidth, UINT uHeight, UINT uDepth
 
 	addBytesTextures(getTextureMemPitch(pTex->m_uDepth, pTex->m_format) * pTex->m_uWidth * pTex->m_uHeight, true, pTex->m_descTex3D.BindFlags & D3D11_BIND_RENDER_TARGET);
 
+	if(uTexUsageFlags & GX_TEXUSAGE_UNORDERED_ACCESS)
+	{
+		memset(&pTex->m_descUAV, 0, sizeof(pTex->m_descUAV));
+		pTex->m_descUAV.Format = DXGI_FORMAT_UNKNOWN;
+		pTex->m_descUAV.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE3D;
+		pTex->m_descUAV.Texture3D.WSize = -1;
+		DX_CALL(m_pDevice->CreateUnorderedAccessView(pTex->m_pTexture, &pTex->m_descUAV, &pTex->m_pUAV));
+	}
+
 	return(pTex);
 }
 IGXTextureCube *CGXContext::createTextureCube(UINT uSize, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData)
@@ -1662,6 +2052,10 @@ IGXTextureCube *CGXContext::createTextureCube(UINT uSize, UINT uMipLevels, UINT 
 	{
 		pTex->m_descTex2D.BindFlags |= D3D11_BIND_RENDER_TARGET;
 	}
+	if(uTexUsageFlags & GX_TEXUSAGE_UNORDERED_ACCESS)
+	{
+		pTex->m_descTex2D.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
+	}
 	if(uTexUsageFlags & GX_TEXUSAGE_AUTOGENMIPMAPS)
 	{
 		pTex->m_descTex2D.MipLevels = 0;
@@ -1688,6 +2082,15 @@ IGXTextureCube *CGXContext::createTextureCube(UINT uSize, UINT uMipLevels, UINT 
 	DX_CALL(m_pDevice->CreateShaderResourceView(pTex->m_pTexture, &pTex->m_descSRV, &pTex->m_pSRV));
 
 	addBytesTextures(getTextureMemPitch(pTex->m_uSize, pTex->m_format) * pTex->m_uSize * 6, true, pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
+
+	if(uTexUsageFlags & GX_TEXUSAGE_UNORDERED_ACCESS)
+	{
+		memset(&pTex->m_descUAV, 0, sizeof(pTex->m_descUAV));
+		pTex->m_descUAV.Format = DXGI_FORMAT_UNKNOWN;
+		pTex->m_descUAV.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
+		pTex->m_descUAV.Texture2DArray.ArraySize = 6;
+		DX_CALL(m_pDevice->CreateUnorderedAccessView(pTex->m_pTexture, &pTex->m_descUAV, &pTex->m_pUAV));
+	}
 
 	return(pTex);
 }

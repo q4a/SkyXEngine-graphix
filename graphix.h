@@ -124,12 +124,14 @@ typedef struct _GXVERTEXELEMENT
 #define MAXGXCOLORTARGETS 4
 #define MAX_GXSAMPLERS 16
 #define MAXGXTEXTURES 16
+#define MAXGXUAVS 8 /* 64 */
 
-#define GX_TEXUSAGE_DEFAULT 0x00000000
-#define GX_TEXUSAGE_RENDERTARGET 0x00000001
-#define GX_TEXUSAGE_AUTOGENMIPMAPS 0x00000002
-#define GX_TEXUSAGE_AUTORESIZE 0x00000004
-#define GX_TEXUSAGE_ALLOWDISCARD 0x00000008 /* разрешено потерять данные, например при потере/восстановлении устройства в dx9 */
+#define GX_TEXUSAGE_DEFAULT          0x00000000
+#define GX_TEXUSAGE_RENDERTARGET     0x00000001
+#define GX_TEXUSAGE_AUTOGENMIPMAPS   0x00000002
+#define GX_TEXUSAGE_AUTORESIZE       0x00000004
+#define GX_TEXUSAGE_ALLOWDISCARD     0x00000008 /* разрешено потерять данные, например при потере/восстановлении устройства в dx9 */
+#define GX_TEXUSAGE_UNORDERED_ACCESS 0x00000010
 
 #define GX_SHADER_CONSTANT_FAIL ~0
 
@@ -558,11 +560,14 @@ class IGXRenderBuffer: public IGXBaseInterface
 class IGXVertexShader: public IGXBaseInterface
 {
 public:
+	//@DEPRECATED:
+	//@{
 	virtual void setConstantF(UINT uStartRegister, const float *pConstantData, UINT uVector4fCount) = 0;
 	virtual void setConstantI(UINT uStartRegister, const int *pConstantData, UINT uVector4iCount) = 0;
 	virtual UINT getConstantCount() = 0;
 	virtual UINT getConstantLocation(const char *szConstName) = 0;
 	virtual UINT getConstantSizeV4(const char *szConstName) = 0;
+	//@}
 	virtual void getData(void *pData, UINT *pSize) = 0;
 };
 
@@ -572,14 +577,23 @@ public:
 	virtual void getData(void *pData, UINT *pSize) = 0;
 };
 
+class IGXComputeShader: public IGXBaseInterface
+{
+public:
+	virtual void getData(void *pData, UINT *pSize) = 0;
+};
+
 class IGXPixelShader: public IGXBaseInterface
 {
 public:
+	//@DEPRECATED:
+	//@{
 	virtual void setConstantF(UINT uStartRegister, const float *pConstantData, UINT uVector4fCount) = 0;
 	virtual void setConstantI(UINT uStartRegister, const int *pConstantData, UINT uVector4iCount) = 0;
 	virtual UINT getConstantCount() = 0;
 	virtual UINT getConstantLocation(const char *szConstName) = 0;
 	virtual UINT getConstantSizeV4(const char *szConstName) = 0;
+	//@}
 	virtual void getData(void *pData, UINT *pSize) = 0;
 };
 
@@ -589,10 +603,12 @@ public:
 	virtual IGXPixelShader *getPixelShader() = 0;
 	virtual IGXGeometryShader *getGeometryShader() = 0;
 	virtual IGXVertexShader *getVertexShader() = 0;
+	virtual IGXComputeShader *getComputeShader() = 0;
 
 	virtual void setPixelShader(IGXPixelShader *pShader) = 0;
 	virtual void setGeometryShader(IGXGeometryShader *pShader) = 0;
 	virtual void setVertexShader(IGXVertexShader *pShader) = 0;
+	virtual void setComputeShader(IGXComputeShader *pShader) = 0;
 };
 
 class IGXDepthStencilSurface: public IGXBaseInterface
@@ -659,6 +675,8 @@ public:
 	virtual bool lock(void **ppData, GXCUBEMAP_FACES face, GXTEXLOCK mode) = 0;
 	//@DEPRECATED: 
 	virtual void unlock() = 0;
+
+	virtual IGXSurface *asRenderTarget() = 0;
 };
 
 class IGXBlendState: public IGXBaseInterface
@@ -740,6 +758,8 @@ public:
 	virtual void drawPrimitive(UINT uStartVertex, UINT uPrimitiveCount) = 0;
 	//virtual void drawPrimitiveInstanced(UINT uInstanceCount, UINT uStartVertex, UINT uPrimitiveCount) = 0;
 	
+	virtual void computeDispatch(UINT uThreadGroupCountX, UINT uThreadGroupCountY, UINT uThreadGroupCountZ) = 0;
+
 	// https://github.com/LukasBanana/XShaderCompiler/releases
 	// https://github.com/Thekla/hlslparser/tree/master/src
 	virtual IGXVertexShader * createVertexShader(const char * szFile, GXMACRO *pDefs = NULL) = 0;
@@ -757,19 +777,26 @@ public:
 	virtual IGXGeometryShader * createGeometryShader(void *pData, UINT uSize) = 0;
 	virtual void setGeometryShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) = 0;
 
+	virtual IGXComputeShader * createComputeShader(const char * szFile, GXMACRO *pDefs = NULL) = 0;
+	virtual IGXComputeShader * createComputeShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) = 0;
+	virtual IGXComputeShader * createComputeShader(void *pData, UINT uSize) = 0;
+	virtual void setComputeShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) = 0;
 
 	// virtual void setVertexShader(IGXVertexShader * pSH) = 0;
 	// virtual void setPixelShader(IGXPixelShader * pSH) = 0;
 
-	virtual IGXShader *createShader(IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL, IGXGeometryShader *pGS = NULL) = 0;
+	virtual IGXShader *createShader(IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL, IGXGeometryShader *pGS = NULL, IGXComputeShader *pCS = NULL) = 0;
 	virtual void setShader(IGXShader *pSH) = 0;
 	virtual IGXShader *getShader() = 0;
 
 	virtual IGXRenderBuffer * createRenderBuffer(UINT countSlots, IGXVertexBuffer ** ppBuff, IGXVertexDeclaration * pDecl) = 0;
 
 	virtual IGXDepthStencilSurface *createDepthStencilSurface(UINT uWidth, UINT uHeight, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false) = 0;
+	virtual IGXDepthStencilSurface *createDepthStencilSurfaceCube(UINT uSize, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false) = 0;
 	virtual void setDepthStencilSurface(IGXDepthStencilSurface *pSurface) = 0;
+	virtual void setDepthStencilSurfaceNULL() = 0;
 	virtual IGXDepthStencilSurface *getDepthStencilSurface() = 0;
+
 
 	virtual IGXSurface *createColorTarget(UINT uWidth, UINT uHeight, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false) = 0;
 	virtual void downsampleColorTarget(IGXSurface *pSource, IGXSurface *pTarget) = 0;
@@ -786,6 +813,13 @@ public:
 
 	virtual void setTexture(IGXBaseTexture *pTexture, UINT uStage = 0) = 0;
 	virtual IGXBaseTexture *getTexture(UINT uStage = 0) = 0;
+	virtual void setTextureVS(IGXBaseTexture *pTexture, UINT uStage = 0) = 0;
+	virtual IGXBaseTexture *getTextureVS(UINT uStage = 0) = 0;
+
+	virtual void setTextureCS(IGXBaseTexture *pTexture, UINT uStage = 0) = 0;
+	virtual IGXBaseTexture *getTextureCS(UINT uStage = 0) = 0;
+	virtual void setUnorderedAccessVeiwCS(IGXBaseTexture *pUAV, UINT uStage = 0) = 0;
+	virtual IGXBaseTexture *getUnorderedAccessVeiwCS(UINT uStage = 0) = 0;
 
 	virtual IGXBlendState *createBlendState(GXBLEND_DESC *pBlendDesc) = 0;
 	virtual void setBlendState(IGXBlendState *pState) = 0;

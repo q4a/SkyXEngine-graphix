@@ -41,6 +41,11 @@ protected:
 		return(false);
 	}
 
+	virtual bool isCube()
+	{
+		return(false);
+	}
+
 	~CGXSurface();
 
 public:
@@ -87,6 +92,34 @@ public:
 	}
 
 	bool is3D()
+	{
+		return(true);
+	}
+};
+
+class CGXSurfaceCube: public CGXSurface
+{
+	friend class CGXContext;
+	friend class CGXTexture3D;
+	friend class CGXTextureCube;
+	friend class CGXSwapChain;
+
+	void initRT();
+
+	D3D11_TEXTURE2D_DESC m_descTex2D;
+	ID3D11Texture2D *m_pSurface = NULL;
+
+public:
+	CGXSurfaceCube(CGXContext * pRender, UINT uSize, GXFORMAT format, ID3D11Texture2D *pSurface):
+		CGXSurface(pRender, uSize, uSize, format, NULL),
+		m_pSurface(pSurface)
+	{
+		m_descTex2D.Width = uSize;
+		m_descTex2D.Height = uSize;
+		m_descTex2D.Format = m_pRender->getDXFormat(format);
+	}
+
+	bool isCube()
 	{
 		return(true);
 	}
