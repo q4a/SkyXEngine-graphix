@@ -226,6 +226,9 @@ typedef enum _GXFORMAT
 	//GXFMT_DXT4 = MAKEFOURCC('D', 'X', 'T', '4'),
 	GXFMT_DXT5 = MAKEFOURCC('D', 'X', 'T', '5'),
 
+	GXFMT_ATI1N = MAKEFOURCC('A', 'T', 'I', '1'),
+	GXFMT_ATI2N = MAKEFOURCC('A', 'T', 'I', '2'),
+
 	//GXFMT_D16_LOCKABLE = 70,
 	GXFMT_D32 = 71,
 	//GXFMT_D15S1 = 73,

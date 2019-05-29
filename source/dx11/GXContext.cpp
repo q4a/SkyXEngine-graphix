@@ -2192,6 +2192,14 @@ UINT CGXContext::getTextureDataSize(UINT uPitch, UINT uHeight, GXFORMAT format)
 		bc = true;
 		break;
 
+	case GXFMT_ATI1N:
+		bc = true;
+		bcnumBytesPerBlock = 8;
+		break;
+	case GXFMT_ATI2N:
+		bc = true;
+		break;
+
 	default:
 		bc = false;
 	}
@@ -2228,6 +2236,14 @@ UINT  CGXContext::getTextureMemPitch(UINT uWidth, GXFORMAT format)
 		bc = true;
 		break;
 	case GXFMT_DXT5:
+		bc = true;
+		break;
+
+	case GXFMT_ATI1N:
+		bc = true;
+		bcnumBytesPerBlock = 8;
+		break;
+	case GXFMT_ATI2N:
 		bc = true;
 		break;
 
@@ -2279,10 +2295,12 @@ UINT CGXContext::getBitsPerPixel(GXFORMAT format)
 		return(16);
 
 	case GXFMT_DXT1:
+	case GXFMT_ATI1N:
 		return(4);
 
 	case GXFMT_DXT3:
 	case GXFMT_DXT5:
+	case GXFMT_ATI2N:
 		return(8);
 	}
 	return(0);
@@ -2374,6 +2392,10 @@ DXGI_FORMAT CGXContext::getDXFormat(GXFORMAT format)
 		return(DXGI_FORMAT_BC2_UNORM);
 	case GXFMT_DXT5:
 		return(DXGI_FORMAT_BC3_UNORM);
+	case GXFMT_ATI1N:
+		return(DXGI_FORMAT_BC4_UNORM);
+	case GXFMT_ATI2N:
+		return(DXGI_FORMAT_BC5_UNORM);
 	case GXFMT_D32:
 		return(DXGI_FORMAT_D32_FLOAT);
 	case GXFMT_D24S8:
@@ -2418,6 +2440,10 @@ GXFORMAT CGXContext::getGXFormat(DXGI_FORMAT format)
 		return(GXFMT_DXT3);
 	case DXGI_FORMAT_BC3_UNORM:
 		return(GXFMT_DXT5);
+	case DXGI_FORMAT_BC4_UNORM:
+		return(GXFMT_ATI1N);
+	case DXGI_FORMAT_BC5_UNORM:
+		return(GXFMT_ATI2N);
 	case DXGI_FORMAT_D32_FLOAT:
 		return(GXFMT_D32);
 	case DXGI_FORMAT_D24_UNORM_S8_UINT:
