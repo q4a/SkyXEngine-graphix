@@ -14,8 +14,8 @@ class CGXVertexDeclaration: public IGXVertexDeclaration
 	IDirect3DVertexDeclaration9 *m_pDeclaration = NULL;
 
 	byte m_u8StreamCount;
-	byte m_u8StreamStride[MAXGXVSTREAM];
-	GXDECLSPEC m_u8SpecSpec[MAXGXVSTREAM];
+	byte m_u8StreamStride[GX_MAX_VSTREAM];
+	GXDECLSPEC m_u8SpecSpec[GX_MAX_VSTREAM];
 
 public:
 	void Release();

@@ -42,7 +42,7 @@ void CGXTexture2D::Release()
 	}
 }
 
-IGXSurface *CGXTexture2D::getMipmap(UINT n)
+IGXSurface* CGXTexture2D::getMipmap(UINT n)
 {
 	for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
 	{
@@ -89,7 +89,7 @@ void CGXTexture2D::update(void *pData)
 	m_pRender->getDXDeviceContext()->UpdateSubresource(m_pTexture, 0, NULL, pData, m_pRender->getTextureMemPitch(m_uWidth, m_format), 0);
 }
 
-ID3D11ShaderResourceView *CGXTexture2D::getDXTexture()
+ID3D11ShaderResourceView* CGXTexture2D::getDXTexture()
 {
 	return(m_pSRV);
 }
@@ -169,6 +169,17 @@ GXTEXTURE_TYPE CGXTexture2D::getType()
 	return(GXTEXTURE_TYPE_2D);
 }
 
+IGXSurface* CGXTexture2D::asRenderTarget()
+{
+	if(!(m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET))
+	{
+		m_pRender->debugMessage(GX_LOG_ERROR, "Unable to use CGXTexture2D::asRenderTarget() on texture created without GX_TEXUSAGE_RENDERTARGET flag!");
+		return(NULL);
+	}
+	
+	return(getMipmap());
+}
+
 //##########################################################################
 
 CGXTexture3D::~CGXTexture3D()
@@ -214,7 +225,7 @@ void CGXTexture3D::Release()
 	}
 }
 
-IGXSurface *CGXTexture3D::asRenderTarget()
+IGXSurface* CGXTexture3D::asRenderTarget()
 {
 	if(!(m_descTex3D.BindFlags & D3D11_BIND_RENDER_TARGET))
 	{
@@ -243,7 +254,7 @@ void CGXTexture3D::update(void *pData)
 	m_pRender->getDXDeviceContext()->UpdateSubresource(m_pTexture, 0, NULL, pData, m_pRender->getTextureMemPitch(m_uWidth, m_format), m_pRender->getTextureMemPitch(m_uDepth, m_format) * m_uWidth);
 }
 
-ID3D11ShaderResourceView *CGXTexture3D::getDXTexture()
+ID3D11ShaderResourceView* CGXTexture3D::getDXTexture()
 {
 	return(m_pSRV);
 }
@@ -277,7 +288,7 @@ void CGXTextureCube::Release()
 	}
 }
 
-IGXSurface *CGXTextureCube::getMipmap(GXCUBEMAP_FACES face, UINT n)
+IGXSurface* CGXTextureCube::getMipmap(GXCUBEMAP_FACES face, UINT n)
 {
 	for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
 	{
@@ -306,7 +317,7 @@ UINT CGXTextureCube::getSize()
 	return(m_uSize);
 }
 
-ID3D11ShaderResourceView *CGXTextureCube::getDXTexture()
+ID3D11ShaderResourceView* CGXTextureCube::getDXTexture()
 {
 	return(m_pSRV);
 }
@@ -389,7 +400,7 @@ GXTEXTURE_TYPE CGXTextureCube::getType()
 	return(GXTEXTURE_TYPE_CUBE);
 }
 
-IGXSurface *CGXTextureCube::asRenderTarget()
+IGXSurface* CGXTextureCube::asRenderTarget()
 {
 	if(!(m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET))
 	{

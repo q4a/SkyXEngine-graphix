@@ -37,7 +37,7 @@ void CGXDepthStencilState::onDevRst()
 		m_pDevice->SetRenderState(D3DRS_STENCILZFAIL, m_desc.stencilDepthFailOp);
 		m_pDevice->SetRenderState(D3DRS_STENCILPASS, m_desc.stencilPassOp);
 		m_pDevice->SetRenderState(D3DRS_STENCILFUNC, m_desc.stencilFunc);
-		if(m_desc.stencilBackFunc != GXCOMPARISON_ALWAYS || m_desc.stencilBackFailOp != GXSTENCIL_OP_KEEP || m_desc.stencilBackDepthFailOp != GXSTENCIL_OP_KEEP || m_desc.stencilBackPassOp != GXSTENCIL_OP_KEEP)
+		if(m_desc.stencilBackFunc != GXCMP_ALWAYS || m_desc.stencilBackFailOp != GXSTENCIL_OP_KEEP || m_desc.stencilBackDepthFailOp != GXSTENCIL_OP_KEEP || m_desc.stencilBackPassOp != GXSTENCIL_OP_KEEP)
 		{
 			m_pDevice->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, TRUE);
 			m_pDevice->SetRenderState(D3DRS_CCW_STENCILFAIL, m_desc.stencilBackFailOp);

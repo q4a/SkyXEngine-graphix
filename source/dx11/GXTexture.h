@@ -8,8 +8,9 @@ class CGXTexture2D: public IGXTexture2D
 	friend class CGXContext;
 
 protected:
-	CGXContext * m_pRender;
-	CGXTexture2D(CGXContext * pRender): m_pRender(pRender)
+	CGXContext *m_pRender;
+	CGXTexture2D(CGXContext *pRender): 
+		m_pRender(pRender)
 	{
 	}
 	~CGXTexture2D();
@@ -35,24 +36,26 @@ protected:
 
 	Array<IGXSurface*> m_apSurfaces;
 public:
-	void Release();
+	void Release() override;
 
-	IGXSurface *getMipmap(UINT i = 0);
+	IGXSurface* getMipmap(UINT i = 0) override;
 
-	UINT getWidth();
-	UINT getHeight();
+	UINT getWidth() override;
+	UINT getHeight() override;
 
-	bool lock(void **ppData, GXTEXLOCK mode);
-	void unlock();
+	bool lock(void **ppData, GXTEXLOCK mode) override;
+	void unlock() override;
 
-	void update(void *pData);
+	void update(void *pData) override;
 
-	GXFORMAT getFormat();
-	bool wasReset();
+	GXFORMAT getFormat() override;
+	bool wasReset() override;
 
-	ID3D11ShaderResourceView *getDXTexture();
+	ID3D11ShaderResourceView* getDXTexture();
 
-	GXTEXTURE_TYPE getType();
+	GXTEXTURE_TYPE getType() override;
+
+	IGXSurface* asRenderTarget() override;
 };
 
 class CGXTexture3D: public IGXTexture3D
@@ -60,8 +63,9 @@ class CGXTexture3D: public IGXTexture3D
 	friend class CGXContext;
 
 protected:
-	CGXContext * m_pRender;
-	CGXTexture3D(CGXContext * pRender): m_pRender(pRender)
+	CGXContext *m_pRender;
+	CGXTexture3D(CGXContext *pRender): 
+		m_pRender(pRender)
 	{
 	}
 	~CGXTexture3D();
@@ -82,22 +86,22 @@ protected:
 
 	IGXSurface *m_pSurfaceRT = NULL;
 public:
-	void Release();
+	void Release() override;
 
-	UINT getWidth();
-	UINT getHeight();
-	UINT getDepth();
+	UINT getWidth() override;
+	UINT getHeight() override;
+	UINT getDepth() override;
 
-	IGXSurface *asRenderTarget();
+	IGXSurface* asRenderTarget() override;
 
-	void update(void *pData);
+	void update(void *pData) override;
 
-	GXFORMAT getFormat();
-	bool wasReset();
+	GXFORMAT getFormat() override;
+	bool wasReset() override;
 
-	ID3D11ShaderResourceView *getDXTexture();
+	ID3D11ShaderResourceView* getDXTexture();
 
-	GXTEXTURE_TYPE getType();
+	GXTEXTURE_TYPE getType() override;
 };
 
 class CGXTextureCube: public IGXTextureCube
@@ -105,8 +109,9 @@ class CGXTextureCube: public IGXTextureCube
 	friend class CGXContext;
 
 protected:
-	CGXContext * m_pRender;
-	CGXTextureCube(CGXContext * pRender): m_pRender(pRender)
+	CGXContext *m_pRender;
+	CGXTextureCube(CGXContext *pRender): 
+		m_pRender(pRender)
 	{
 	}
 	~CGXTextureCube();
@@ -135,23 +140,23 @@ protected:
 
 	IGXSurface *m_pSurfaceRT = NULL;
 public:
-	void Release();
+	void Release() override;
 
-	IGXSurface *getMipmap(GXCUBEMAP_FACES face, UINT i = 0);
+	IGXSurface* getMipmap(GXCUBEMAP_FACES face, UINT i = 0) override;
 
-	UINT getSize();
+	UINT getSize() override;
 
-	bool lock(void **ppData, GXCUBEMAP_FACES face, GXTEXLOCK mode);
-	void unlock();
+	bool lock(void **ppData, GXCUBEMAP_FACES face, GXTEXLOCK mode) override;
+	void unlock() override;
 
-	GXFORMAT getFormat();
-	bool wasReset();
+	GXFORMAT getFormat() override;
+	bool wasReset() override;
 
-	ID3D11ShaderResourceView *getDXTexture();
+	ID3D11ShaderResourceView* getDXTexture();
 
-	GXTEXTURE_TYPE getType();
+	GXTEXTURE_TYPE getType() override;
 
-	IGXSurface *asRenderTarget();
+	IGXSurface* asRenderTarget() override;
 };
 
 #endif

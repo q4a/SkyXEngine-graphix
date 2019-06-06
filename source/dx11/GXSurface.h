@@ -11,7 +11,7 @@ class CGXSurface: public IGXSurface
 	friend class CGXSwapChain;
 protected:
 	
-	CGXContext * m_pRender;
+	CGXContext *m_pRender;
 	D3D11_TEXTURE2D_DESC m_descTex2D;
 	ID3D11Texture2D *m_pSurface = NULL;
 
@@ -49,7 +49,7 @@ protected:
 	~CGXSurface();
 
 public:
-	CGXSurface(CGXContext * pRender, UINT uWidth, UINT uHeight, GXFORMAT format, ID3D11Texture2D *pSurface):
+	CGXSurface(CGXContext *pRender, UINT uWidth, UINT uHeight, GXFORMAT format, ID3D11Texture2D *pSurface):
 		m_pRender(pRender),
 		m_uWidth(uWidth),
 		m_uHeight(uHeight),
@@ -61,11 +61,11 @@ public:
 		m_descTex2D.Format = m_pRender->getDXFormat(format);
 	}
 
-	void Release();
+	void Release() override;
 
-	UINT getWidth();
-	UINT getHeight();
-	GXFORMAT getFormat();
+	UINT getWidth() override;
+	UINT getHeight() override;
+	GXFORMAT getFormat() override;
 };
 
 class CGXSurface3D: public CGXSurface
@@ -81,7 +81,7 @@ class CGXSurface3D: public CGXSurface
 	ID3D11Texture3D *m_pSurface = NULL;
 
 public:
-	CGXSurface3D(CGXContext * pRender, UINT uWidth, UINT uHeight, UINT uDepth, GXFORMAT format, ID3D11Texture3D *pSurface):
+	CGXSurface3D(CGXContext *pRender, UINT uWidth, UINT uHeight, UINT uDepth, GXFORMAT format, ID3D11Texture3D *pSurface):
 		CGXSurface(pRender, uWidth, uHeight, format, NULL),
 		m_pSurface(pSurface)
 	{
@@ -91,7 +91,7 @@ public:
 		m_descTex3D.Format = m_pRender->getDXFormat(format);
 	}
 
-	bool is3D()
+	bool is3D() override
 	{
 		return(true);
 	}
@@ -110,7 +110,7 @@ class CGXSurfaceCube: public CGXSurface
 	ID3D11Texture2D *m_pSurface = NULL;
 
 public:
-	CGXSurfaceCube(CGXContext * pRender, UINT uSize, GXFORMAT format, ID3D11Texture2D *pSurface):
+	CGXSurfaceCube(CGXContext *pRender, UINT uSize, GXFORMAT format, ID3D11Texture2D *pSurface):
 		CGXSurface(pRender, uSize, uSize, format, NULL),
 		m_pSurface(pSurface)
 	{
@@ -119,7 +119,7 @@ public:
 		m_descTex2D.Format = m_pRender->getDXFormat(format);
 	}
 
-	bool isCube()
+	bool isCube() override
 	{
 		return(true);
 	}

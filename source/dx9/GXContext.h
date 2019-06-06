@@ -200,8 +200,8 @@ protected:
 	IGXVertexDeclaration * m_pCurVertexDecl;
 	D3DPRIMITIVETYPE m_drawPT;
 
-	IGXSamplerState * m_pSamplerState[MAX_GXSAMPLERS];
-	DWORD m_dwCurrentSamplerStates[MAX_GXSAMPLERS][D3DSAMP_SRGBTEXTURE];
+	IGXSamplerState * m_pSamplerState[GX_MAX_SAMPLERS];
+	DWORD m_dwCurrentSamplerStates[GX_MAX_SAMPLERS][D3DSAMP_SRGBTEXTURE];
 	IGXSamplerState *m_pDefaultSamplerState = NULL;
 
 	IGXRasterizerState *m_pRasterizerState = NULL;
@@ -218,10 +218,10 @@ protected:
 	IGXDepthStencilSurface *m_pDepthStencilSurface = NULL;
 	IDirect3DSurface9 *m_pDefaultDepthStencilSurface = NULL;
 
-	IGXSurface *m_pColorTarget[MAXGXCOLORTARGETS];
+	IGXSurface *m_pColorTarget[GX_MAX_COLORTARGETS];
 	IDirect3DSurface9 *m_pDefaultColorTarget = NULL;
 
-	IGXBaseTexture *m_pTextures[MAXGXTEXTURES];
+	IGXBaseTexture *m_pTextures[GX_MAX_TEXTURES];
 
 	IGXShader *m_pShader = NULL;
 
@@ -230,15 +230,15 @@ protected:
 		//BOOL bVertexLayout;
 		BOOL bIndexBuffer;
 		BOOL bRenderBuffer;
-		BOOL bSamplerState[MAX_GXSAMPLERS];
+		BOOL bSamplerState[GX_MAX_SAMPLERS];
 		BOOL bRasterizerState;
 		BOOL bDepthStencilState;
 		BOOL bStencilRef;
 		BOOL bBlendState;
 		BOOL bBlendFactor;
 		BOOL bDepthStencilSurface;
-		BOOL bColorTarget[MAXGXCOLORTARGETS];
-		BOOL bTexture[MAXGXTEXTURES];
+		BOOL bColorTarget[GX_MAX_COLORTARGETS];
+		BOOL bTexture[GX_MAX_TEXTURES];
 		BOOL bShader;
 		BOOL bScissorsRect;
 		//BOOL bVertexBuffers[MAXDSGVSTREAM];

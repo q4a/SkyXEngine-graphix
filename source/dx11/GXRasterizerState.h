@@ -7,12 +7,13 @@ class CGXRasterizerState: public IGXRasterizerState
 {
 	friend class CGXContext;
 
-	CGXRasterizerState(CGXContext * pRender):m_pRender(pRender)
+	CGXRasterizerState(CGXContext *pRender):
+		m_pRender(pRender)
 	{
-	};
+	}
 	~CGXRasterizerState();
 
-	CGXContext * m_pRender;
+	CGXContext *m_pRender;
 	ID3D11RasterizerState *m_pStateBlock = NULL;
 	BOOL m_isScissorsEnabled = 0;
 	GXRASTERIZER_DESC m_desc;
@@ -21,7 +22,7 @@ class CGXRasterizerState: public IGXRasterizerState
 	void onDevRst();
 
 public:
-	void Release();
+	void Release() override;
 };
 
 #endif

@@ -35,7 +35,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 }
 #endif
 
-C GXGAPI IGXContext * GetInstance()
+C GXGAPI IGXContext* GetInstance()
 {
 	return(new CGXContext());
 }

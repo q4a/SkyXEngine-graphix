@@ -10,30 +10,30 @@ void CGXVertexDeclaration::Release()
 	}
 }
 
-CGXVertexDeclaration::CGXVertexDeclaration(ID3D11Device *pDevice, CGXContext * pRender, const GXVERTEXELEMENT * pDecl):
+CGXVertexDeclaration::CGXVertexDeclaration(ID3D11Device *pDevice, CGXContext *pRender, const GXVERTEXELEMENT *pDecl):
 	m_pRender(pRender)
 {
 	UINT uDeclCount = 0;
-	while(pDecl[uDeclCount++].Type != GXDECLTYPE_UNUSED);
+	while(pDecl[uDeclCount++].type != GXDECLTYPE_UNUSED);
 	--uDeclCount;
 
-	for(UINT i = 0; i < MAXGXVSTREAM; ++i)
+	for(UINT i = 0; i < GX_MAX_VSTREAM; ++i)
 	{
 		m_u8SpecSpec[i] = (GXDECLSPEC)-1;
 	}
 
 	for(UINT i = 0; i < uDeclCount; ++i)
 	{
-		if(pDecl[i].Stream >= MAXGXVSTREAM)
+		if(pDecl[i].u8Stream >= GX_MAX_VSTREAM)
 		{
-			CGXContext::debugMessage(GX_LOG_ERROR, "Unable to create vertex declaration: Stream >= MAXGXVSTREAM!");
+			CGXContext::debugMessage(GX_LOG_ERROR, "Unable to create vertex declaration: Stream >= GX_MAX_VSTREAM!");
 			return;
 		}
-		if(m_u8SpecSpec[pDecl[i].Stream] == (GXDECLSPEC)-1)
+		if(m_u8SpecSpec[pDecl[i].u8Stream] == (GXDECLSPEC)-1)
 		{
-			m_u8SpecSpec[pDecl[i].Stream] = pDecl[i].spec;
+			m_u8SpecSpec[pDecl[i].u8Stream] = pDecl[i].spec;
 		}
-		else if(m_u8SpecSpec[pDecl[i].Stream] != pDecl[i].spec)
+		else if(m_u8SpecSpec[pDecl[i].u8Stream] != pDecl[i].spec)
 		{
 			CGXContext::debugMessage(GX_LOG_ERROR, "Unable to create vertex declaration: vertex instance specs in a stream must be the same!");
 			return;
@@ -49,13 +49,13 @@ CGXVertexDeclaration::CGXVertexDeclaration(ID3D11Device *pDevice, CGXContext * p
 	m_u8StreamCount = 0;
 	for(UINT i = 0; i < uDeclCount; ++i)
 	{
-		pEls[i].InputSlot = pDecl[i].Stream;
-		pEls[i].AlignedByteOffset = pDecl[i].Offset;
+		pEls[i].InputSlot = pDecl[i].u8Stream;
+		pEls[i].AlignedByteOffset = pDecl[i].u16Offset;
 		pEls[i].SemanticIndex = 0;
 
-		if(pDecl[i].Stream + 1 > m_u8StreamCount)
+		if(pDecl[i].u8Stream + 1 > m_u8StreamCount)
 		{
-			m_u8StreamCount = pDecl[i].Stream + 1;
+			m_u8StreamCount = pDecl[i].u8Stream + 1;
 		}
 
 		switch(pDecl[i].spec)
@@ -72,7 +72,7 @@ CGXVertexDeclaration::CGXVertexDeclaration(ID3D11Device *pDevice, CGXContext * p
 
 		const char *szShaderType = NULL;
 		UINT uSize = 0;
-		switch(pDecl[i].Type)
+		switch(pDecl[i].type)
 		{
 		case GXDECLTYPE_FLOAT1:
 			pEls[i].Format = DXGI_FORMAT_R32_FLOAT; uSize = 4; szShaderType = "float"; break;
@@ -121,12 +121,12 @@ CGXVertexDeclaration::CGXVertexDeclaration(ID3D11Device *pDevice, CGXContext * p
 			pEls[i].Format = DXGI_FORMAT_R16G16B16A16_FLOAT; uSize = 8; szShaderType = "float4"; break;
 		}
 
-		if(pEls[i].AlignedByteOffset + uSize > m_u8StreamStride[pDecl[i].Stream])
+		if(pEls[i].AlignedByteOffset + uSize > m_u8StreamStride[pDecl[i].u8Stream])
 		{
-			m_u8StreamStride[pDecl[i].Stream] = pEls[i].AlignedByteOffset + uSize;
+			m_u8StreamStride[pDecl[i].u8Stream] = pEls[i].AlignedByteOffset + uSize;
 		}
 
-		switch(pDecl[i].Usage)
+		switch(pDecl[i].usage)
 		{
 		case GXDECLUSAGE_POSITION:
 			pEls[i].SemanticName = "POSITION"; break;

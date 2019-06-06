@@ -7,19 +7,19 @@ class CGXVertexDeclaration: public IGXVertexDeclaration
 {
 	friend class CGXContext;
 	
-	CGXVertexDeclaration(ID3D11Device *pDevice, CGXContext * pRender, const GXVERTEXELEMENT * pDecl);
+	CGXVertexDeclaration(ID3D11Device *pDevice, CGXContext *pRender, const GXVERTEXELEMENT *pDecl);
 	~CGXVertexDeclaration();
-	CGXContext * m_pRender;
+	CGXContext *m_pRender;
 		
 	
 	ID3D11InputLayout *m_pDeclaration = NULL;
 
 	byte m_u8StreamCount;
-	byte m_u8StreamStride[MAXGXVSTREAM];
-	GXDECLSPEC m_u8SpecSpec[MAXGXVSTREAM];
+	byte m_u8StreamStride[GX_MAX_VSTREAM];
+	GXDECLSPEC m_u8SpecSpec[GX_MAX_VSTREAM];
 
 public:
-	void Release();
+	void Release() override;
 };
 
 #endif

@@ -7,12 +7,13 @@ class CGXDepthStencilSurface: public IGXDepthStencilSurface
 {					  
 	friend class CGXContext;
 
-	CGXDepthStencilSurface(CGXContext * pRender):m_pRender(pRender)
+	CGXDepthStencilSurface(CGXContext * pRender):
+		m_pRender(pRender)
 	{
-	};
+	}
 	~CGXDepthStencilSurface();
 
-	CGXContext * m_pRender;
+	CGXContext *m_pRender;
 	ID3D11DepthStencilView *m_pSurface = NULL;
 	ID3D11Texture2D *m_pBuffer = NULL;
 
@@ -27,7 +28,7 @@ class CGXDepthStencilSurface: public IGXDepthStencilSurface
 	void onDevRst(UINT uScreenWidth, UINT uScreenHeight);
 
 public:
-	void Release();
+	void Release() override;
 };
 
 #endif

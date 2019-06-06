@@ -267,7 +267,7 @@ BOOL CGXContext::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindo
 	memset(&depthStencilDesc, 0, sizeof(depthStencilDesc));
 	depthStencilDesc.bDepthEnable = TRUE;
 	depthStencilDesc.bEnableDepthWrite = TRUE;
-	depthStencilDesc.depthFunc = GXCOMPARISON_LESS_EQUAL;
+	depthStencilDesc.depthFunc = GXCMP_LESS_EQUAL;
 	depthStencilDesc.bStencilEnable = FALSE;
 
 	m_pDefaultDepthStencilState = createDepthStencilState(&depthStencilDesc);
@@ -395,10 +395,10 @@ IGXIndexBuffer * CGXContext::createIndexBuffer(size_t size, UINT flags, GXINDEXT
 
 	switch(it)
 	{
-	case GXIT_USHORT:
+	case GXIT_UINT16:
 		pBuff->m_format = D3DFMT_INDEX16;
 		break;
-	case GXIT_UINT:
+	case GXIT_UINT32:
 		pBuff->m_format = D3DFMT_INDEX32;
 		break;
 	}
@@ -630,7 +630,7 @@ void CGXContext::syncronize(UINT flags)
 		m_isScissorsEnable = pRS->m_isScissorsEnabled;
 		m_sync_state.bRasterizerState = FALSE;
 	}
-	for(UINT i = 0; i < MAX_GXSAMPLERS; ++i)
+	for(UINT i = 0; i < GX_MAX_SAMPLERS; ++i)
 	{
 		if(m_sync_state.bSamplerState[i])
 		{
@@ -698,7 +698,7 @@ void CGXContext::syncronize(UINT flags)
 		m_sync_state.bDepthStencilSurface = FALSE;
 	}
 
-	for(UINT i = 0; i < MAXGXCOLORTARGETS; ++i)
+	for(UINT i = 0; i < GX_MAX_COLORTARGETS; ++i)
 	{
 		if(m_sync_state.bColorTarget[i])
 		{
@@ -805,7 +805,7 @@ void CGXContext::syncronize(UINT flags)
 		}
 	}
 
-	for(UINT i = 0; i < MAXGXTEXTURES; ++i)
+	for(UINT i = 0; i < GX_MAX_TEXTURES; ++i)
 	{
 		if(m_sync_state.bTexture[i])
 		{
@@ -1416,7 +1416,7 @@ void CGXContext::destroySamplerState(IGXSamplerState *pState)
 {
 	if(pState)
 	{
-		for(UINT i = 0; i < MAX_GXSAMPLERS; ++i)
+		for(UINT i = 0; i < GX_MAX_SAMPLERS; ++i)
 		{
 			if(pState == m_pSamplerState[i])
 			{
@@ -1429,10 +1429,10 @@ void CGXContext::destroySamplerState(IGXSamplerState *pState)
 }
 void CGXContext::setSamplerState(IGXSamplerState *pState, UINT uSlot)
 {
-	assert(uSlot < MAX_GXSAMPLERS);
-	if(uSlot >= MAX_GXSAMPLERS)
+	assert(uSlot < GX_MAX_SAMPLERS);
+	if(uSlot >= GX_MAX_SAMPLERS)
 	{
-		debugMessage(GX_LOG_ERROR, "Unable to set sampler state: uSlot >= MAX_GXSAMPLERS!");
+		debugMessage(GX_LOG_ERROR, "Unable to set sampler state: uSlot >= GX_MAX_SAMPLERS!");
 		return;
 	}
 	if(m_pSamplerState[uSlot] == pState)
@@ -1449,7 +1449,7 @@ void CGXContext::setSamplerState(IGXSamplerState *pState, UINT uSlot)
 }
 IGXSamplerState *CGXContext::getSamplerState(UINT uSlot)
 {
-	assert(uSlot < MAX_GXSAMPLERS);
+	assert(uSlot < GX_MAX_SAMPLERS);
 	if(m_pSamplerState[uSlot])
 	{
 		m_pSamplerState[uSlot]->AddRef();
@@ -1736,7 +1736,7 @@ void CGXContext::destroyColorTarget(IGXSurface *pSurface)
 {
 	if(pSurface)
 	{
-		for(UINT i = 0; i < MAXGXCOLORTARGETS; ++i)
+		for(UINT i = 0; i < GX_MAX_COLORTARGETS; ++i)
 		{
 			if(pSurface == m_pColorTarget[0])
 			{
@@ -1770,7 +1770,7 @@ void CGXContext::downsampleColorTarget(IGXSurface *pSource, IGXSurface *pTarget)
 }
 void CGXContext::setColorTarget(IGXSurface *pSurf, UINT idx)
 {
-	assert(idx < MAXGXCOLORTARGETS);
+	assert(idx < GX_MAX_COLORTARGETS);
 	if(m_pColorTarget[idx] == pSurf)
 	{
 		return;
@@ -1786,7 +1786,7 @@ void CGXContext::setColorTarget(IGXSurface *pSurf, UINT idx)
 
 IGXSurface *CGXContext::getColorTarget(UINT idx)
 {
-	assert(idx < MAXGXCOLORTARGETS);
+	assert(idx < GX_MAX_COLORTARGETS);
 	if(m_pColorTarget[idx])
 	{
 		m_pColorTarget[idx]->AddRef();
@@ -1796,7 +1796,7 @@ IGXSurface *CGXContext::getColorTarget(UINT idx)
 
 void CGXContext::setTexture(IGXBaseTexture *pTexture, UINT uStage)
 {
-	assert(uStage < MAXGXTEXTURES);
+	assert(uStage < GX_MAX_TEXTURES);
 	if(m_pTextures[uStage] == pTexture)
 	{
 		return;
@@ -1811,7 +1811,7 @@ void CGXContext::setTexture(IGXBaseTexture *pTexture, UINT uStage)
 }
 IGXBaseTexture *CGXContext::getTexture(UINT uStage)
 {
-	assert(uStage < MAXGXTEXTURES);
+	assert(uStage < GX_MAX_TEXTURES);
 	if(m_pTextures[uStage])
 	{
 		m_pTextures[uStage]->AddRef();
@@ -1953,7 +1953,7 @@ void CGXContext::destroyTexture2D(IGXTexture2D * pTexture)
 {
 	if(pTexture)
 	{
-		for(UINT i = 0; i < MAXGXTEXTURES; ++i)
+		for(UINT i = 0; i < GX_MAX_TEXTURES; ++i)
 		{
 			if(pTexture == m_pTextures[i])
 			{
@@ -1979,7 +1979,7 @@ void CGXContext::destroyTextureCube(IGXTextureCube * pTexture)
 {
 	if(pTexture)
 	{
-		for(UINT i = 0; i < MAXGXTEXTURES; ++i)
+		for(UINT i = 0; i < GX_MAX_TEXTURES; ++i)
 		{
 			if(pTexture == m_pTextures[i])
 			{

@@ -5,6 +5,12 @@ void CGXSwapChain::onDevLost()
 {
 	mem_release(((CGXSurface*)m_pColorSurface)->m_pSurface);
 	mem_release(((CGXSurface*)m_pColorSurface)->m_pRTV);
+
+	if(m_pSwapChain)
+	{
+		m_pSwapChain->SetFullscreenState(FALSE, NULL);
+	}
+	
 	mem_release(m_pSwapChain);
 }
 void CGXSwapChain::onDevRst()
@@ -44,7 +50,7 @@ void CGXSwapChain::resize(int iWidth, int iHeight, bool isWindowed)
 	onDevRst();
 }
 
-CGXSwapChain::CGXSwapChain(CGXContext * pRender, int iWidth, int iHeight, SXWINDOW wnd, bool isWindowed):m_pRender(pRender)
+CGXSwapChain::CGXSwapChain(CGXContext *pRender, int iWidth, int iHeight, SXWINDOW wnd, bool isWindowed):m_pRender(pRender)
 {
 	memset(&m_presentParameters, 0, sizeof(m_presentParameters));
 	if(iWidth < 1)
@@ -95,7 +101,7 @@ void CGXSwapChain::swapBuffers()
 		DX_CALL(m_pSwapChain->Present(NULL, NULL));
 	}
 }
-IGXSurface *CGXSwapChain::getColorTarget()
+IGXSurface* CGXSwapChain::getColorTarget()
 {
 	m_pColorSurface->AddRef();
 	return(m_pColorSurface);

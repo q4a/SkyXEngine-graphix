@@ -7,12 +7,13 @@ class CGXVertexBuffer: public IGXVertexBuffer
 {
 	friend class CGXContext;
 
-	CGXVertexBuffer(CGXContext * pRender):m_pRender(pRender)
+	CGXVertexBuffer(CGXContext *pRender):
+		m_pRender(pRender)
 	{
-	};
+	}
 	~CGXVertexBuffer();
 
-	CGXContext * m_pRender;
+	CGXContext *m_pRender;
 	ID3D11Buffer *m_pBuffer;
 	//D3DFORMAT m_format;
 	bool m_wasReset = true;
@@ -21,12 +22,12 @@ class CGXVertexBuffer: public IGXVertexBuffer
 	bool m_isLockable = true;
 
 public:
-	void Release();
+	void Release() override;
 
-	bool lock(void **ppData, GXBUFFERLOCK mode);
-	void unlock();
+	bool lock(void **ppData, GXBUFFERLOCK mode) override;
+	void unlock() override;
 
-	bool wasReset();
+	bool wasReset() override;
 };
 
 #endif

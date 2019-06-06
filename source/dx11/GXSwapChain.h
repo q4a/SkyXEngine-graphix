@@ -7,10 +7,10 @@ class CGXSwapChain: public IGXSwapChain
 {
 	friend class CGXContext;
 
-	CGXSwapChain(CGXContext * pRender, int iWidth, int iHeight, SXWINDOW wnd, bool isWindowed=true);
+	CGXSwapChain(CGXContext *pRender, int iWidth, int iHeight, SXWINDOW wnd, bool isWindowed=true);
 	~CGXSwapChain();
 
-	CGXContext * m_pRender;
+	CGXContext *m_pRender;
 	IDXGISwapChain *m_pSwapChain = NULL;
 	DXGI_SWAP_CHAIN_DESC m_presentParameters;
 	IGXSurface *m_pColorSurface;
@@ -22,9 +22,9 @@ class CGXSwapChain: public IGXSwapChain
 	void resize(int iWidth, int iHeight, bool isWindowed = true);
 
 public:
-	void Release();
-	void swapBuffers();
-	IGXSurface *getColorTarget();
+	void Release() override;
+	void swapBuffers() override;
+	IGXSurface* getColorTarget() override;
 };
 
 #endif

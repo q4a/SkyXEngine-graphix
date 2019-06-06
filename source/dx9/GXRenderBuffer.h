@@ -11,7 +11,7 @@ class CGXRenderBuffer: public IGXRenderBuffer
 
 	CGXContext * m_pRender;
 
-	IGXVertexBuffer *m_ppVertexBuffers[MAXGXVSTREAM];
+	IGXVertexBuffer *m_ppVertexBuffers[GX_MAX_VSTREAM];
 	IGXVertexDeclaration *m_pVertexDeclaration;
 
 	UINT m_uStreamCount;

@@ -41,149 +41,149 @@ class CGXContext: public IGXContext
 protected:
 	~CGXContext();
 public:
-	BOOL initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindowed);
+	BOOL initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindowed) override;
 	CGXContext();
-	void Release();
+	void Release() override;
 
-	void resize(int iWidth, int iHeight, bool isWindowed);
+	void resize(int iWidth, int iHeight, bool isWindowed) override;
 
-	void swapBuffers();
+	void swapBuffers() override;
 
-	bool beginFrame();
-	void endFrame();
-	bool canBeginFrame();
+	bool beginFrame() override;
+	void endFrame() override;
+	bool canBeginFrame() override;
 
-	bool wasReset();
+	bool wasReset() override;
 
-	void clear(UINT what, GXCOLOR color = 0, float fDepth = 1.0f, UINT uStencil = 0);
+	void clear(UINT what, GXCOLOR color = 0, float fDepth = 1.0f, UINT uStencil = 0) override;
 
-	IGXVertexBuffer * createVertexBuffer(size_t size, UINT flags, void * pInitData = NULL);
-	IGXIndexBuffer * createIndexBuffer(size_t size, UINT flags, GXINDEXTYPE it, void * pInitData = NULL);
+	IGXVertexBuffer* createVertexBuffer(size_t size, GX_BUFFER_USAGE usage, void *pInitData = NULL) override;
+	IGXIndexBuffer* createIndexBuffer(size_t size, GX_BUFFER_USAGE usage, GXINDEXTYPE it, void *pInitData = NULL) override;
 	
 	void destroyIndexBuffer(IGXIndexBuffer * pBuff);
 	void destroyVertexBuffer(IGXVertexBuffer * pBuff);
 
-	IGXVertexDeclaration * createVertexDeclaration(const GXVERTEXELEMENT * pDecl);
+	IGXVertexDeclaration* createVertexDeclaration(const GXVERTEXELEMENT *pDecl) override;
 	void destroyVertexDeclaration(IGXVertexDeclaration * pDecl);
 
-	void setIndexBuffer(IGXIndexBuffer * pBuff);
-	void setRenderBuffer(IGXRenderBuffer * pBuff);
+	void setIndexBuffer(IGXIndexBuffer *pBuff) override;
+	void setRenderBuffer(IGXRenderBuffer *pBuff) override;
 	//void setVertexBuffers(UINT startSlot, UINT countSlots, IDSRvertexBuffer ** pBuff);
 
 	//void setInputLayout(IDSGvertexDeclaration * pDecl);
 
-	void drawIndexed(UINT uVertexCount, UINT uPrimitiveCount, UINT uStartIndexLocation, int iBaseVertexLocation);
-	void drawIndexedInstanced(UINT uInstanceCount, UINT uVertexCount, UINT uPrimitiveCount, UINT uStartIndexLocation, int iBaseVertexLocation);
-	void drawPrimitive(UINT uStartVertex, UINT uPrimitiveCount);
+	void drawIndexed(UINT uVertexCount, UINT uPrimitiveCount, UINT uStartIndexLocation, int iBaseVertexLocation) override;
+	void drawIndexedInstanced(UINT uInstanceCount, UINT uVertexCount, UINT uPrimitiveCount, UINT uStartIndexLocation, int iBaseVertexLocation) override;
+	void drawPrimitive(UINT uStartVertex, UINT uPrimitiveCount) override;
 	void drawPrimitiveInstanced(UINT uInstanceCount, UINT uStartVertex, UINT uPrimitiveCount);
 
-	void computeDispatch(UINT uThreadGroupCountX, UINT uThreadGroupCountY, UINT uThreadGroupCountZ);
+	void computeDispatch(UINT uThreadGroupCountX, UINT uThreadGroupCountY, UINT uThreadGroupCountZ) override;
 
-	void setPrimitiveTopology(GXPT pt);
+	void setPrimitiveTopology(GXPRIMITIVETOPOLOGY pt) override;
 
 	//IGXShader * createShader(const char * pName, UINT flags = 0);
 	//void destroyShader(IGXShader * pSH);
 	//void setShader(IGXShader * pSH);
 
-	IGXVertexShader * createVertexShader(const char * szFile, GXMACRO *pDefs = NULL);
-	IGXVertexShader * createVertexShaderFromString(const char * szCode, GXMACRO *pDefs = NULL);
-	IGXVertexShader * createVertexShader(void *pData, UINT uSize);
-	void setVertexShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0);
+	IGXVertexShader* createVertexShader(const char *szFile, GXMACRO *pDefs = NULL) override;
+	IGXVertexShader* createVertexShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) override;
+	IGXVertexShader* createVertexShader(void *pData, UINT uSize) override;
+	void setVertexShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) override;
 
-	IGXPixelShader * createPixelShader(const char * szFile, GXMACRO *pDefs = NULL);
-	IGXPixelShader * createPixelShaderFromString(const char * szCode, GXMACRO *pDefs = NULL);
-	IGXPixelShader * createPixelShader(void *pData, UINT uSize);
-	void setPixelShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0);
+	IGXPixelShader* createPixelShader(const char *szFile, GXMACRO *pDefs = NULL) override;
+	IGXPixelShader* createPixelShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) override;
+	IGXPixelShader* createPixelShader(void *pData, UINT uSize) override;
+	void setPixelShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) override;
 
-	IGXGeometryShader * createGeometryShader(const char * szFile, GXMACRO *pDefs = NULL);
-	IGXGeometryShader * createGeometryShaderFromString(const char * szCode, GXMACRO *pDefs = NULL);
-	IGXGeometryShader * createGeometryShader(void *pData, UINT uSize);
-	void setGeometryShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0);
+	IGXGeometryShader* createGeometryShader(const char *szFile, GXMACRO *pDefs = NULL) override;
+	IGXGeometryShader* createGeometryShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) override;
+	IGXGeometryShader* createGeometryShader(void *pData, UINT uSize) override;
+	void setGeometryShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) override;
 
-	IGXComputeShader * createComputeShader(const char * szFile, GXMACRO *pDefs = NULL);
-	IGXComputeShader * createComputeShaderFromString(const char * szCode, GXMACRO *pDefs = NULL);
-	IGXComputeShader * createComputeShader(void *pData, UINT uSize);
-	void setComputeShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0);
+	IGXComputeShader* createComputeShader(const char *szFile, GXMACRO *pDefs = NULL) override;
+	IGXComputeShader* createComputeShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) override;
+	IGXComputeShader* createComputeShader(void *pData, UINT uSize) override;
+	void setComputeShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) override;
 
 
 	//void setVertexShader(IGXVertexShader * pSH);
 	//void setPixelShader(IGXPixelShader * pSH);
 
-	IGXShader *createShader(IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL, IGXGeometryShader *pGS = NULL, IGXComputeShader *pCS = NULL);
-	void setShader(IGXShader *pSH);
-	IGXShader *getShader();
+	IGXShaderSet* createShader(IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL, IGXGeometryShader *pGS = NULL, IGXComputeShader *pCS = NULL) override;
+	void setShader(IGXShaderSet *pSH) override;
+	IGXShaderSet* getShader() override;
 
-	IGXRenderBuffer * createRenderBuffer(UINT countSlots, IGXVertexBuffer ** pBuff, IGXVertexDeclaration * pDecl);
+	IGXRenderBuffer* createRenderBuffer(UINT countSlots, IGXVertexBuffer ** pBuff, IGXVertexDeclaration *pDecl) override;
 	void destroyRenderBuffer(IGXRenderBuffer * pDecl);
 
-	IGXDepthStencilSurface *createDepthStencilSurface(UINT uWidth, UINT uHeight, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false);
-	IGXDepthStencilSurface *createDepthStencilSurfaceCube(UINT uSize, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false);
+	IGXDepthStencilSurface* createDepthStencilSurface(UINT uWidth, UINT uHeight, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false) override;
+	IGXDepthStencilSurface* createDepthStencilSurfaceCube(UINT uSize, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false) override;
 	void destroyDepthStencilSurface(IGXDepthStencilSurface *pSurface);
-	void setDepthStencilSurface(IGXDepthStencilSurface *pSurface);
-	void setDepthStencilSurfaceNULL();
-	IGXDepthStencilSurface *getDepthStencilSurface();
+	void setDepthStencilSurface(IGXDepthStencilSurface *pSurface) override;
+	void setDepthStencilSurfaceNULL() override;
+	IGXDepthStencilSurface* getDepthStencilSurface() override;
 
-	IGXSurface *createColorTarget(UINT uWidth, UINT uHeight, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false);
+	IGXSurface* createColorTarget(UINT uWidth, UINT uHeight, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false) override;
 	void destroyColorTarget(IGXSurface *pSurface);
-	void downsampleColorTarget(IGXSurface *pSource, IGXSurface *pTarget);
+	void downsampleColorTarget(IGXSurface *pSource, IGXSurface *pTarget) override;
 
-	void setColorTarget(IGXSurface *pSurf, UINT idx = 0);
-	IGXSurface *getColorTarget(UINT idx = 0);
+	void setColorTarget(IGXSurface *pSurf, UINT idx = 0) override;
+	IGXSurface* getColorTarget(UINT idx = 0) override;
 
-	IGXTexture2D *createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData = NULL);
-	IGXTexture3D *createTexture3D(UINT uWidth, UINT uHeight, UINT uDepth, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData = NULL);
-	IGXTextureCube *createTextureCube(UINT uSize, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData = NULL);
+	IGXTexture2D* createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData = NULL) override;
+	IGXTexture3D* createTexture3D(UINT uWidth, UINT uHeight, UINT uDepth, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData = NULL) override;
+	IGXTextureCube* createTextureCube(UINT uSize, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void * pInitData = NULL) override;
 	void destroyTexture2D(IGXTexture2D * pTexture);
 	void destroyTextureCube(IGXTextureCube * pTexture);
 
-	IGXTexture2D *createTexture2DFromFile(const char *szFileName, UINT uTexUsageFlags, bool bAllowNonPowerOf2 = false);
-	IGXTextureCube *createTextureCubeFromFile(const char *szFileName, UINT uTexUsageFlags, bool bAllowNonPowerOf2 = false);
+	IGXTexture2D* createTexture2DFromFile(const char *szFileName, UINT uTexUsageFlags, bool bAllowNonPowerOf2 = false) override;
+	IGXTextureCube* createTextureCubeFromFile(const char *szFileName, UINT uTexUsageFlags, bool bAllowNonPowerOf2 = false) override;
 
-	void setTexture(IGXBaseTexture *pTexture, UINT uStage = 0);
-	IGXBaseTexture *getTexture(UINT uStage = 0);
-	void setTextureVS(IGXBaseTexture *pTexture, UINT uStage = 0);
-	IGXBaseTexture *getTextureVS(UINT uStage = 0);
-	void setTextureCS(IGXBaseTexture *pTexture, UINT uStage = 0);
-	IGXBaseTexture *getTextureCS(UINT uStage = 0);
-	void setUnorderedAccessVeiwCS(IGXBaseTexture *pUAV, UINT uStage = 0);
-	IGXBaseTexture *getUnorderedAccessVeiwCS(UINT uStage = 0);
+	void setTexture(IGXBaseTexture *pTexture, UINT uStage = 0) override;
+	IGXBaseTexture* getTexture(UINT uStage = 0) override;
+	void setTextureVS(IGXBaseTexture *pTexture, UINT uStage = 0) override;
+	IGXBaseTexture* getTextureVS(UINT uStage = 0) override;
+	void setTextureCS(IGXBaseTexture *pTexture, UINT uStage = 0) override;
+	IGXBaseTexture* getTextureCS(UINT uStage = 0) override;
+	void setUnorderedAccessVeiwCS(IGXBaseTexture *pUAV, UINT uStage = 0) override;
+	IGXBaseTexture* getUnorderedAccessVeiwCS(UINT uStage = 0) override;
 	
-	IGXBlendState *createBlendState(GXBLEND_DESC *pBlendDesc);
+	IGXBlendState* createBlendState(GXBLEND_DESC *pBlendDesc) override;
 	void destroyBlendState(IGXBlendState *pState);
-	void setBlendState(IGXBlendState *pState);
-	IGXBlendState *getBlendState();
-	void setBlendFactor(GXCOLOR val);
+	void setBlendState(IGXBlendState *pState) override;
+	IGXBlendState* getBlendState() override;
+	void setBlendFactor(GXCOLOR val) override;
 
-	IGXDepthStencilState *createDepthStencilState(GXDEPTH_STENCIL_DESC *pDSDesc);
+	IGXDepthStencilState* createDepthStencilState(GXDEPTH_STENCIL_DESC *pDSDesc) override;
 	void destroyDepthStencilState(IGXDepthStencilState *pState);
-	void setDepthStencilState(IGXDepthStencilState *pState);
-	IGXDepthStencilState *getDepthStencilState();
-	void setStencilRef(UINT uVal);
+	void setDepthStencilState(IGXDepthStencilState *pState) override;
+	IGXDepthStencilState* getDepthStencilState() override;
+	void setStencilRef(UINT uVal) override;
 
-	IGXRasterizerState *createRasterizerState(GXRASTERIZER_DESC *pDSDesc);
+	IGXRasterizerState* createRasterizerState(GXRASTERIZER_DESC *pDSDesc) override;
 	void destroyRasterizerState(IGXRasterizerState *pState);
-	void setRasterizerState(IGXRasterizerState *pState);
-	IGXRasterizerState *getRasterizerState();
-	void setScissorRect(int iTop, int iRight, int iBottom, int iLeft);
+	void setRasterizerState(IGXRasterizerState *pState) override;
+	IGXRasterizerState* getRasterizerState() override;
+	void setScissorRect(int iTop, int iRight, int iBottom, int iLeft) override;
 
-	IGXSamplerState *createSamplerState(GXSAMPLER_DESC *pSamplerDesc);
+	IGXSamplerState* createSamplerState(GXSAMPLER_DESC *pSamplerDesc) override;
 	void destroySamplerState(IGXSamplerState *pState);
-	void setSamplerState(IGXSamplerState *pState, UINT uSlot);
-	IGXSamplerState *getSamplerState(UINT uSlot);
+	void setSamplerState(IGXSamplerState *pState, UINT uSlot) override;
+	IGXSamplerState* getSamplerState(UINT uSlot) override;
 
-	IGXSwapChain *createSwapChain(UINT uWidth, UINT uHeight, SXWINDOW wnd);
-	IGXSwapChain *createSwapChain(UINT uWidth, UINT uHeight, SXWINDOW wnd, bool bWindowed);
+	IGXSwapChain* createSwapChain(UINT uWidth, UINT uHeight, SXWINDOW wnd) override;
+	IGXSwapChain* createSwapChain(UINT uWidth, UINT uHeight, SXWINDOW wnd, bool bWindowed);
 	void destroySwapChain(IGXSwapChain *pSwapChain);
 
-	IGXConstantBuffer *createConstantBuffer(UINT uSize);
+	IGXConstantBuffer* createConstantBuffer(UINT uSize) override;
 
 	static void debugMessage(GX_LOG, const char *msg);
 	static void logDXcall(const char *szCodeString, HRESULT hr);
 
 	
-	ID3D11Device *getDXDevice();
-	ID3D11DeviceContext *getDXDeviceContext();
-	IDXGIFactory *getDXGIFactory();
+	ID3D11Device* getDXDevice();
+	ID3D11DeviceContext* getDXDeviceContext();
+	IDXGIFactory* getDXGIFactory();
 	//const D3DCAPS9 *getDXDeviceCaps();
 
 	DXGI_FORMAT getDXFormat(GXFORMAT format);
@@ -193,18 +193,18 @@ public:
 	UINT getTextureMemPitch(UINT uWidth, GXFORMAT format);
 	UINT getBitsPerPixel(GXFORMAT format);
 
-	GXTEXTURE_TYPE getTextureTypeFromFile(const char *szFile);
-	bool saveTextureToFile(const char *szTarget, IGXBaseTexture *pTexture);
+	GXTEXTURE_TYPE getTextureTypeFromFile(const char *szFile) override;
+	bool saveTextureToFile(const char *szTarget, IGXBaseTexture *pTexture) override;
 
-	const GX_FRAME_STATS *getFrameStats()
+	const GX_FRAME_STATS* getFrameStats() override
 	{
 		return(&m_frameStats);
 	}
-	const GX_MEMORY_STATS *getMemoryStats()
+	const GX_GPU_MEMORY_STATS* getMemoryStats() override
 	{
 		return(&m_memoryStats);
 	}
-	const GX_ADAPTER_DESC *getAdapterDesc()
+	const GX_ADAPTER_DESC* getAdapterDesc() override
 	{
 		return(&m_adapterDesc);
 	}
@@ -266,20 +266,20 @@ protected:
 	void onResetDevice();
 
 	GX_FRAME_STATS m_frameStats;
-	GX_MEMORY_STATS m_memoryStats;
+	GX_GPU_MEMORY_STATS m_memoryStats;
 	GX_ADAPTER_DESC m_adapterDesc;
 
 	HWND m_hWnd;
 
 	//IDSRvertexBuffer * m_pCurVertexBuffer[MAXDSGVSTREAM];
-	IGXRenderBuffer * m_pCurRenderBuffer;
-	IGXIndexBuffer * m_pCurIndexBuffer;
+	IGXRenderBuffer *m_pCurRenderBuffer;
+	IGXIndexBuffer *m_pCurIndexBuffer;
 
-	IGXVertexDeclaration * m_pCurVertexDecl;
+	IGXVertexDeclaration *m_pCurVertexDecl;
 	D3D_PRIMITIVE_TOPOLOGY m_drawPT;
 
-	IGXSamplerState * m_pSamplerState[MAX_GXSAMPLERS];
-	//DWORD m_dwCurrentSamplerStates[MAX_GXSAMPLERS][D3DSAMP_SRGBTEXTURE];
+	IGXSamplerState *m_pSamplerState[GX_MAX_SAMPLERS];
+	//DWORD m_dwCurrentSamplerStates[GX_MAX_SAMPLERS][D3DSAMP_SRGBTEXTURE];
 	IGXSamplerState *m_pDefaultSamplerState = NULL;
 
 	IGXRasterizerState *m_pRasterizerState = NULL;
@@ -296,33 +296,33 @@ protected:
 	IGXDepthStencilSurface *m_pDepthStencilSurface = NULL;
 	IGXDepthStencilSurface *m_pDefaultDepthStencilSurface = NULL;
 
-	IGXSurface *m_pColorTarget[MAXGXCOLORTARGETS];
-	ID3D11RenderTargetView *m_pDXColorTarget[MAXGXCOLORTARGETS];
+	IGXSurface *m_pColorTarget[GX_MAX_COLORTARGETS];
+	ID3D11RenderTargetView *m_pDXColorTarget[GX_MAX_COLORTARGETS];
 	//ID3D11RenderTargetView *m_pDefaultColorTarget = NULL;
 
 	IGXSwapChain *m_pDefaultSwapChain = NULL;
 
-	IGXBaseTexture *m_pTextures[MAXGXTEXTURES];
-	IGXBaseTexture *m_pTexturesVS[MAXGXTEXTURES];
-	IGXBaseTexture *m_pTexturesCS[MAXGXTEXTURES];
-	IGXBaseTexture *m_pUAVsCS[MAXGXUAVS];
+	IGXBaseTexture *m_pTextures[GX_MAX_TEXTURES];
+	IGXBaseTexture *m_pTexturesVS[GX_MAX_TEXTURES];
+	IGXBaseTexture *m_pTexturesCS[GX_MAX_TEXTURES];
+	IGXBaseTexture *m_pUAVsCS[GX_MAX_UAV_TEXTURES];
 
-	IGXShader *m_pShader = NULL;
+	IGXShaderSet *m_pShader = NULL;
 
 	struct _sync_state
 	{
 		//BOOL bVertexLayout;
 		BOOL bIndexBuffer;
 		BOOL bRenderBuffer;
-		BOOL bSamplerState[MAX_GXSAMPLERS];
+		BOOL bSamplerState[GX_MAX_SAMPLERS];
 		BOOL bRasterizerState;
 		BOOL bDepthStencilState;
 		BOOL bBlendState;
 		BOOL bRenderTarget;
-		BOOL bTexture[MAXGXTEXTURES];
-		BOOL bTextureVS[MAXGXTEXTURES];
-		BOOL bTextureCS[MAXGXTEXTURES];
-		BOOL bUAVsCS[MAXGXUAVS];
+		BOOL bTexture[GX_MAX_TEXTURES];
+		BOOL bTextureVS[GX_MAX_TEXTURES];
+		BOOL bTextureCS[GX_MAX_TEXTURES];
+		BOOL bUAVsCS[GX_MAX_UAV_TEXTURES];
 		BOOL bShader;
 		BOOL bScissorsRect;
 		//BOOL bVertexBuffers[MAXDSGVSTREAM];

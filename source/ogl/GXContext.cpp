@@ -240,10 +240,10 @@ IGXIndexBuffer * CGXContext::createIndexBuffer(size_t size, UINT flags, GXINDEXT
 	case GXIT_UBYTE:
 		pBuff->m_uIndexSize = GL_UNSIGNED_BYTE;
 		break;
-	case GXIT_USHORT:
+	case GXIT_UINT16:
 		pBuff->m_uIndexSize = GL_UNSIGNED_SHORT;
 		break;
-	case GXIT_UINT:
+	case GXIT_UINT32:
 		pBuff->m_uIndexSize = GL_UNSIGNED_INT;
 		break;
 	}

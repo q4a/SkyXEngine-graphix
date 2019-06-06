@@ -7,12 +7,13 @@ class CGXIndexBuffer: public IGXIndexBuffer
 {
 	friend class CGXContext;
 
-	CGXIndexBuffer(CGXContext * pRender):m_pRender(pRender)
+	CGXIndexBuffer(CGXContext *pRender):
+		m_pRender(pRender)
 	{
-	};
+	}
 	~CGXIndexBuffer();
 
-	CGXContext * m_pRender;
+	CGXContext *m_pRender;
 	ID3D11Buffer *m_pBuffer;
 	DXGI_FORMAT m_format;
 	bool m_wasReset = true;
@@ -21,12 +22,12 @@ class CGXIndexBuffer: public IGXIndexBuffer
 	bool m_isLockable = true;
 
 public:
-	void Release();
+	void Release() override;
 
-	bool lock(void **ppData, GXBUFFERLOCK mode);
-	void unlock();
+	bool lock(void **ppData, GXBUFFERLOCK mode) override;
+	void unlock() override;
 
-	bool wasReset();
+	bool wasReset() override;
 };
 
 #endif

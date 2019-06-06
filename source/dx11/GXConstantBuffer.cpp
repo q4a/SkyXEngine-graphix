@@ -10,7 +10,7 @@ void CGXConstantBuffer::Release()
 	}
 }
 
-CGXConstantBuffer::CGXConstantBuffer(CGXContext * pRender, UINT uSize):
+CGXConstantBuffer::CGXConstantBuffer(CGXContext *pRender, UINT uSize):
 	m_pRender(pRender)
 {
 	D3D11_BUFFER_DESC bufferDesc;

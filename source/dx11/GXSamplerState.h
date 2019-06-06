@@ -7,11 +7,12 @@ class CGXSamplerState: public IGXSamplerState
 {
 	friend class CGXContext;
 
-	CGXSamplerState(CGXContext * pRender):m_pRender(pRender)
+	CGXSamplerState(CGXContext *pRender):
+		m_pRender(pRender)
 	{
-	};
+	}
 
-	CGXContext * m_pRender;
+	CGXContext *m_pRender;
 	ID3D11SamplerState *m_pStateBlock;
 
 	GXSAMPLER_DESC m_desc;
@@ -19,7 +20,7 @@ class CGXSamplerState: public IGXSamplerState
 	void onDevRst();
 
 public:
-	void Release();
+	void Release() override;
 };
 
 #endif

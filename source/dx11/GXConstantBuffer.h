@@ -7,18 +7,18 @@ class CGXConstantBuffer: public IGXConstantBuffer
 {
 	friend class CGXContext;
 
-	CGXConstantBuffer(CGXContext * pRender, UINT uSize);
+	CGXConstantBuffer(CGXContext *pRender, UINT uSize);
 	~CGXConstantBuffer();
 
-	void update(const void *pData);
-	UINT getSize();
+	void update(const void *pData) override;
+	UINT getSize() override;
 
-	CGXContext * m_pRender;
+	CGXContext *m_pRender;
 	ID3D11Buffer *m_pBuffer;
 	UINT m_uSize;
 
 public:
-	void Release();
+	void Release() override;
 };
 
 #endif

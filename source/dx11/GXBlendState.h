@@ -7,12 +7,13 @@ class CGXBlendState: public IGXBlendState
 {
 	friend class CGXContext;
 
-	CGXBlendState(CGXContext * pRender):m_pRender(pRender)
+	CGXBlendState(CGXContext *pRender):
+		m_pRender(pRender)
 	{
 	};
 	~CGXBlendState();
 
-	CGXContext * m_pRender;
+	CGXContext *m_pRender;
 	ID3D11BlendState *m_pStateBlock = NULL;
 	GXBLEND_DESC m_desc;
 
@@ -20,7 +21,7 @@ class CGXBlendState: public IGXBlendState
 	void onDevRst();
 
 public:
-	void Release();
+	void Release() override;
 };
 
 #endif

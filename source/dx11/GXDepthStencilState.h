@@ -7,12 +7,13 @@ class CGXDepthStencilState: public IGXDepthStencilState
 {
 	friend class CGXContext;
 
-	CGXDepthStencilState(CGXContext * pRender):m_pRender(pRender)
+	CGXDepthStencilState(CGXContext *pRender):
+		m_pRender(pRender)
 	{
 	};
 	~CGXDepthStencilState();
 
-	CGXContext * m_pRender;
+	CGXContext *m_pRender;
 	ID3D11DepthStencilState *m_pStateBlock = NULL;
 	GXDEPTH_STENCIL_DESC m_desc;
 
@@ -20,7 +21,7 @@ class CGXDepthStencilState: public IGXDepthStencilState
 	void onDevRst();
 
 public:
-	void Release();
+	void Release() override;
 };
 
 #endif

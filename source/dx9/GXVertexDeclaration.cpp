@@ -16,16 +16,16 @@ CGXVertexDeclaration::CGXVertexDeclaration(IDirect3DDevice9 *pDevice, CGXContext
 	while(pDecl[uDeclCount++].Type != GXDECLTYPE_UNUSED);
 	--uDeclCount;
 
-	for(UINT i = 0; i < MAXGXVSTREAM; ++i)
+	for(UINT i = 0; i < GX_MAX_VSTREAM; ++i)
 	{
 		m_u8SpecSpec[i] = (GXDECLSPEC)-1;
 	}
 
 	for(UINT i = 0; i < uDeclCount; ++i)
 	{
-		if(pDecl[i].Stream >= MAXGXVSTREAM)
+		if(pDecl[i].Stream >= GX_MAX_VSTREAM)
 		{
-			CGXContext::debugMessage(GX_LOG_ERROR, "Unable to create vertex declaration: Stream >= MAXGXVSTREAM!");
+			CGXContext::debugMessage(GX_LOG_ERROR, "Unable to create vertex declaration: Stream >= GX_MAX_VSTREAM!");
 			return;
 		}
 		if(m_u8SpecSpec[pDecl[i].Stream] == (GXDECLSPEC)-1)
