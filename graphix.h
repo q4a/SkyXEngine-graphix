@@ -24,33 +24,44 @@ virtual IGXShaderBase* createShader(GX_SHADER_TYPE type, const char * szFile, GX
 
 //##########################################################################
 
-typedef UINT GXCOLOR;
+//! тип 32 битного (4 байта) цвета, на каждую компоненту 8 бит [0, 255]
+typedef UINT32 GXCOLOR;
 
 #ifndef MAKEFOURCC
+
+//! преобразования 4х символов в число
 #define MAKEFOURCC(ch0, ch1, ch2, ch3)                              \
                 ((UINT)(BYTE)(ch0) | ((UINT)(BYTE)(ch1) << 8) |   \
                 ((UINT)(BYTE)(ch2) << 16) | ((UINT)(BYTE)(ch3) << 24 ))
 #endif
 
-//! создание ARGB цвета, 8 бит [0, 255] на канал (UINT)
+//! создание GXCOLOR ARGB цвета
 #define GXCOLOR_ARGB(a,r,g,b) \
     ((GXCOLOR)((((a)&0xff)<<24)|(((r)&0xff)<<16)|(((g)&0xff)<<8)|((b)&0xff)))
 
+//! создание GXCOLOR RGBА цвета
 #define GXCOLOR_RGBA(r,g,b,a) GXCOLOR_ARGB(a,r,g,b)
 
+//! создание RGB цвета, в A компоненте 255
 #define GXCOLOR_XRGB(r,g,b)   GXCOLOR_ARGB(0xff,r,g,b)
 
-#define GXCOLOR_XYUV(y,u,v)   GXCOLOR_ARGB(0xff,y,u,v)
 
+//! создание YUV цвета с альфа компонентой
 #define GXCOLOR_AYUV(a,y,u,v) GXCOLOR_ARGB(a,y,u,v)
 
-// maps floating point channels [0.f, 1.f] to GXCOLOR
-#define GXCOLOR_COLORVALUE(r,g,b,a) \
+//! создание YUV цвета без альфа компоненты, значение альфы 255
+#define GXCOLOR_XYUV(y,u,v)   GXCOLOR_ARGB(0xff,y,u,v)
+
+
+//! преобразование цвета с float компонентами [0.f, 1.f] в GXCOLOR RGBA
+#define GXCOLOR_FLOAT_RGBA(r,g,b,a) \
     GXCOLOR_RGBA((UINT)((r)*255.f),(UINT)((g)*255.f),(UINT)((b)*255.f),(UINT)((a)*255.f))
 
-#define GXCOLOR_COLORVALUE_V4(vec) GXCOLOR_COLORVALUE((vec).x, (vec).y, (vec).z, (vec).w)
+//! преобразование цвета float4 с компонентами [0.f, 1.f] в GXCOLOR, XYZW -> RGBA
+#define GXCOLOR_F4_TO_COLOR(vec) GXCOLOR_COLORVALUE((vec).x, (vec).y, (vec).z, (vec).w)
 
-#define GXCOLOR_COLORVECTOR_ARGB(val) float4_t( \
+//! преобразование GXCOLOR в float4_t с компонентами [0.f, 1.f] RGBA -> XYZW
+#define GXCOLOR_COLOR_TO_F4(val) float4_t( \
 	(float)(((UINT)(val) >> 16) & 0xFF) / 255.0f, \
 	(float)(((UINT)(val) >> 8) & 0xFF) / 255.0f, \
 	(float)((UINT)(val) & 0xFF) / 255.0f, \
@@ -59,24 +70,21 @@ typedef UINT GXCOLOR;
 
 //##########################################################################
 
-//deprecated
+//! deprecated
 enum GXBUFFERLOCK
 {
-	GXBL_READ, // obsolete
+	GXBL_READ,
 	GXBL_WRITE
 };
 
-//! тип блокировки текстур
+//! deprecated тип блокировки текстур
 enum GXTEXLOCK
 {
-	//! чтение
 	GXTL_READ,
-
-	//! запись
 	GXTL_WRITE
 };
 
-/*! \name Идентификаторы буферов
+/*! @name Идентификаторы буферов
 !{*/
 
 //! идентификатор буфера цвета
@@ -106,12 +114,12 @@ enum GX_BUFFER_USAGE
 
 
 /*! тип данных при декларации вершинного буфера
-\note В видеопамяти регистры по 4 float, значит GXDECLTYPE_FLOAT1 в видеопамяти будет занимать 4 float.
-GXDECLTYPE_FLOAT1 (2, 3), введены для того чтобы меньше данных гонять пошине,
-то есть с CPU в GPU будет отправлен 1 float при этом GPU допишет в регистр скрытые данные.
-Аналогичное правило действует и для других типов данных.
-\note Данные имеющие нормализацию являются float в пределах отведенной памяти.
-Например GXDECLTYPE_UBYTE4N принимают значения [0.0/255.0, 255.0/255.0]
+ @note В видеопамяти регистры по 4 float, значит GXDECLTYPE_FLOAT1 в видеопамяти будет занимать 4 float.
+  GXDECLTYPE_FLOAT1 (2, 3), введены для того чтобы меньше данных гонять пошине,
+  то есть с CPU в GPU будет отправлен 1 float при этом GPU допишет в регистр скрытые данные.
+  Аналогичное правило действует и для других типов данных.
+ @note Данные имеющие нормализацию являются float в пределах отведенной памяти.
+  Например GXDECLTYPE_UBYTE4N принимают значения [0.0/255.0, 255.0/255.0]
 */
 enum GXDECLTYPE
 {
@@ -163,7 +171,7 @@ enum GXDECLTYPE
 };
 
 /*! финальная строка декларации вершин
-\note Каждая декларация должна заканчиваться данной макрофункцией
+ @note Каждая декларация должна заканчиваться данной макрофункцией
 */
 #define GXDECL_END() {0xFF,0,GXDECLTYPE_UNUSED,(GXDECLUSAGE)0, GXDECLSPEC_PER_VERTEX_DATA}
 
@@ -180,15 +188,34 @@ enum GXDECLSPEC
 //! Семантика данных в вершинном буфере
 enum GXDECLUSAGE
 {
+	//! позиция (float3, float4)
 	GXDECLUSAGE_POSITION = 0,
+
+	//! основные текстурные координаты (float2 - float4)
 	GXDECLUSAGE_TEXCOORD,
+
+	//! нормаль (float3)
 	GXDECLUSAGE_NORMAL,
+
+	//! веса смешивания (костей) (float4, на одну вершину до 4 костей, [0.0, 1.0])
 	GXDECLUSAGE_BLENDWEIGHT,
+
+	//! веса индексов (костей) (ubyte4)
 	GXDECLUSAGE_BLENDINDICES,
+
+	//! цвет (float4, без HDR [0.0, 1.0])
 	GXDECLUSAGE_COLOR,
+
+	//! касательная (float3)
 	GXDECLUSAGE_TANGENT,
+
+	//! бинормаль (float3)
 	GXDECLUSAGE_BINORMAL,
+
+	//! 
 	GXDECLUSAGE_TESSFACTOR,
+
+	//! дополнительные текстурные координаты (float2 - float4)
 	GXDECLUSAGE_TEXCOORD1,
 	GXDECLUSAGE_TEXCOORD2,
 	GXDECLUSAGE_TEXCOORD3,
@@ -198,7 +225,7 @@ enum GXDECLUSAGE
 	GXDECLUSAGE_TEXCOORD7,
 };
 
-//! \todo Выяснить: надо ли?
+//! @todo Выяснить: надо ли?
 #define GXDECLLIST { \
 	"POSITION",      \
 	"TEXCOORD",      \
@@ -246,7 +273,7 @@ struct GXVERTEXELEMENT
 #define GX_MAX_STABLE_COLORTARGETS 4
 
 /*! максимальное количество цветовых render targets при использовании MRT (multi render targets)
-\warning Не все GPU поддерживают 8 RT, но 4 поддерживают
+ @warning Не все GPU поддерживают 8 RT, но 4 поддерживают
 */
 #define GX_MAX_COLORTARGETS 8
 
@@ -256,8 +283,14 @@ struct GXVERTEXELEMENT
 //! макисмальное количество регистров текстур
 #define GX_MAX_TEXTURES 16
 
-//! максимальное количество текстур с произвольным доступом
+//! максимальное количество текстур с произвольным доступом (#GX_TEXUSAGE_UNORDERED_ACCESS)
 #define GX_MAX_UAV_TEXTURES 8
+
+//! макссимальное значение анизотропной фильтрации
+#define GX_MAX_ANISOTROPY 16
+
+//! @deprecated
+#define GX_SHADER_CONSTANT_FAIL ~0
 
 //##########################################################################
 
@@ -270,26 +303,20 @@ struct GXVERTEXELEMENT
 //! автоматически генерировать mip-map уровни
 #define GX_TEXUSAGE_AUTOGENMIPMAPS   0x00000002
 
-//! автоматическое изменение размера текстуры относительно back buffer
+//! автоматическое изменение размера текстуры относительно цепочки вывода #IGXSwapChain
 #define GX_TEXUSAGE_AUTORESIZE       0x00000004
 
-//! deprecated, разрешено потерять данные, например при потере/восстановлении устройства в dx9
+//! @deprecated, разрешено потерять данные, например при потере/восстановлении устройства в dx9
 #define GX_TEXUSAGE_ALLOWDISCARD     0x00000008
 
 //! текстура с произвольным доступом
 #define GX_TEXUSAGE_UNORDERED_ACCESS 0x00000010
 
-//! deprecated
-#define GX_SHADER_CONSTANT_FAIL ~0
-
-//! макссимальное значение анизотропной фильтрации
-#define GX_MAX_ANISOTROPY 16
-
 //##########################################################################
 
 /*! тип примитивов
-\note LIST - список, на каждый примитив по необходимому количесту индексов, для линий 2, для треугольников 3
-\note STRIP - полоса, на первый примитив нужное количество индексов, на остальные по 1 индексу, а остальные из предыдущего примитива
+ @note LIST - список, на каждый примитив по необходимому количесту индексов, для линий 2, для треугольников 3
+ @note STRIP - полоса, на первый примитив нужное количество индексов, на остальные по 1 индексу, а остальные из предыдущего примитива
 */
 enum GXPRIMITIVETOPOLOGY
 {
@@ -322,7 +349,7 @@ enum GXINDEXTYPE
 //##########################################################################
 
 /*
-\todo Посмотреть закоменченное и разобраться с этим
+ @todo Посмотреть закоменченное и разобраться с этим
 */
 enum GXFORMAT
 {
@@ -414,8 +441,13 @@ enum GXFORMAT
 //! типы Multi-Sample буфера
 enum GXMULTISAMPLE_TYPE
 {
+	//! без мультисемплинга
 	GXMULTISAMPLE_NONE = 0,
+
+	//! немаскируемый мультисемплируемый буфер, только для получения anti-aliasing
 	GXMULTISAMPLE_NONMASKABLE = 1,
+
+	//! маскируемый мультисемплируемый буфер с 2 субпикселями на пиксель
 	GXMULTISAMPLE_2_SAMPLES = 2,
 	GXMULTISAMPLE_3_SAMPLES = 3,
 	GXMULTISAMPLE_4_SAMPLES = 4,
@@ -451,9 +483,15 @@ enum GXCUBEMAP_FACES
 //##########################################################################
 
 /*! факторы смешивания, с указанием значения для каждого канала RGBA
-\note Постфиксы: s - source (источник), d - destination (приеник)
-\note Устанавливаются для источника и для применика
-\todo Разобраться с SRC1, объяснить что это
+ @note Постфиксы: s - source (источник), d - destination (приеник)
+ @note Устанавливаются для источника и для применика
+ @note https://dbgdiary.blogspot.com/2014/07/dual-source-blending-in-directx-11.html
+  SRC1 это возможность влиять на приемника еще до того как будет произведено смешивание.
+  Теоретически это работает только для одного render target.
+  Для того чтобы использовать данную возможность, необходимо в пиксельном шейдере записывать 2 выходных цвета, 
+  то есть якобы записывать цвета в 2 render target, однако на самом деле работа осуществляется только в одном.
+  Второй выходной цвет будет умножен на цвет приемника если было использовано #GXBLEND_SRC1_COLOR
+  @todo Полностью разобраться с SRC1
 */
 enum GXBLEND
 {
@@ -496,10 +534,10 @@ enum GXBLEND
 	//! смешиванием с инвертированным установленным цветом через #IGXContext::setBlendFactor
 	GXBLEND_INV_BLEND_FACTOR = 15,
 
-	//GXBLEND_SRC1_COLOR = 16,
-	//GXBLEND_INV_SRC1_COLOR = 17,
-	//GXBLEND_SRC1_ALPHA = 18,
-	//GXBLEND_INV_SRC1_ALPHA = 19,
+	GXBLEND_SRC1_COLOR = 16,
+	GXBLEND_INV_SRC1_COLOR = 17,
+	GXBLEND_SRC1_ALPHA = 18,
+	GXBLEND_INV_SRC1_ALPHA = 19,
 
 	GXBLEND_FORCE_DWORD = 0x7fffffff
 };
@@ -535,31 +573,29 @@ enum GXCOLOR_WRITE_ENABLE
 	GXCOLOR_WRITE_ENABLE_ALL = (((GXCOLOR_WRITE_ENABLE_RED | GXCOLOR_WRITE_ENABLE_GREEN) | GXCOLOR_WRITE_ENABLE_BLUE) | GXCOLOR_WRITE_ENABLE_ALPHA)
 };
 
-/*! описатель смешивания
-\todo Разобрать bAlphaToCoverageEnable
-*/
+//! описатель смешивания
 struct GXBLEND_DESC
 {
 	//! описание смешивания для каждого render target
 	struct GXBLEND_RT_DESC
 	{
 		//! включить/выключить смешивание
-		BOOL bBlendEnable = FALSE;
+		BOOL useBlend = FALSE;
 
 		//! фактор источника цвета
-		GXBLEND srcBlend = GXBLEND_ONE;
+		GXBLEND blendSrcColor = GXBLEND_ONE;
 
 		//! фактор приемника цвета
-		GXBLEND destBlend = GXBLEND_ZERO;
+		GXBLEND blendDestColor = GXBLEND_ZERO;
 
 		//! операция смешивания цвета
-		GXBLEND_OP blendOp = GXBLEND_OP_ADD;
+		GXBLEND_OP blendOpColor = GXBLEND_OP_ADD;
 
 		//! фактор источника прозрачности
-		GXBLEND srcBlendAlpha = GXBLEND_ONE;
+		GXBLEND blendSrcAlpha = GXBLEND_ONE;
 
 		//! фактор приемника прозрачности
-		GXBLEND destBlendAlpha = GXBLEND_ZERO;
+		GXBLEND blendDestAlpha = GXBLEND_ZERO;
 
 		//! операция смешивания прозрачности
 		GXBLEND_OP blendOpAlpha = GXBLEND_OP_ADD;
@@ -570,10 +606,15 @@ struct GXBLEND_DESC
 
 	//######################################################################
 
-	BOOL bAlphaToCoverageEnable = FALSE;
+	/*! сглаживание полупрозрачных поверхностей
+	 @note Рабтает при включенном MSAA, иначе результат как здесь https://gamedev.ru/code/forum/?id=179377
+	  Еще одна ссылка на эту же тему https://www.gamedev.net/forums/topic/671912-alpha-to-coverage-wo-msaa/
+	  Статья где можно посмотреть как MSAA работает без AlphaToCoverage и вместе https://habr.com/ru/post/343876/
+	*/
+	BOOL useAlphaToCoverage = FALSE;
 
 	//! раздельное смешивание по render target включить/выключить
-	BOOL bIndependentBlendEnabled = FALSE;
+	BOOL useIndependentBlend = FALSE;
 
 	//! описания смешиваний для каждого render target
 	GXBLEND_RT_DESC renderTarget[GX_MAX_COLORTARGETS];
@@ -611,7 +652,7 @@ enum GXCOMPARISON_FUNC
 	GXCMP_FORCE_DWORD = 0x7fffffff
 };
 
-//! операции stencil буфера
+//! операции буфера трафарета
 enum GXSTENCIL_OP
 {
 	//! игнорировать
@@ -642,48 +683,52 @@ enum GXSTENCIL_OP
 };
 
 /*! описатель depth-stencil операций
-\note Stencil тест может осуществляться для передних к камере граней (front) и для задних (back)
+\note Stencil тест (тест трафарета) может осуществляться для передних к наблюдателю граней (front) и для задних (back)
 \note Маски чтения/записи помогают считывать/записывать определенные биты stencil буфера,
 для передачи значения (сравнения при чтении)/записи есть функция #IGXContext::setStencilRef
 */
 struct GXDEPTH_STENCIL_DESC
 {
 	//! включен ли тест глубины
-	BOOL bDepthEnable = TRUE;
+	BOOL useDepthTest = TRUE;
 
 	//! включена ли запись в буфер глубины
-	BOOL bEnableDepthWrite = TRUE;
+	BOOL useDepthWrite = TRUE;
 
 	//! функция сравнения записываемой глубины с уже записанной
-	GXCOMPARISON_FUNC depthFunc = GXCMP_LESS_EQUAL;
+	GXCOMPARISON_FUNC cmpFuncDepth = GXCMP_LESS_EQUAL;
 
 
-	//! включен ли stencil тест
-	BOOL bStencilEnable = FALSE;
+	//! включен ли тест трафарета
+	BOOL useStencilTest = FALSE;
 
-	//! маска считывания данных из stencil буфера
+	//! маска считывания данных из буфера трафарета
 	byte u8StencilReadMask = 0xFF;
 
-	//! маска записи данных в stencil буфер
+	//! маска записи данных в буфер трафарета
 	byte u8StencilWriteMask = 0xFF;
 
+	//! общие данные теста трафарета
+	struct GXSTENCIL_TEST_DATA
+	{
+		//! действие в случае провала stencil теста
+		GXSTENCIL_OP stencilOpFail = GXSTENCIL_OP_KEEP;
 
-	//! действие в случае провала stencil теста
-	GXSTENCIL_OP stencilFailOp = GXSTENCIL_OP_KEEP;
+		//! действие в случае провала depth теста
+		GXSTENCIL_OP stencilOpDepthFail = GXSTENCIL_OP_KEEP;
 
-	//! действие в случае провала depth теста
-	GXSTENCIL_OP stencilDepthFailOp = GXSTENCIL_OP_KEEP;
+		//! действие в случае успеха stencil теста
+		GXSTENCIL_OP stencilOpPass = GXSTENCIL_OP_KEEP;
 
-	//! действие в случае успеха stencil теста
-	GXSTENCIL_OP stencilPassOp = GXSTENCIL_OP_KEEP;
+		//! функция сравнения #u8StencilReadMask с данными записанными в stencil буфер
+		GXCOMPARISON_FUNC cmpFuncStencil = GXCMP_ALWAYS;
+	};
 
-	//! функция сравнения #u8StencilReadMask с данными записанными в stencil буфер
-	GXCOMPARISON_FUNC stencilFunc = GXCMP_ALWAYS;
+	//! данные теста трафарета для передних к наблюдателю граней
+	GXSTENCIL_TEST_DATA stencilTestFront;
 
-	GXSTENCIL_OP stencilBackFailOp = GXSTENCIL_OP_KEEP;
-	GXSTENCIL_OP stencilBackDepthFailOp = GXSTENCIL_OP_KEEP;
-	GXSTENCIL_OP stencilBackPassOp = GXSTENCIL_OP_KEEP;
-	GXCOMPARISON_FUNC stencilBackFunc = GXCMP_ALWAYS;
+	//! данные теста трафарета для задних к наблюдателю граней
+	GXSTENCIL_TEST_DATA stencilTestBack;
 };
 
 //##########################################################################
@@ -712,13 +757,12 @@ enum GXCULL_MODE
 };
 
 /*! описатель растеризатора
-\note Примерная формула смещения буфера глубины (при включенном/заданном смещении):
-Bias = clamp(DepthBias * MinDepth + SlopeScaledDepthBias * MaxDepthSlope, 0, DepthBiasClamp);
-MaxDepthSlope = max (abs(ddx (z)), abs(ddy(z)));
-MinDepth = 1 / pow(BitZbuffer, 2);
-https://docs.microsoft.com/ru-ru/windows/desktop/direct3d11/d3d10-graphics-programming-guide-output-merger-stage-depth-bias
-https://www.gamedev.net/forums/topic/660387-depthbias-how-is-maxdepthslope-computed/
-
+ @note Примерная формула смещения буфера глубины (при включенном/заданном смещении):
+  Bias = clamp(DepthBias * MinDepth + SlopeScaledDepthBias * MaxDepthSlope, 0, DepthBiasClamp);
+  MaxDepthSlope = max (abs(ddx (z)), abs(ddy(z)));
+  MinDepth = 1 / pow(BitZbuffer, 2);
+  https://docs.microsoft.com/ru-ru/windows/desktop/direct3d11/d3d10-graphics-programming-guide-output-merger-stage-depth-bias
+  https://www.gamedev.net/forums/topic/660387-depthbias-how-is-maxdepthslope-computed/
 */
 struct GXRASTERIZER_DESC
 {
@@ -738,31 +782,31 @@ struct GXRASTERIZER_DESC
 	float fSlopeScaledDepthBias = 0.0f;
 
 	//! включено ли отсечение на основании расстояния
-	BOOL bDepthClipEnable = 1;
+	BOOL useDepthClip = 1;
 
 	//! включен ли scissor тест
-	BOOL bScissorEnable = 0;
+	BOOL useScissorTest = 0;
 
 	//! включен ли multi sampling
-	BOOL bMultisampleEnable = 0;
+	BOOL useMultisample = 0;
 
 	//! включен ли антиальясинг для рендера линий
-	BOOL bAntialiasedLineEnable = 0;
+	BOOL useAntialiasedLine = 0;
 };
 
 //##########################################################################
 
 /*! режим фильрации текстур
-\note Фильтры работают для нескольких режимов представления текстур:
-Mag (magnification) - увеличение
-Min (minification) - уменьшение
-Mipmap - уменьшенные копии исходной текстуры, которые участвуют в текстурировании на основании размера/дальности объекта с текстурой
-\note Точечная фильтрация основывается на информации соседних пикселей, дает худший результат на рендере сцены
-используется для точных расчетов в постпроцессе, когда нужна точность в получении цветовых данных (например из буфера глубины)
-Линейная фильтрация не способная дать хорошее изображение если видимая плоскость с текстурой находится под углом к камере
-сглаживает текстуру при full screen quad рендере, если текстура меньше/больше размеров back buffer
-Анизотропная фильтрация выдает хорошие результаты если плоскость с текстурой находится под углом к камере,
-используется для рендера моделей с текстурами
+ @note Фильтры работают для нескольких режимов представления текстур:
+  Mag (magnification) - увеличение
+  Min (minification) - уменьшение
+  Mipmap - уменьшенные копии исходной текстуры, которые участвуют в текстурировании на основании размера/дальности объекта с текстурой
+ @note Точечная фильтрация основывается на информации соседних пикселей, дает худший результат на рендере сцены
+  используется для точных расчетов в постпроцессе, когда нужна точность в получении цветовых данных (например из буфера глубины)
+  Линейная фильтрация не способная дать хорошее изображение если видимая плоскость с текстурой находится под углом к камере
+  сглаживает текстуру при full screen quad рендере, если текстура меньше/больше размеров back buffer
+  Анизотропная фильтрация выдает хорошие результаты если плоскость с текстурой находится под углом к камере,
+  используется для рендера моделей с текстурами
 */
 enum GXFILTER
 {
@@ -796,7 +840,13 @@ enum GXTEXTURE_ADDRESS_MODE
 	GXTEXTURE_ADDRESS_MIRROR_ONCE
 };
 
-//! описатель выборки текстур
+/*! описатель выборки текстур
+ @note Номер текущего mipmap уровня для использования считается по формуле:
+  fCurrLOD = clamp(0+fMipLODBias, fMinLOD, fMaxLOD);
+  где clamp(x, a, b) - если x < a, то возвращает а, если x > b, то возвращает b, иначе возвращает x
+ @note Смещение mipmap уровней (fMipLODBias), так же как и их ограничение (fMinLOD, fMaxLOD) имеет тип float, так как допускаются дробые значения,
+  итоговый результат вычисления применяемого уровня зависит от установленной фильтрации
+*/
 struct GXSAMPLER_DESC
 {
 	//! фильтрация текстур
@@ -808,10 +858,8 @@ struct GXSAMPLER_DESC
 	//! адресация для V (y - height) оси текстуры
 	GXTEXTURE_ADDRESS_MODE addressV = GXTEXTURE_ADDRESS_WRAP;
 
-	//! адресация для W (w - depth) оси текстуры
+	//! адресация для W (w - depth) слоя текстуры
 	GXTEXTURE_ADDRESS_MODE addressW = GXTEXTURE_ADDRESS_WRAP;
-
-	float fMipLODBias = 0.0f;
 
 	//! маскимальное значение анизотропной фильтрации, чем выше, тем лучше качество, максимум #GX_MAX_ANISOTROPY
 	UINT uMaxAnisotropy = 1;
@@ -821,6 +869,9 @@ struct GXSAMPLER_DESC
 
 	//! цвет рамки в случае если адресация border, [0.0, 1.0]
 	float4_t f4BorderColor;
+
+	//! Смещение относительно расчетного mipmap уровня для выборки
+	float fMipLODBias = 0.0f;
 
 	//! номер наибольшего мип-уровня, доступного для использования (0 - самый детальный)
 	float fMinLOD = 0;
@@ -844,9 +895,16 @@ enum GXTEXTURE_TYPE
 //! статистика текущего кадра
 struct GX_FRAME_STATS
 {
+	//! количество вызовов DrawIndexedPrimitive и иных функций отрисовки
 	UINT uDIPcount;
+
+	//! количество отрисованных примитивов
 	UINT uPolyCount;
+
+	//! количество отрисованных линий
 	UINT uLineCount;
+
+	//! количество отрисованных точек
 	UINT uPointCount;
 
 	//! количество байт, выделенных на текстуры
@@ -863,16 +921,26 @@ struct GX_FRAME_STATS
 };
 
 /*! статистика занятой памяти GPU
-\todo Вместо UINT юзать size_t
+ @note Занятая память в байтах
 */
 struct GX_GPU_MEMORY_STATS
 {
-	//@FIXME: Handle mipmaps properly!
-	UINT uTextureBytes;
-	UINT uRenderTargetBytes;
-	UINT uVertexBufferBytes;
-	UINT uIndexBufferBytes;
-	UINT uShaderConstBytes;
+	/*! память занятая текстурами
+	 @fixme: Handle mipmaps properly!
+	*/
+	size_t sizeTextureBytes;
+
+	//! память занятая render target
+	size_t sizeRenderTargetBytes;
+
+	//! память занятая вершинными буферами
+	size_t sizeVertexBufferBytes;
+
+	//! память занятая индексными буферами
+	size_t sizeIndexBufferBytes;
+
+	//! память занятая шейдерными константами
+	size_t sizeShaderConstBytes;
 };
 
 //! описание GPU
@@ -882,7 +950,7 @@ struct GX_ADAPTER_DESC
 	wchar_t szDescription[128];
 
 	//! размер видеопамяти в байтах
-	size_t uTotalGPUMemory;
+	size_t sizeTotalGPUmemory;
 };
 
 //##########################################################################
@@ -906,22 +974,22 @@ public:
 //##########################################################################
 
 /*! интерфейс базового буфера
-\note Для доступа к данным буфера необходима блокировка (lock), после окончания необходимо разблокировать (unlock).
-При блокировке невозможно использовать данные буфера для рендера
+ @note Для доступа к данным буфера необходима блокировка (lock), после окончания необходимо разблокировать (unlock).
+  При блокировке невозможно использовать данные буфера для рендера
 */
 class IGXBaseBuffer: public IGXBaseInterface
 {
 public:
 
 	/*! заблокировать буфер для доступа к данным
-	\param ppData указатель на массив вершин
+	 @param ppData указатель на массив вершин
 	*/
 	virtual bool lock(void **ppData, GXBUFFERLOCK mode) = 0;
 
 	//! разблокировать
 	virtual void unlock() = 0;
 
-	//! deprecated
+	//! @deprecated
 	virtual bool wasReset() = 0;
 };
 
@@ -948,8 +1016,8 @@ class IGXRenderBuffer: public IGXBaseInterface
 //##########################################################################
 
 /*! макроопределения передаваемые в шейдер
-\note В шейдере это выглядит так:
-#define szName szDefinition
+ @note В шейдере это выглядит так:
+  #define szName szDefinition
 */
 struct GXMACRO
 {
@@ -962,7 +1030,7 @@ struct GXMACRO
 };
 
 /*! финальная строка массива макроопределений
-\note Каждый массив должен заканчиваться данной макрофункцией
+ @note Каждый массив должен заканчиваться данной макрофункцией
 */
 #define GXMACRO_END() {0,0}
 
@@ -987,6 +1055,7 @@ public:
 class IGXShaderBase: public IGXBaseInterface
 {
 public:
+
 	//записывает бинарный код шейдера в pData, в pSize размер в байтах
 	virtual void getData(void *pData, UINT *pSize) = 0;
 };
@@ -1029,8 +1098,7 @@ public:
 	//@}
 };
 
-/*! набор шейдеров для каждого из этапов рендера объекта
-*/
+//! набор шейдеров для каждого из этапов рендера объекта
 class IGXShaderSet: public IGXBaseInterface
 {
 public:
@@ -1079,7 +1147,7 @@ public:
 	virtual GXTEXTURE_TYPE getType() = 0;
 
 	/*! использовать текстуру как render target, используется нулевой лод (максимальный размер)
-	\note IGXTexture3D и IGXTextureCube используются как многослойные, IGXTexture2D как 2D
+	 @note #IGXTexture3D и #IGXTextureCube используются как многослойные, #IGXTexture2D как 2D
 	*/
 	virtual IGXSurface* asRenderTarget() = 0;
 };
@@ -1096,7 +1164,7 @@ public:
 	virtual UINT getHeight() = 0;
 
 	/*! заполняет текстуру данными из буфера
-	\note pData должен быть размером как текстура, частичное заполнение недопустимо
+	 @note pData должен быть размером как текстура, частичное заполнение недопустимо
 	*/
 	virtual void update(void *pData) = 0;
 };
@@ -1166,13 +1234,13 @@ class IGXSamplerState: public IGXBaseInterface
 //##########################################################################
 
 /*! цепочка вывода
-\note Содержит 2 буфера:
-- back - задний, в который производится рендер
-- front - передний, который показывается в связанном окне (окно привязывается в методе #IGXContext::createSwapChain)
-\note Последовательность:
-# получение back буфер методом #IGXSwapChain::getColorTarget
-# рендер
-# вызов метода #IGXSwapChain::swapBuffers для показа результатов рендера в связанном окне
+ @note Содержит 2 буфера:
+  - back - задний, в который производится рендер
+  - front - передний, который показывается в связанном окне (окно привязывается в методе #IGXContext::createSwapChain)
+ \note Последовательность:
+  # получение back буфер методом #IGXSwapChain::getColorTarget
+  # рендер
+  # вызов метода #IGXSwapChain::swapBuffers для показа результатов рендера в связанном окне
 */
 class IGXSwapChain: public IGXBaseInterface
 {
@@ -1197,12 +1265,12 @@ protected:
 public:
 
 	/*! инициализация контекста
-	@note В оконном режиме (windowed) можно указать произвольный размер окна, а в полноэкранном (fullscreen) допустимы только поддерживаемые режимы
-	@note В область рендера будет растянута/сжата по размерам окна
-	@param hWnd - нативный дескриптов окна
-	@param iWidth - ширина области рендера в пикселях
-	@param iHeight - высота области рендера в пикселях
-	@param isWindowed - true-оконный режим, false-полноэкранный
+	 @note В оконном режиме (windowed) можно указать произвольный размер окна, а в полноэкранном (fullscreen) допустимы только поддерживаемые режимы
+	 @note В область рендера будет растянута/сжата по размерам окна
+	 @param hWnd - нативный дескриптов окна
+	 @param iWidth - ширина области рендера в пикселях
+	 @param iHeight - высота области рендера в пикселях
+	 @param isWindowed - true-оконный режим, false-полноэкранный
 	*/
 	virtual BOOL initContext(SXWINDOW hWnd, int iWidth, int iHeight, bool isWindowed) = 0;
 	virtual void Release() = 0;
@@ -1212,7 +1280,7 @@ public:
 
 	//##########################################################################
 
-	//! создать цепочку вывода приязанную к окну wnd
+	//! создать цепочку вывода #IGXSwapChain приязанную к окну wnd
 	virtual IGXSwapChain* createSwapChain(UINT uWidth, UINT uHeight, SXWINDOW wnd) = 0;
 
 	//! обменять front и back буферы, когда необходимо показать на экране то что нарисовано
@@ -1233,25 +1301,25 @@ public:
 	virtual bool wasReset() = 0;
 
 	/*! очистка данных рендера
-	\param what - что надо очистить, из дефайно GXCLEAR_
-	\param color - цветя для #GXCLEAR_COLOR
-	\param fDepth - глубина [0.0, 1.0] для #GXCLEAR_DEPTH
-	\param uStencil - значение для #GXCLEAR_STENCIL
+	 @param what - что надо очистить, из дефайно GXCLEAR_
+	 @param color - цветя для #GXCLEAR_COLOR
+	 @param fDepth - глубина [0.0, 1.0] для #GXCLEAR_DEPTH
+	 @param uStencil - значение для #GXCLEAR_STENCIL
 	*/
 	virtual void clear(UINT what, GXCOLOR color = 0, float fDepth = 1.0f, UINT uStencil = 0) = 0;
 
 	/*! создание вершинного буфера
-	\param size - размер буфера в байтах, размер_структуры * количество_вершин
-	\param usage - тип использования из #GX_BUFFER_USAGE
-	\param pInitData - данные для заполнения, если буфер статичный (usage == GX_BUFFER_USAGE_STATIC) тогда pInitData единственный способ заполнить буфер
+	 @param size - размер буфера в байтах, размер_структуры * количество_вершин
+	 @param usage - тип использования из #GX_BUFFER_USAGE
+	 @param pInitData - данные для заполнения, если буфер статичный (usage == GX_BUFFER_USAGE_STATIC) тогда pInitData единственный способ заполнить буфер
 	*/
 	virtual IGXVertexBuffer* createVertexBuffer(size_t size, GX_BUFFER_USAGE usage, void *pInitData = NULL) = 0;
 
 	/*! создание индексного буфера
-	\param size - размер буфера в байтах, размер_структуры * количество_индексов
-	\param usage - тип использования из #GX_BUFFER_USAGE
-	\param it - тип индексов из #GXINDEXTYPE
-	\param pInitData - данные для заполнения, если буфер статичный (usage == GX_BUFFER_USAGE_STATIC) тогда pInitData единственный способ заполнить буфер
+	 @param size - размер буфера в байтах, размер_структуры * количество_индексов
+	 @param usage - тип использования из #GX_BUFFER_USAGE
+	 @param it - тип индексов из #GXINDEXTYPE
+	 @param pInitData - данные для заполнения, если буфер статичный (usage == GX_BUFFER_USAGE_STATIC) тогда pInitData единственный способ заполнить буфер
 	*/
 	virtual IGXIndexBuffer* createIndexBuffer(size_t size, GX_BUFFER_USAGE usage, GXINDEXTYPE it, void *pInitData = NULL) = 0;
 
@@ -1270,28 +1338,27 @@ public:
 	virtual void setPrimitiveTopology(GXPRIMITIVETOPOLOGY pt) = 0;
 
 	/*! отрисовка индексированных примитивов
-	\todo переименовать iBaseVertexLocation
-	\param uVertexCount - количество вершин, которые будут задействованы в отрисовке
-	\param uPrimitiveCount - количество рисуемых примитивов
-	\param uStartIndexLocation - стартовый индекс
-	\param iBaseVertexLocation - номер стартовой вершины
+	 @param uVertexCount количество вершин, которые будут задействованы в отрисовке
+	 @param uPrimitiveCount количество рисуемых примитивов
+	 @param uStartIndexLocation стартовый индекс
+	 @param iVertexBias смещение текущего значения индекса. Например, в индексном буфере лежит число 17, а iVertexBias равен -2
+тогда будет взят вертекс за номером 15
 	*/
-	virtual void drawIndexed(UINT uVertexCount, UINT uPrimitiveCount, UINT uStartIndexLocation = 0, int iBaseVertexLocation = 0) = 0;
+	virtual void drawIndexed(UINT uVertexCount, UINT uPrimitiveCount, UINT uStartIndexLocation = 0, int iVertexBias = 0) = 0;
 
 	/*! отрисовка индексированных примтивов с использованием hardware instancing
-	\note Параметры uVertexCount, uPrimitiveCount, uStartIndexLocation, iBaseVertexLocation указываются для ортисовки одной инстанции
-	\param uInstanceCount - количество инстансов
-	\param uVertexCount - количество вершин, которые будут задействованы в отрисовке
-	\param uPrimitiveCount - количество рисуемых примитивов
-	\param uStartIndexLocation - стартовый индекс
-	\param iBaseVertexLocation - номер стартовой вершины
+	 @note Параметры uVertexCount, uPrimitiveCount, uStartIndexLocation, iVertexBias указываются для ортисовки одной инстанции
+	 @param uInstanceCount количество инстансов
+	 @param uVertexCount количество вершин, которые будут задействованы в отрисовке
+	 @param uPrimitiveCount количество рисуемых примитивов
+	 @param uStartIndexLocation стартовый индекс
+	 @param iVertexBias смещение текущего значения индекса
 	*/
-	virtual void drawIndexedInstanced(UINT uInstanceCount, UINT uVertexCount, UINT uPrimitiveCount, UINT uStartIndexLocation = 0, int iBaseVertexLocation = 0) = 0;
+	virtual void drawIndexedInstanced(UINT uInstanceCount, UINT uVertexCount, UINT uPrimitiveCount, UINT uStartIndexLocation = 0, int iVertexBias = 0) = 0;
 
 	/*! отрисовка примитивов
-	\todo Поменять параметры местами, так как в drawIndexed и drawIndexedInstanced другой порядок
-	\param uStartVertex - номер стартовой вершины
-	\param uPrimitiveCount - количество рисуемых примитивов
+	 @param uStartVertex номер стартовой вершины
+	 @param uPrimitiveCount количество рисуемых примитивов
 	*/
 	virtual void drawPrimitive(UINT uStartVertex, UINT uPrimitiveCount) = 0;
 
@@ -1301,36 +1368,34 @@ public:
 	// https://github.com/Thekla/hlslparser/tree/master/src
 
 	/*! выполнение compute shaders
-	\note Шейдеры могут выполняться в многопоточном режиме.
-	Аргументы данной функции задают трехмерную сетку групп потоков, которая является лишь абстрацией, и создана для связи кода с координатами этой сетки.
-	Внутри каждой группы количество потоков задается при помощи вектора numthreads внутри шейдера
-	\note Трехмерность групп и потоков связана с тем чтобы дать зависимость расчетов внутри шейдера от координат,
-	которые присваиваются каждой группе и каждому потоку.
-	Если зависимость не нужна, тогда в X координате можно указывать общее количество групп и потоков.
-	Например:
-	- computeDispatch(3, 4, 5) запустит 3x4x5 = 60 групп потоков
-	- numthreads(5,6,3) запустит 5x6x3 = 90 потоков в каждой группе,
-	итого 60x90 = 5400 потоков, при этом внутри шейдера можно будет получить доступ к координатам привязанным как к группе так и к потоку.
-	Если в предыдущем случае не нужна зависимость от координат групп и потоков, тогда:
-	- computeDispatch(60, 1, 1)
-	- numthreads(90, 1, 1)
+	 @note Шейдеры могут выполняться в многопоточном режиме.
+	  Аргументы данной функции задают трехмерную сетку групп потоков, которая является лишь абстрацией, и создана для связи кода с координатами этой сетки.
+	  Внутри каждой группы количество потоков задается при помощи вектора numthreads внутри шейдера
+	 @note Трехмерность групп и потоков связана с тем чтобы дать зависимость расчетов внутри шейдера от координат,
+	  которые присваиваются каждой группе и каждому потоку.
+	  Если зависимость не нужна, тогда в X координате можно указывать общее количество групп и потоков.
+	  Например:
+	   - computeDispatch(3, 4, 5) запустит 3x4x5 = 60 групп потоков
+	   - numthreads(5,6,3) запустит 5x6x3 = 90 потоков в каждой группе,
+	  итого 60x90 = 5400 потоков, при этом внутри шейдера можно будет получить доступ к координатам привязанным как к группе так и к потоку.
+	  Если в предыдущем случае не нужна зависимость от координат групп и потоков, тогда:
+	   - computeDispatch(60, 1, 1)
+	   - numthreads(90, 1, 1)
 	*/
 	virtual void computeDispatch(UINT uThreadGroupCountX, UINT uThreadGroupCountY, UINT uThreadGroupCountZ) = 0;
 
 
 	/*! создать вершинный шейдер загрузив код из файла szFile
-	\param szFile путь до файла
-	\param pDefs массив макроопределений передаваймых в шейдер
+	 @param szFile путь до файла
+	 @param pDefs массив макроопределений передаваймых в шейдер
 	*/
 	virtual IGXVertexShader* createVertexShader(const char * szFile, GXMACRO *pDefs = NULL) = 0;
 
 	//! создать вершинный шейдер из строки с кодом szCode
 	virtual IGXVertexShader* createVertexShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) = 0;
 
-	/*! создать вершинный шейдер из бинарных данных pData
-	\todo переименовать в createVertexShaderFRomBin
-	*/
-	virtual IGXVertexShader* createVertexShader(void *pData, UINT uSize) = 0;
+	//! создать вершинный шейдер из бинарных данных pData
+	virtual IGXVertexShader* createVertexShaderFromBin(void *pData, UINT uSize) = 0;
 
 	//! установить буфер константы pBuffer вершинному шейдеру в слот uSlot
 	virtual void setVertexShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) = 0;
@@ -1338,19 +1403,19 @@ public:
 
 	virtual IGXPixelShader* createPixelShader(const char * szFile, GXMACRO *pDefs = NULL) = 0;
 	virtual IGXPixelShader* createPixelShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) = 0;
-	virtual IGXPixelShader* createPixelShader(void *pData, UINT uSize) = 0;
+	virtual IGXPixelShader* createPixelShaderFromBin(void *pData, UINT uSize) = 0;
 	virtual void setPixelShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) = 0;
 
 
 	virtual IGXGeometryShader* createGeometryShader(const char * szFile, GXMACRO *pDefs = NULL) = 0;
 	virtual IGXGeometryShader* createGeometryShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) = 0;
-	virtual IGXGeometryShader* createGeometryShader(void *pData, UINT uSize) = 0;
+	virtual IGXGeometryShader* createGeometryShaderFromBin(void *pData, UINT uSize) = 0;
 	virtual void setGeometryShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) = 0;
 
 
 	virtual IGXComputeShader* createComputeShader(const char * szFile, GXMACRO *pDefs = NULL) = 0;
 	virtual IGXComputeShader* createComputeShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) = 0;
-	virtual IGXComputeShader* createComputeShader(void *pData, UINT uSize) = 0;
+	virtual IGXComputeShader* createComputeShaderFromBin(void *pData, UINT uSize) = 0;
 	virtual void setComputeShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) = 0;
 
 
@@ -1369,18 +1434,18 @@ public:
 	//########################################################################
 
 	/*! создать рендер буфер
-	\param countSlots количество вершинных буферов в ppBuff
-	\param ppBuff указатель на массив вершинных буферов
-	\param pDecl декларация вершин
+	 @param countSlots количество вершинных буферов в ppBuff
+	 @param ppBuff указатель на массив вершинных буферов
+	 @param pDecl декларация вершин
 	*/
 	virtual IGXRenderBuffer* createRenderBuffer(UINT countSlots, IGXVertexBuffer **ppBuff, IGXVertexDeclaration *pDecl) = 0;
 
 	/*! создание 2D поверхности глубины и трафарета
-	\param uWidth ширина в пикселях
-	\param uHeight высота в пикселях
-	\param format формат буфера
-	\param multisampleType тип мультисемплинга
-	\param bAutoResize будет ли изменяться размер поверхности относительно основной цепочки вывода, в случае ресайза
+	 @param uWidth ширина в пикселях
+	 @param uHeight высота в пикселях
+	 @param format формат буфера
+	 @param multisampleType тип мультисемплинга
+	 @param bAutoResize будет ли изменяться размер поверхности относительно основной цепочки вывода (создается при вызове #IGXContext::initContext), в случае ресайза
 	*/
 	virtual IGXDepthStencilSurface* createDepthStencilSurface(UINT uWidth, UINT uHeight, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false) = 0;
 
@@ -1400,25 +1465,25 @@ public:
 
 
 	/*! создание поверхности цвета
-	\param uWidth ширина в пикселях
-	\param uHeight высота в пикселях
-	\param format формат буфера
-	\param multisampleType тип мультисемплинга
-	\param bAutoResize будет ли изменяться размер поверхности относительно основной цепочки вывода, в случае ресайза
+	 @param uWidth ширина в пикселях
+	 @param uHeight высота в пикселях
+	 @param format формат буфера
+	 @param multisampleType тип мультисемплинга
+	 @param bAutoResize будет ли изменяться размер поверхности относительно основной цепочки вывода (создается при вызове #IGXContext::initContext), в случае ресайза
 	*/
 	virtual IGXSurface* createColorTarget(UINT uWidth, UINT uHeight, GXFORMAT format, GXMULTISAMPLE_TYPE multisampleType, bool bAutoResize = false) = 0;
 
 	/*! даунсемплирование pSource в pTarget
-	\param pSource исходная поверхность с обязательным MSAA
-	\param pTarget приемная поверхность, обязана быть такого же размера и формата как pSource, без MSAA
-	\note Cмысл таков что поверхность с MSAA используется только тогда, когда нужен MSAA,
+	 @param pSource исходная поверхность с обязательным MSAA
+	 @param pTarget приемная поверхность, обязана быть такого же размера и формата как pSource, без MSAA
+	 @note Cмысл таков что поверхность с MSAA используется только тогда, когда нужен MSAA,
 	после того как поверхность с MSAA больше не нужена ее даунсемплируют и дальше работают с даунсемплированной поверхностью
 	*/
 	virtual void downsampleColorTarget(IGXSurface *pSource, IGXSurface *pTarget) = 0;
 
 	/*! установка цветового буфера
-	\param pSurf поверхность цвета
-	\param idx индекс места куда будет установлен буфер в MRT, максимальное количество #GX_MAX_COLORTARGETS
+	 @param pSurf поверхность цвета
+	 @param idx индекс места куда будет установлен буфер в MRT, максимальное количество #GX_MAX_COLORTARGETS
 	*/
 	virtual void setColorTarget(IGXSurface *pSurf, UINT idx = 0) = 0;
 
@@ -1430,29 +1495,29 @@ public:
 	//https://docs.microsoft.com/en-us/windows/desktop/direct3d11/typed-unordered-access-view-loads
 
 	/*! создать 2D текстуру
-	\param uWidth
-	\param uHeight
-	\param uMipLevels количество mipmap уровней, минимум 1
-	\param uTexUsageFlags флаги использования, дефайны GX_TEXUSAGE_
-	\param format формат текстуры
-	\param pInitData массив данных для заполнения, опционально
+	 @param uWidth ширина в пикселях
+	 @param uHeight высота в пикселях
+	 @param uMipLevels количество mipmap уровней, минимум 1
+	 @param uTexUsageFlags флаги использования, дефайны GX_TEXUSAGE_
+	 @param format формат текстуры
+	 @param pInitData массив данных для заполнения, опционально
 	*/
 	virtual IGXTexture2D* createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void *pInitData = NULL) = 0;
 	virtual IGXTexture3D* createTexture3D(UINT uWidth, UINT uHeight, UINT uDepth, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void *pInitData = NULL) = 0;
 	virtual IGXTextureCube* createTextureCube(UINT uSize, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void *pInitData = NULL) = 0;
 
 	/*! загрузка 2D текстуры из файла
-	\param szFileName путь до файла
-	\param uTexUsageFlags флаги использования, дефайны GX_TEXUSAGE_
-	\param bAllowNonPowerOf2 разрешить текстуре иметь размеры не кратные степени 2,
-	если false тогда размеры будут подогнаны до ближайших подходящих, и этот подгон может быть не пропорциональным
+	 @param szFileName путь до файла
+	 @param uTexUsageFlags флаги использования, дефайны GX_TEXUSAGE_
+	 @param bAllowNonPowerOf2 разрешить текстуре иметь размеры не кратные степени 2,
+	  если false тогда размеры будут подогнаны до ближайших подходящих, и этот подгон может быть не пропорциональным
 	*/
 	virtual IGXTexture2D* createTexture2DFromFile(const char *szFileName, UINT uTexUsageFlags, bool bAllowNonPowerOf2 = false) = 0;
 	virtual IGXTextureCube* createTextureCubeFromFile(const char *szFileName, UINT uTexUsageFlags, bool bAllowNonPowerOf2 = false) = 0;
 
 	/*! установка текстуры для пиксельного шейдера
-	\note В пиксельном шейдере можно только читать текстуру
-	\todo Переименовать в setTexturePS
+	 @note В пиксельном шейдере можно только читать текстуру
+	 @todo Переименовать в setTexturePS
 	*/
 	virtual void setTexture(IGXBaseTexture *pTexture, UINT uStage = 0) = 0;
 	virtual IGXBaseTexture* getTexture(UINT uStage = 0) = 0;
@@ -1463,17 +1528,15 @@ public:
 	virtual void setTextureCS(IGXBaseTexture *pTexture, UINT uStage = 0) = 0;
 	virtual IGXBaseTexture* getTextureCS(UINT uStage = 0) = 0;
 
-	/*! установить текстуру с произвольным доступом для вычислительного шейдера
-	\todo Переименовать, в слове Veiw ошибка
-	*/
-	virtual void setUnorderedAccessVeiwCS(IGXBaseTexture *pUAV, UINT uStage = 0) = 0;
-	virtual IGXBaseTexture* getUnorderedAccessVeiwCS(UINT uStage = 0) = 0;
+	//! установить текстуру с произвольным доступом для вычислительного шейдера
+	virtual void setUnorderedAccessViewCS(IGXBaseTexture *pUAV, UINT uStage = 0) = 0;
+	virtual IGXBaseTexture* getUnorderedAccessViewCS(UINT uStage = 0) = 0;
 
 	//! возвращает тип текстуры из файла
 	virtual GXTEXTURE_TYPE getTextureTypeFromFile(const char *szFile) = 0;
 
 	/*
-	\todo сделать метод для сохранения surface
+	 @todo сделать метод для сохранения surface
 	*/
 	virtual bool saveTextureToFile(const char *szTarget, IGXBaseTexture *pTexture) = 0;
 
@@ -1488,7 +1551,7 @@ public:
 	//! возвращает текущее установленное состояние смешивания
 	virtual IGXBlendState* getBlendState() = 0;
 
-	//! установить фактор смешивания, если в GXBLEND_DESC установлен GXBLEND_BLEND_FACTOR
+	//! установить фактор смешивания, если в #GXBLEND_DESC установлен GXBLEND_BLEND_FACTOR
 	virtual void setBlendFactor(GXCOLOR val) = 0;
 
 
@@ -1517,7 +1580,7 @@ public:
 	virtual IGXRasterizerState* getRasterizerState() = 0;
 
 	/*! установить фиксированную облать для рендера
-	\note Параметры задают координаты 2D прямоугольнка для рендера относительно back буфера
+	 @note Параметры задают координаты 2D прямоугольнка для рендера относительно back буфера
 	*/
 	virtual void setScissorRect(int iTop, int iRight, int iBottom, int iLeft) = 0;
 	
