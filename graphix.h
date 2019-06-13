@@ -25,7 +25,7 @@ virtual IGXShaderBase* createShader(GX_SHADER_TYPE type, const char * szFile, GX
 //##########################################################################
 
 //! тип 32 битного (4 байта) цвета, на каждую компоненту 8 бит [0, 255]
-typedef UINT32 GXCOLOR;
+typedef UINT GXCOLOR;
 
 #ifndef MAKEFOURCC
 
@@ -58,7 +58,7 @@ typedef UINT32 GXCOLOR;
     GXCOLOR_RGBA((UINT)((r)*255.f),(UINT)((g)*255.f),(UINT)((b)*255.f),(UINT)((a)*255.f))
 
 //! преобразование цвета float4 с компонентами [0.f, 1.f] в GXCOLOR, XYZW -> RGBA
-#define GXCOLOR_F4_TO_COLOR(vec) GXCOLOR_COLORVALUE((vec).x, (vec).y, (vec).z, (vec).w)
+#define GXCOLOR_F4_TO_COLOR(vec) GXCOLOR_FLOAT_RGBA((vec).x, (vec).y, (vec).z, (vec).w)
 
 //! преобразование GXCOLOR в float4_t с компонентами [0.f, 1.f] RGBA -> XYZW
 #define GXCOLOR_COLOR_TO_F4(val) float4_t( \

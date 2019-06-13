@@ -27,10 +27,10 @@ void CGXRasterizerState::onDevRst()
 	rsDesc.DepthBias = m_desc.iDepthBias;
 	rsDesc.DepthBiasClamp = m_desc.fDepthBiasClamp;
 	rsDesc.SlopeScaledDepthBias = m_desc.fSlopeScaledDepthBias;
-	rsDesc.DepthClipEnable = m_desc.bDepthClipEnable;
-	rsDesc.ScissorEnable = m_desc.bScissorEnable;
-	rsDesc.MultisampleEnable = m_desc.bMultisampleEnable;
-	rsDesc.AntialiasedLineEnable = m_desc.bAntialiasedLineEnable;
+	rsDesc.DepthClipEnable = m_desc.useDepthClip;
+	rsDesc.ScissorEnable = m_desc.useScissorTest;
+	rsDesc.MultisampleEnable = m_desc.useMultisample;
+	rsDesc.AntialiasedLineEnable = m_desc.useAntialiasedLine;
 
 	switch(m_desc.fillMode)
 	{

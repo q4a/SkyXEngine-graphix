@@ -195,7 +195,7 @@ BOOL CGXContext::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindo
 	if(!FAILED(DX_CALL(pDXGIAdapter->GetDesc(&adapterDesc))))
 	{
 		lstrcpyW(m_adapterDesc.szDescription, adapterDesc.Description);
-		m_adapterDesc.uTotalGPUMemory = adapterDesc.DedicatedVideoMemory;
+		m_adapterDesc.sizeTotalGPUmemory = adapterDesc.DedicatedVideoMemory;
 	}
 	else
 	{
@@ -222,15 +222,15 @@ BOOL CGXContext::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindo
 	memset(&rasterizerDesc, 0, sizeof(rasterizerDesc));
 	rasterizerDesc.fillMode = GXFILL_SOLID;
 	rasterizerDesc.cullMode = GXCULL_BACK;
-	rasterizerDesc.bDepthClipEnable = TRUE;
+	rasterizerDesc.useDepthClip = TRUE;
 	m_pDefaultRasterizerState = createRasterizerState(&rasterizerDesc);
 
 	GXDEPTH_STENCIL_DESC depthStencilDesc;
 	memset(&depthStencilDesc, 0, sizeof(depthStencilDesc));
-	depthStencilDesc.bDepthEnable = TRUE;
-	depthStencilDesc.bEnableDepthWrite = TRUE;
-	depthStencilDesc.depthFunc = GXCMP_LESS_EQUAL;
-	depthStencilDesc.bStencilEnable = FALSE;
+	depthStencilDesc.useDepthTest = TRUE;
+	depthStencilDesc.useDepthWrite = TRUE;
+	depthStencilDesc.cmpFuncDepth = GXCMP_LESS_EQUAL;
+	depthStencilDesc.useStencilTest = FALSE;
 
 	m_pDefaultDepthStencilState = createDepthStencilState(&depthStencilDesc);
 
@@ -276,7 +276,7 @@ void CGXContext::clear(UINT what, GXCOLOR color, float fDepth, UINT uStencil)
 		{
 			if(m_pColorTarget[i])
 			{
-				m_pDeviceContext->ClearRenderTargetView(((CGXSurface*)m_pColorTarget[i])->m_pRTV, (float*)&GXCOLOR_COLORVECTOR_ARGB(color));
+				m_pDeviceContext->ClearRenderTargetView(((CGXSurface*)m_pColorTarget[i])->m_pRTV, (float*)&GXCOLOR_COLOR_TO_F4(color));
 			}
 		}
 	}
@@ -325,7 +325,7 @@ IGXVertexBuffer* CGXContext::createVertexBuffer(size_t size, GX_BUFFER_USAGE fla
 	}
 
 	pBuff->m_uSize = (UINT)size;
-	m_memoryStats.uVertexBufferBytes += pBuff->m_uSize;
+	m_memoryStats.sizeVertexBufferBytes += pBuff->m_uSize;
 
 	return(pBuff);
 }
@@ -378,7 +378,7 @@ IGXIndexBuffer* CGXContext::createIndexBuffer(size_t size, GX_BUFFER_USAGE flags
 	}
 
 	pBuff->m_uSize = (UINT)size;
-	m_memoryStats.uIndexBufferBytes += pBuff->m_uSize;
+	m_memoryStats.sizeIndexBufferBytes += pBuff->m_uSize;
 		
 	return(pBuff);
 }
@@ -392,7 +392,7 @@ void CGXContext::destroyIndexBuffer(IGXIndexBuffer *pBuff)
 			m_pCurIndexBuffer = NULL;
 			m_sync_state.bIndexBuffer = TRUE;
 		}
-		m_memoryStats.uIndexBufferBytes -= ((CGXIndexBuffer*)pBuff)->m_uSize;
+		m_memoryStats.sizeIndexBufferBytes -= ((CGXIndexBuffer*)pBuff)->m_uSize;
 	}
 	mem_delete(pBuff);
 }
@@ -407,7 +407,7 @@ void CGXContext::destroyVertexBuffer(IGXVertexBuffer *pBuff)
 			m_sync_state.bIndexBuffer = TRUE;
 		}*/
 
-		m_memoryStats.uVertexBufferBytes -= ((CGXVertexBuffer*)pBuff)->m_uSize;
+		m_memoryStats.sizeVertexBufferBytes -= ((CGXVertexBuffer*)pBuff)->m_uSize;
 	}
 	mem_delete(pBuff);
 }
@@ -579,7 +579,7 @@ void CGXContext::syncronize(UINT flags)
 		{
 			pBS = (CGXBlendState*)m_pDefaultBlendState;
 		}
-		m_pDeviceContext->OMSetBlendState(pBS->m_pStateBlock, (float*)&GXCOLOR_COLORVECTOR_ARGB(m_blendFactor), 0xffffffff);
+		m_pDeviceContext->OMSetBlendState(pBS->m_pStateBlock, (float*)&GXCOLOR_COLOR_TO_F4(m_blendFactor), 0xffffffff);
 		m_sync_state.bBlendState = FALSE;
 	}
 
@@ -872,7 +872,7 @@ IGXVertexShader* CGXContext::createVertexShader(const char *szFile, GXMACRO *pDe
 	}
 	mem_release(pErrorBlob);
 
-	IGXVertexShader *pShader = createVertexShader(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
+	IGXVertexShader *pShader = createVertexShaderFromBin(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
 	
@@ -896,13 +896,13 @@ IGXVertexShader* CGXContext::createVertexShaderFromString(const char *szCode, GX
 	}
 	mem_release(pErrorBlob);
 
-	IGXVertexShader *pShader = createVertexShader(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
+	IGXVertexShader *pShader = createVertexShaderFromBin(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
 
 	return(pShader);
 }
-IGXVertexShader* CGXContext::createVertexShader(void *_pData, UINT uSize)
+IGXVertexShader* CGXContext::createVertexShaderFromBin(void *_pData, UINT uSize)
 {
 	CGXVertexShader *pShader = new CGXVertexShader(this);
 
@@ -946,13 +946,13 @@ IGXPixelShader* CGXContext::createPixelShader(const char *szFile, GXMACRO *pDefs
 	}
 	mem_release(pErrorBlob);
 
-	IGXPixelShader *pShader = createPixelShader(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
+	IGXPixelShader *pShader = createPixelShaderFromBin(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
 
 	return(pShader);
 }
-IGXPixelShader* CGXContext::createPixelShader(void *_pData, UINT uSize)
+IGXPixelShader* CGXContext::createPixelShaderFromBin(void *_pData, UINT uSize)
 {
 	CGXPixelShader *pShader = new CGXPixelShader(this);
 
@@ -985,7 +985,7 @@ IGXPixelShader* CGXContext::createPixelShaderFromString(const char *szCode, GXMA
 	}
 	mem_release(pErrorBlob);
 
-	IGXPixelShader *pShader = createPixelShader(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
+	IGXPixelShader *pShader = createPixelShaderFromBin(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
 
@@ -1020,13 +1020,13 @@ IGXGeometryShader* CGXContext::createGeometryShader(const char *szFile, GXMACRO 
 	}
 	mem_release(pErrorBlob);
 
-	IGXGeometryShader *pShader = createGeometryShader(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
+	IGXGeometryShader *pShader = createGeometryShaderFromBin(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
 
 	return(pShader);
 }
-IGXGeometryShader* CGXContext::createGeometryShader(void *_pData, UINT uSize)
+IGXGeometryShader* CGXContext::createGeometryShaderFromBin(void *_pData, UINT uSize)
 {
 	CGXGeometryShader *pShader = new CGXGeometryShader(this);
 
@@ -1059,7 +1059,7 @@ IGXGeometryShader* CGXContext::createGeometryShaderFromString(const char *szCode
 	}
 	mem_release(pErrorBlob);
 
-	IGXGeometryShader *pShader = createGeometryShader(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
+	IGXGeometryShader *pShader = createGeometryShaderFromBin(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
 
@@ -1097,13 +1097,13 @@ IGXComputeShader* CGXContext::createComputeShader(const char *szFile, GXMACRO *p
 	}
 	mem_release(pErrorBlob);
 
-	IGXComputeShader *pShader = createComputeShader(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
+	IGXComputeShader *pShader = createComputeShaderFromBin(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
 
 	return(pShader);
 }
-IGXComputeShader* CGXContext::createComputeShader(void *_pData, UINT uSize)
+IGXComputeShader* CGXContext::createComputeShaderFromBin(void *_pData, UINT uSize)
 {
 	CGXComputeShader *pShader = new CGXComputeShader(this);
 
@@ -1137,7 +1137,7 @@ IGXComputeShader* CGXContext::createComputeShaderFromString(const char *szCode, 
 	}
 	mem_release(pErrorBlob);
 
-	IGXComputeShader *pShader = createComputeShader(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
+	IGXComputeShader *pShader = createComputeShaderFromBin(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
 
@@ -1310,7 +1310,7 @@ IGXRasterizerState* CGXContext::createRasterizerState(GXRASTERIZER_DESC *pRSDesc
 {
 	CGXRasterizerState *pRS = new CGXRasterizerState(this);
 
-	pRS->m_isScissorsEnabled = pRSDesc->bScissorEnable;
+	pRS->m_isScissorsEnabled = pRSDesc->useScissorTest;
 	pRS->m_desc = *pRSDesc;
 	pRS->onDevRst();
 
@@ -1809,7 +1809,7 @@ IGXBaseTexture* CGXContext::getTextureCS(UINT uStage)
 	return(m_pTexturesCS[uStage]);
 }
 
-void CGXContext::setUnorderedAccessVeiwCS(IGXBaseTexture *pTexture, UINT uStage)
+void CGXContext::setUnorderedAccessViewCS(IGXBaseTexture *pTexture, UINT uStage)
 {
 	assert(uStage < GX_MAX_UAV_TEXTURES);
 	mem_release(m_pUAVsCS[uStage]);
@@ -1820,7 +1820,7 @@ void CGXContext::setUnorderedAccessVeiwCS(IGXBaseTexture *pTexture, UINT uStage)
 	}
 	m_sync_state.bUAVsCS[uStage] = TRUE;
 }
-IGXBaseTexture* CGXContext::getUnorderedAccessVeiwCS(UINT uStage)
+IGXBaseTexture* CGXContext::getUnorderedAccessViewCS(UINT uStage)
 {
 	assert(uStage < GX_MAX_UAV_TEXTURES);
 	if(m_pUAVsCS[uStage])

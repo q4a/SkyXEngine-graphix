@@ -87,22 +87,22 @@ public:
 
 	IGXVertexShader* createVertexShader(const char *szFile, GXMACRO *pDefs = NULL) override;
 	IGXVertexShader* createVertexShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) override;
-	IGXVertexShader* createVertexShader(void *pData, UINT uSize) override;
+	IGXVertexShader* createVertexShaderFromBin(void *pData, UINT uSize) override;
 	void setVertexShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) override;
 
 	IGXPixelShader* createPixelShader(const char *szFile, GXMACRO *pDefs = NULL) override;
 	IGXPixelShader* createPixelShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) override;
-	IGXPixelShader* createPixelShader(void *pData, UINT uSize) override;
+	IGXPixelShader* createPixelShaderFromBin(void *pData, UINT uSize) override;
 	void setPixelShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) override;
 
 	IGXGeometryShader* createGeometryShader(const char *szFile, GXMACRO *pDefs = NULL) override;
 	IGXGeometryShader* createGeometryShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) override;
-	IGXGeometryShader* createGeometryShader(void *pData, UINT uSize) override;
+	IGXGeometryShader* createGeometryShaderFromBin(void *pData, UINT uSize) override;
 	void setGeometryShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) override;
 
 	IGXComputeShader* createComputeShader(const char *szFile, GXMACRO *pDefs = NULL) override;
 	IGXComputeShader* createComputeShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) override;
-	IGXComputeShader* createComputeShader(void *pData, UINT uSize) override;
+	IGXComputeShader* createComputeShaderFromBin(void *pData, UINT uSize) override;
 	void setComputeShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) override;
 
 
@@ -145,8 +145,8 @@ public:
 	IGXBaseTexture* getTextureVS(UINT uStage = 0) override;
 	void setTextureCS(IGXBaseTexture *pTexture, UINT uStage = 0) override;
 	IGXBaseTexture* getTextureCS(UINT uStage = 0) override;
-	void setUnorderedAccessVeiwCS(IGXBaseTexture *pUAV, UINT uStage = 0) override;
-	IGXBaseTexture* getUnorderedAccessVeiwCS(UINT uStage = 0) override;
+	void setUnorderedAccessViewCS(IGXBaseTexture *pUAV, UINT uStage = 0) override;
+	IGXBaseTexture* getUnorderedAccessViewCS(UINT uStage = 0) override;
 	
 	IGXBlendState* createBlendState(GXBLEND_DESC *pBlendDesc) override;
 	void destroyBlendState(IGXBlendState *pState);
@@ -215,11 +215,11 @@ public:
 		{
 			if(isRT)
 			{
-				m_memoryStats.uRenderTargetBytes += uBytes;
+				m_memoryStats.sizeRenderTargetBytes += uBytes;
 			}
 			else
 			{
-				m_memoryStats.uTextureBytes += uBytes;
+				m_memoryStats.sizeTextureBytes += uBytes;
 			}
 
 			if(uBytes < 0)
@@ -241,7 +241,7 @@ public:
 	{
 		if(bTotal)
 		{
-			m_memoryStats.uShaderConstBytes += uBytes;
+			m_memoryStats.sizeShaderConstBytes += uBytes;
 
 			if(uBytes < 0)
 			{
