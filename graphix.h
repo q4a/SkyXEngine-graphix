@@ -683,8 +683,8 @@ enum GXSTENCIL_OP
 };
 
 /*! описатель depth-stencil операций
-\note Stencil тест (тест трафарета) может осуществляться для передних к наблюдателю граней (front) и для задних (back)
-\note Маски чтения/записи помогают считывать/записывать определенные биты stencil буфера,
+ @note Stencil тест (тест трафарета) может осуществляться для передних к наблюдателю граней (front) и для задних (back)
+ @note Маски чтения/записи помогают считывать/записывать определенные биты stencil буфера,
 для передачи значения (сравнения при чтении)/записи есть функция #IGXContext::setStencilRef
 */
 struct GXDEPTH_STENCIL_DESC
@@ -712,16 +712,16 @@ struct GXDEPTH_STENCIL_DESC
 	struct GXSTENCIL_TEST_DATA
 	{
 		//! действие в случае провала stencil теста
-		GXSTENCIL_OP stencilOpFail = GXSTENCIL_OP_KEEP;
+		GXSTENCIL_OP opFail = GXSTENCIL_OP_KEEP;
 
 		//! действие в случае провала depth теста
-		GXSTENCIL_OP stencilOpDepthFail = GXSTENCIL_OP_KEEP;
+		GXSTENCIL_OP opDepthFail = GXSTENCIL_OP_KEEP;
 
 		//! действие в случае успеха stencil теста
-		GXSTENCIL_OP stencilOpPass = GXSTENCIL_OP_KEEP;
+		GXSTENCIL_OP opPass = GXSTENCIL_OP_KEEP;
 
 		//! функция сравнения #u8StencilReadMask с данными записанными в stencil буфер
-		GXCOMPARISON_FUNC cmpFuncStencil = GXCMP_ALWAYS;
+		GXCOMPARISON_FUNC cmpFunc = GXCMP_ALWAYS;
 	};
 
 	//! данные теста трафарета для передних к наблюдателю граней
@@ -1237,7 +1237,7 @@ class IGXSamplerState: public IGXBaseInterface
  @note Содержит 2 буфера:
   - back - задний, в который производится рендер
   - front - передний, который показывается в связанном окне (окно привязывается в методе #IGXContext::createSwapChain)
- \note Последовательность:
+ @note Последовательность:
   # получение back буфер методом #IGXSwapChain::getColorTarget
   # рендер
   # вызов метода #IGXSwapChain::swapBuffers для показа результатов рендера в связанном окне
@@ -1342,7 +1342,7 @@ public:
 	 @param uPrimitiveCount количество рисуемых примитивов
 	 @param uStartIndexLocation стартовый индекс
 	 @param iVertexBias смещение текущего значения индекса. Например, в индексном буфере лежит число 17, а iVertexBias равен -2
-тогда будет взят вертекс за номером 15
+	  тогда будет взят вертекс за номером 15
 	*/
 	virtual void drawIndexed(UINT uVertexCount, UINT uPrimitiveCount, UINT uStartIndexLocation = 0, int iVertexBias = 0) = 0;
 
@@ -1456,7 +1456,7 @@ public:
 	virtual void setDepthStencilSurface(IGXDepthStencilSurface *pSurface) = 0;
 
 	/*! убрать текущую поверхность глубины и трафарета
-	\note Отсутствие поверхности глубины и трафарета полностью отключает стадию конвейера ответственную за глубину и трафарет
+	 @note Отсутствие поверхности глубины и трафарета полностью отключает стадию конвейера ответственную за глубину и трафарет
 	*/
 	virtual void setDepthStencilSurfaceNULL() = 0;
 
