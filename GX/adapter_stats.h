@@ -38,10 +38,10 @@ struct GX_FRAME_STATS
 	UINT uUploadedBuffersShaderConst;
 };
 
-/*! статистика занятой памяти GPU
+/*! статистика занятой памяти адаптером
  @note Занятая память в байтах
 */
-struct GX_GPU_MEMORY_STATS
+struct GX_ADAPTER_MEMORY_STATS
 {
 	/*! память занятая текстурами
 	 @fixme: Handle mipmaps properly!
@@ -64,11 +64,11 @@ struct GX_GPU_MEMORY_STATS
 //! описание GPU
 struct GX_ADAPTER_DESC
 {
-	//! название GPU
+	//! название адаптера
 	wchar_t szDescription[128];
 
 	//! размер видеопамяти в байтах
-	size_t sizeTotalGPUmemory;
+	size_t sizeTotalmemory;
 };
 
 #endif

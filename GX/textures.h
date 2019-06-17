@@ -20,23 +20,29 @@ enum GXTEXLOCK
 
 //##########################################################################
 
-//! расположение текстуры на стороне GPU
-#define GX_TEXUSAGE_DEFAULT          0x00000000
+/*! @name Свойства текстур
+ @note Свойства могут быть комбинируемыми
+@{*/
 
-//! использовать текстуру как render target
-#define GX_TEXUSAGE_RENDERTARGET     0x00000001
+//! по умолчанию
+#define GX_TEXFLAG_DEFAULT          0x00000000
 
-//! автоматически генерировать mip-map уровни
-#define GX_TEXUSAGE_AUTOGENMIPMAPS   0x00000002
+//! render target
+#define GX_TEXFLAG_RENDERTARGET     0x00000001
 
-//! автоматическое изменение размера текстуры относительно цепочки вывода #IGXSwapChain
-#define GX_TEXUSAGE_AUTORESIZE       0x00000004
+//! автоматически генерируемые mip-map уровни
+#define GX_TEXFLAG_AUTOGENMIPMAPS   0x00000002
+
+//! автоматическое изменение размера относительно цепочки вывода #IGXSwapChain
+#define GX_TEXFLAG_AUTORESIZE       0x00000004
 
 //! @deprecated, разрешено потерять данные, например при потере/восстановлении устройства в dx9
-#define GX_TEXUSAGE_ALLOWDISCARD     0x00000008
+#define GX_TEXFLAG_ALLOWDISCARD     0x00000008
 
-//! текстура с произвольным доступом
-#define GX_TEXUSAGE_UNORDERED_ACCESS 0x00000010
+//! произвольный доступ для compute shader
+#define GX_TEXFLAG_UNORDERED_ACCESS 0x00000010
+
+//!@}
 
 //##########################################################################
 

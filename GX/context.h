@@ -8,6 +8,17 @@ See the license in LICENSE
 #ifndef __CONTEXT_H
 #define __CONTEXT_H
 
+#include "color.h"
+#include "ibase.h"
+#include "textures.h"
+#include "surfaces.h"
+#include "states.h"
+#include "shaders.h"
+#include "adapter_stats.h"
+#include "buffers.h"
+
+//##########################################################################
+
 //! интерфейс графического контекста
 class IGXContext
 {
@@ -251,7 +262,7 @@ public:
 	 @param uWidth ширина в пикселях
 	 @param uHeight высота в пикселях
 	 @param uMipLevels количество mipmap уровней, минимум 1
-	 @param uTexUsageFlags флаги использования, дефайны GX_TEXUSAGE_
+	 @param uTexUsageFlags флаги использования, дефайны GX_TEXFLAG_
 	 @param format формат текстуры
 	 @param pInitData массив данных для заполнения, опционально
 	*/
@@ -261,7 +272,7 @@ public:
 
 	/*! загрузка 2D текстуры из файла
 	 @param szFileName путь до файла
-	 @param uTexUsageFlags флаги использования, дефайны GX_TEXUSAGE_
+	 @param uTexUsageFlags флаги использования, дефайны GX_TEXFLAG_
 	 @param bAllowNonPowerOf2 разрешить текстуре иметь размеры не кратные степени 2,
 	  если false тогда размеры будут подогнаны до ближайших подходящих, и этот подгон может быть не пропорциональным
 	*/
@@ -333,7 +344,7 @@ public:
 	virtual IGXRasterizerState* getRasterizerState() = 0;
 
 	/*! установить фиксированную облать для рендера
-	 @note Параметры задают координаты 2D прямоугольнка для рендера относительно back буфера
+	 @note Параметры задают координаты 2D прямоугольнка для рендера, для всех цепочек вывода
 	*/
 	virtual void setScissorRect(int iTop, int iRight, int iBottom, int iLeft) = 0;
 	
@@ -353,10 +364,10 @@ public:
 	//! возвращает статистику текущего кадра
 	virtual const GX_FRAME_STATS* getFrameStats() = 0;
 
-	//! возвращает статистику занятой памяти GPU
-	virtual const GX_GPU_MEMORY_STATS* getMemoryStats() = 0;
+	//! возвращает статистику занятой памяти адаптером
+	virtual const GX_ADAPTER_MEMORY_STATS* getMemoryStats() = 0;
 
-	//! возвращает описание GPU
+	//! возвращает описание адаптера
 	virtual const GX_ADAPTER_DESC* getAdapterDesc() = 0;
 
 
