@@ -38,7 +38,7 @@ struct GX_FRAME_STATS
 	UINT uUploadedBuffersShaderConst;
 };
 
-/*! статистика занятой памяти адаптером
+/*! статистика занятой памяти адаптера
  @note Занятая память в байтах
 */
 struct GX_ADAPTER_MEMORY_STATS

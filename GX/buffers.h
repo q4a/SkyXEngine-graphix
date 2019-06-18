@@ -43,7 +43,7 @@ enum GX_BUFFER_USAGE
 
 /*! тип данных при декларации вершинного буфера
  @note В видеопамяти регистры по 4 float, значит GXDECLTYPE_FLOAT1 в видеопамяти будет занимать 4 float.
-  GXDECLTYPE_FLOAT1 (2, 3), введены для того чтобы меньше данных гонять пошине,
+  GXDECLTYPE_FLOAT1 (2, 3), введены для того чтобы меньше данных гонять по шине,
   то есть с CPU в GPU будет отправлен 1 float при этом GPU допишет в регистр скрытые данные.
   Аналогичное правило действует и для других типов данных.
  @note Данные имеющие нормализацию являются float в пределах отведенной памяти.
@@ -51,50 +51,51 @@ enum GX_BUFFER_USAGE
 */
 enum GXDECLTYPE
 {
-	// 1 float expanded to (value, 0., 0., 1.)
+	//! 1 float, итоговое значение float4(x, 0.0, 0.0, 1.0)
 	GXDECLTYPE_FLOAT1 = 0,
 
-	// 2 float expanded to (value, value, 0., 1.)
+	//! 2 float, итоговое значение float4(x, y, 0.0, 1.0)
 	GXDECLTYPE_FLOAT2 = 1,
 
-	// 3 float expanded to (value, value, value, 1.)
+	//! 3 float, итоговое значение float4(x, y, z, 1.0)
 	GXDECLTYPE_FLOAT3 = 2,
 
-	// 4 float
+	//! 4 float
 	GXDECLTYPE_FLOAT4 = 3,
 
-	// 4 unsigned byte
+	//! 4 unsigned byte
 	GXDECLTYPE_UBYTE4 = 5,
 
-	// 2 signed short expanded to (value, value, 0., 1.)
+	//! 2 signed short, итоговое значение short4(x, y, 0, 1)
 	GXDECLTYPE_SHORT2 = 6,
 
-	// 4 signed short
+	//! 4 signed short
 	GXDECLTYPE_SHORT4 = 7,
 
-	// Each of 4 bytes is normalized by dividing to 255.0
+
+	//! 4 unsigned byte, итоговое значение ubyte4(x/255.0, y/255.0, z/255.0, w/255.0)
 	GXDECLTYPE_UBYTE4N = 8,
 
-	// 2D signed short normalized (v[0]/32767.0,v[1]/32767.0,0,1)
+	//! 2 signed short, итоговое значение short4(x/32767.0, y/32767.0, 0.0, 1.0)
 	GXDECLTYPE_SHORT2N = 9,
 
-	// 4D signed short normalized (v[0]/32767.0,v[1]/32767.0,v[2]/32767.0,v[3]/32767.0)
+	//! 4 signed short, итоговое значение short4(x/32767.0, y/32767.0, z/32767.0, z/32767.0)
 	GXDECLTYPE_SHORT4N = 10,
 
-	// 2D unsigned short normalized (v[0]/65535.0,v[1]/65535.0,0,1)
+	//! 2 unsigned short, итоговое значение ushort4(x/65535.0, y/65535.0, 0.0, 1.0)
 	GXDECLTYPE_USHORT2N = 11,
 
-	// 4D unsigned short normalized (v[0]/65535.0,v[1]/65535.0,v[2]/65535.0,v[3]/65535.0)
+	//! 4 unsigned short, итоговое значение ushort4(x/65535.0, y/65535.0, z/65535.0, w/65535.0)
 	GXDECLTYPE_USHORT4N = 12,
 
-	// Two 16-bit floating point values, expanded to (value, value, 0, 1)
+	//! 2 16-bit float, итоговое значение half4(x, y, 0.0, 1.0)
 	GXDECLTYPE_FLOAT16_2 = 15,
 
-	// Four 16-bit floating point values
+	//! 4 16-bit float
 	GXDECLTYPE_FLOAT16_4 = 16,
 
 
-	// When the type field in a decl is unused.
+	//! значение для завершающего элемента массива декларации вершин
 	GXDECLTYPE_UNUSED = 17,
 };
 
