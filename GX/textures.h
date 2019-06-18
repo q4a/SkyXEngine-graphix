@@ -65,11 +65,22 @@ enum GXTEXTURE_TYPE
 //! идентификаторы граней кубической текстуры
 enum GXCUBEMAP_FACES
 {
+	//! Правая сторона куба, координаты направления float3(1.0, 0.0, 0.0) 
 	GXCUBEMAP_FACE_POSITIVE_X = 0,
+
+	//! Левая сторона куба, координаты направления float3(-1.0, 0.0, 0.0) 
 	GXCUBEMAP_FACE_NEGATIVE_X = 1,
+
+	//! Верхняя сторона куба, координаты направления float3(0.0, 1.0, 0.0) 
 	GXCUBEMAP_FACE_POSITIVE_Y = 2,
+
+	//! Нижняя сторона куба, координаты направления float3(0.0, -1.0, 0.0) 
 	GXCUBEMAP_FACE_NEGATIVE_Y = 3,
+
+	//! Передняя сторона куба, координаты направления float3(0.0, 0.0, 1.0) 
 	GXCUBEMAP_FACE_POSITIVE_Z = 4,
+
+	//! Задняя сторона куба, координаты направления float3(0.0, 0.0, -1.0)
 	GXCUBEMAP_FACE_NEGATIVE_Z = 5,
 
 	GXCUBEMAP_FACE_FORCE_DWORD = 0x7fffffff

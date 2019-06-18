@@ -40,7 +40,7 @@ See the license in LICENSE
 //##########################################################################
 
 /*
- @todo Посмотреть закоменченное и разобраться с этим
+ @todo Подумать над разделением форматов по видам (для текстур, рт, глубины), может быть раскидать по енумам, а может быть просто добавить в имена
 */
 enum GXFORMAT
 {
@@ -50,67 +50,18 @@ enum GXFORMAT
 	GXFMT_A8R8G8B8 = 21,
 	GXFMT_X8R8G8B8 = 22,
 	GXFMT_R5G6B5 = 23,
-	//GXFMT_X1R5G5B5 = 24,
-	//GXFMT_A1R5G5B5 = 25,
-	//GXFMT_A4R4G4B4 = 26,
-	//GXFMT_R3G3B2 = 27,
-	//GXFMT_A8 = 28,
-	//GXFMT_A8R3G3B2 = 29,
-	//GXFMT_X4R4G4B4 = 30,
-	//GXFMT_A2B10G10R10 = 31,
-	//GXFMT_A8B8G8R8 = 32,
-	//GXFMT_X8B8G8R8 = 33,
-	//GXFMT_G16R16 = 34,
-	//GXFMT_A2R10G10B10 = 35,
 	GXFMT_A16B16G16R16 = 36,
 
-	//GXFMT_A8P8 = 40,
-	//GXFMT_P8 = 41,
-
-	//GXFMT_L8 = 50,
-	//GXFMT_A8L8 = 51,
-	//GXFMT_A4L4 = 52,
-
-	//GXFMT_V8U8 = 60,
-	//GXFMT_L6V5U5 = 61,
-	//GXFMT_X8L8V8U8 = 62,
-	//GXFMT_Q8W8V8U8 = 63,
-	//GXFMT_V16U16 = 64,
-	//GXFMT_A2W10V10U10 = 67,
-
-	//GXFMT_UYVY = MAKEFOURCC('U', 'Y', 'V', 'Y'),
-	//GXFMT_R8G8_B8G8 = MAKEFOURCC('R', 'G', 'B', 'G'),
-	//GXFMT_YUY2 = MAKEFOURCC('Y', 'U', 'Y', '2'),
-	//GXFMT_G8R8_G8B8 = MAKEFOURCC('G', 'R', 'G', 'B'),
 	GXFMT_DXT1 = MAKEFOURCC('D', 'X', 'T', '1'),
-	//GXFMT_DXT2 = MAKEFOURCC('D', 'X', 'T', '2'),
 	GXFMT_DXT3 = MAKEFOURCC('D', 'X', 'T', '3'),
-	//GXFMT_DXT4 = MAKEFOURCC('D', 'X', 'T', '4'),
 	GXFMT_DXT5 = MAKEFOURCC('D', 'X', 'T', '5'),
 	GXFMT_ATI1N = MAKEFOURCC('A', 'T', 'I', '1'),
 	GXFMT_ATI2N = MAKEFOURCC('A', 'T', 'I', '2'),
 
-
-	//GXFMT_D16_LOCKABLE = 70,
 	GXFMT_D32 = 71,
-	//GXFMT_D15S1 = 73,
 	GXFMT_D24S8 = 75,
 	GXFMT_D24X8 = 77, //@DEPRECATED
-	//GXFMT_D24X4S4 = 79,
 	GXFMT_D16 = 80,
-
-	//GXFMT_D32F_LOCKABLE = 82,
-	//GXFMT_D24FS8 = 83,
-
-	//GXFMT_L16 = 81,
-
-	//GXFMT_VERTEXDATA = 100,
-	//GXFMT_INDEX16 = 101,
-	//GXFMT_INDEX32 = 102,
-
-	//GXFMT_Q16W16V16U16 = 110,
-
-	//gxFMT_MULTI2_ARGB8 = MAKEFOURCC('M', 'E', 'T', '1'),
 
 	// Floating point surface formats
 
@@ -123,8 +74,6 @@ enum GXFORMAT
 	GXFMT_R32F = 114,
 	GXFMT_G32R32F = 115,
 	GXFMT_A32B32G32R32F = 116,
-
-	//GXFMT_CxV8U8 = 117,
 
 	GXFMT_FORCE_DWORD = 0x7fffffff
 };
