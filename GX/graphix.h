@@ -22,6 +22,9 @@ virtual IGXShaderBase* createShader(GX_SHADER_TYPE type, const char * szFile, GX
 в метод setSamplerState отправлять тип шейдера для применения к нему фильтрации
 */
 
+/*! @gtodo разобраться с именованием GX и GX_, структуры имен одинаковы у дефайнов, енумов и структур
+*/
+
 #ifndef __GRAPHIX_H
 #define __GRAPHIX_H
 
