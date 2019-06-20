@@ -27,7 +27,7 @@ See the license in LICENSE
  @note В шейдере это выглядит так:
   #define szName szDefinition
 */
-struct GXMACRO
+struct GXMacro
 {
 	//! название макрооределения
 	const char *szName;

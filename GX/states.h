@@ -119,10 +119,10 @@ enum GXCOLOR_WRITE_ENABLE
 };
 
 //! описатель смешивания
-struct GXBLEND_DESC
+struct GXBlendDesc
 {
 	//! описание смешивания для каждого render target
-	struct GXBLEND_RT_DESC
+	struct GXBlendRTdesc
 	{
 		//! включить/выключить смешивание
 		BOOL useBlend = FALSE;
@@ -162,7 +162,7 @@ struct GXBLEND_DESC
 	BOOL useIndependentBlend = FALSE;
 
 	//! описания смешиваний для каждого render target
-	GXBLEND_RT_DESC renderTarget[GX_MAX_COLORTARGETS];
+	GXBlendRTdesc renderTarget[GX_MAX_COLORTARGETS];
 };
 
 //##########################################################################
@@ -232,7 +232,7 @@ enum GXSTENCIL_OP
  @note Маски чтения/записи помогают считывать/записывать определенные биты stencil буфера,
 для передачи значения (сравнения при чтении)/записи есть функция #IGXContext::setStencilRef
 */
-struct GXDEPTH_STENCIL_DESC
+struct GXDepthStencilDesc
 {
 	//! включен ли тест глубины
 	BOOL useDepthTest = TRUE;
@@ -254,7 +254,7 @@ struct GXDEPTH_STENCIL_DESC
 	byte u8StencilWriteMask = 0xFF;
 
 	//! общие данные теста трафарета
-	struct GXSTENCIL_TEST_DATA
+	struct GXStencilTestData
 	{
 		//! действие в случае провала stencil теста
 		GXSTENCIL_OP opFail = GXSTENCIL_OP_KEEP;
@@ -270,10 +270,10 @@ struct GXDEPTH_STENCIL_DESC
 	};
 
 	//! данные теста трафарета для передних к наблюдателю граней
-	GXSTENCIL_TEST_DATA stencilTestFront;
+	GXStencilTestData stencilTestFront;
 
 	//! данные теста трафарета для задних к наблюдателю граней
-	GXSTENCIL_TEST_DATA stencilTestBack;
+	GXStencilTestData stencilTestBack;
 };
 
 //##########################################################################
@@ -309,7 +309,7 @@ enum GXCULL_MODE
   https://docs.microsoft.com/ru-ru/windows/desktop/direct3d11/d3d10-graphics-programming-guide-output-merger-stage-depth-bias
   https://www.gamedev.net/forums/topic/660387-depthbias-how-is-maxdepthslope-computed/
 */
-struct GXRASTERIZER_DESC
+struct GXRasterizerDesc
 {
 	//! режим заполнения
 	GXFILL_MODE fillMode = GXFILL_SOLID;
@@ -378,7 +378,7 @@ enum GXTEXTURE_ADDRESS_MODE
 	//! обрезка текстуры по краям, вне диапазона [0.0, 1.0] будет присвоен граничный цвет
 	GXTEXTURE_ADDRESS_CLAMP,
 
-	//! на координаты текстуры вне диапазона [0.0, 1.0] устанавливается цвет границы заданный через GXSAMPLER_DESC::f4BorderColor
+	//! на координаты текстуры вне диапазона [0.0, 1.0] устанавливается цвет границы заданный через GXSamplerDesc::f4BorderColor
 	GXTEXTURE_ADDRESS_BORDER,
 
 	//! однократное отражение вне диапазона [0.0, 1.0], после чего эффект как #GXTEXTURE_ADDRESS_CLAMP
@@ -392,7 +392,7 @@ enum GXTEXTURE_ADDRESS_MODE
  @note Смещение mipmap уровней (fMipLODBias), так же как и их ограничение (fMinLOD, fMaxLOD) имеет тип float, так как допускаются дробые значения,
   итоговый результат вычисления применяемого уровня зависит от установленной фильтрации
 */
-struct GXSAMPLER_DESC
+struct GXSamplerDesc
 {
 	//! фильтрация текстур
 	GXFILTER filter = GXFILTER_MIN_MAG_MIP_POINT;
@@ -427,22 +427,22 @@ struct GXSAMPLER_DESC
 
 //##########################################################################
 
-//! интерфейс состояния смешивания, #GXBLEND_DESC
+//! интерфейс состояния смешивания, #GXBlendDesc
 class IGXBlendState: public IGXBaseInterface
 {
 };
 
-//! интерфейс состояния глуибны и трафарета, #GXDEPTH_STENCIL_DESC
+//! интерфейс состояния глуибны и трафарета, #GXDepthStencilDesc
 class IGXDepthStencilState: public IGXBaseInterface
 {
 };
 
-//! интерфейс состояния растеризатора, #GXRASTERIZER_DESC
+//! интерфейс состояния растеризатора, #GXRasterizerDesc
 class IGXRasterizerState: public IGXBaseInterface
 {
 };
 
-//! интерфейс состояния выборки из текстуры, #GXSAMPLER_DESC
+//! интерфейс состояния выборки из текстуры, #GXSamplerDesc
 class IGXSamplerState: public IGXBaseInterface
 {
 };

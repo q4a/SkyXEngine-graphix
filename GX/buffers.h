@@ -178,7 +178,7 @@ enum GXDECLUSAGE
 }
 
 //! Характеристика элемента вершинном буфера
-struct GXVERTEXELEMENT
+struct GXVertexElement
 {
 	//! Индекс потока
 	UINT8 u8Stream;

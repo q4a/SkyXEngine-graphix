@@ -9,7 +9,7 @@ See the license in LICENSE
 
 /*! \gtodo пересмотреть методы IGXContext::create ... Shader методы повторяются аж 4 раза, как и комментарии
 был вариант создать метод
-virtual IGXShaderBase* createShader(GX_SHADER_TYPE type, const char * szFile, GXMACRO *pDefs = NULL) = 0;
+virtual IGXShaderBase* createShader(GX_SHADER_TYPE type, const char * szFile, GXMacro *pDefs = NULL) = 0;
 который бы внутри создавал конкретный шейдер, а возвращал базовый,
 нормальный вариант но ошибку несоответсвия типов не получить на этапе компиляции
 */

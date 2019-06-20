@@ -94,7 +94,7 @@ public:
 	virtual void setRenderBuffer(IGXRenderBuffer *pBuff) = 0;
 
 	//! создание декларации вершин из массива pDecl
-	virtual IGXVertexDeclaration* createVertexDeclaration(const GXVERTEXELEMENT * pDecl) = 0;
+	virtual IGXVertexDeclaration* createVertexDeclaration(const GXVertexElement *pDecl) = 0;
 
 	//##########################################################################
 
@@ -153,10 +153,10 @@ public:
 	 @param szFile путь до файла
 	 @param pDefs массив макроопределений передаваймых в шейдер
 	*/
-	virtual IGXVertexShader* createVertexShader(const char * szFile, GXMACRO *pDefs = NULL) = 0;
+	virtual IGXVertexShader* createVertexShader(const char * szFile, GXMacro *pDefs = NULL) = 0;
 
 	//! создать вершинный шейдер из строки с кодом szCode
-	virtual IGXVertexShader* createVertexShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) = 0;
+	virtual IGXVertexShader* createVertexShaderFromString(const char * szCode, GXMacro *pDefs = NULL) = 0;
 
 	//! создать вершинный шейдер из бинарных данных pData
 	virtual IGXVertexShader* createVertexShaderFromBin(void *pData, UINT uSize) = 0;
@@ -165,20 +165,20 @@ public:
 	virtual void setVertexShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) = 0;
 
 
-	virtual IGXPixelShader* createPixelShader(const char * szFile, GXMACRO *pDefs = NULL) = 0;
-	virtual IGXPixelShader* createPixelShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) = 0;
+	virtual IGXPixelShader* createPixelShader(const char * szFile, GXMacro *pDefs = NULL) = 0;
+	virtual IGXPixelShader* createPixelShaderFromString(const char * szCode, GXMacro *pDefs = NULL) = 0;
 	virtual IGXPixelShader* createPixelShaderFromBin(void *pData, UINT uSize) = 0;
 	virtual void setPixelShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) = 0;
 
 
-	virtual IGXGeometryShader* createGeometryShader(const char * szFile, GXMACRO *pDefs = NULL) = 0;
-	virtual IGXGeometryShader* createGeometryShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) = 0;
+	virtual IGXGeometryShader* createGeometryShader(const char * szFile, GXMacro *pDefs = NULL) = 0;
+	virtual IGXGeometryShader* createGeometryShaderFromString(const char * szCode, GXMacro *pDefs = NULL) = 0;
 	virtual IGXGeometryShader* createGeometryShaderFromBin(void *pData, UINT uSize) = 0;
 	virtual void setGeometryShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) = 0;
 
 
-	virtual IGXComputeShader* createComputeShader(const char * szFile, GXMACRO *pDefs = NULL) = 0;
-	virtual IGXComputeShader* createComputeShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) = 0;
+	virtual IGXComputeShader* createComputeShader(const char * szFile, GXMacro *pDefs = NULL) = 0;
+	virtual IGXComputeShader* createComputeShaderFromString(const char * szCode, GXMacro *pDefs = NULL) = 0;
 	virtual IGXComputeShader* createComputeShaderFromBin(void *pData, UINT uSize) = 0;
 	virtual void setComputeShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) = 0;
 
@@ -307,7 +307,7 @@ public:
 	//########################################################################
 
 	//! создание состояния смешивания
-	virtual IGXBlendState* createBlendState(GXBLEND_DESC *pBlendDesc) = 0;
+	virtual IGXBlendState* createBlendState(GXBlendDesc *pBlendDesc) = 0;
 
 	//! установка состояния смешивания
 	virtual void setBlendState(IGXBlendState *pState) = 0;
@@ -315,13 +315,13 @@ public:
 	//! возвращает текущее установленное состояние смешивания
 	virtual IGXBlendState* getBlendState() = 0;
 
-	//! установить фактор смешивания, если в #GXBLEND_DESC установлен GXBLEND_BLEND_FACTOR
+	//! установить фактор смешивания, если в #GXBlendDesc установлен GXBLEND_BLEND_FACTOR
 	virtual void setBlendFactor(GXCOLOR val) = 0;
 
 
 
 	//! создание состояния глубины и трафарета
-	virtual IGXDepthStencilState* createDepthStencilState(GXDEPTH_STENCIL_DESC *pDSDesc) = 0;
+	virtual IGXDepthStencilState* createDepthStencilState(GXDepthStencilDesc *pDSDesc) = 0;
 
 	//! установить состояние глубины и трафарета
 	virtual void setDepthStencilState(IGXDepthStencilState *pState) = 0;
@@ -329,13 +329,13 @@ public:
 	//! возвращает текущее установленное состояние глубины и трафарета
 	virtual IGXDepthStencilState* getDepthStencilState() = 0;
 
-	//! установка значения для внутренних операций указанных в состоянии (#GXDEPTH_STENCIL_DESC) глубины и трафарета
+	//! установка значения для внутренних операций указанных в состоянии (#GXDepthStencilDesc) глубины и трафарета
 	virtual void setStencilRef(UINT uVal) = 0;
 
 
 
 	//! создание состояния растеризатора
-	virtual IGXRasterizerState *createRasterizerState(GXRASTERIZER_DESC *pRSDesc) = 0;
+	virtual IGXRasterizerState *createRasterizerState(GXRasterizerDesc *pRSDesc) = 0;
 
 	//! установить состояние растеризатора
 	virtual void setRasterizerState(IGXRasterizerState *pState) = 0;
@@ -351,7 +351,7 @@ public:
 
 
 	//! создание состония выборки из текстуры
-	virtual IGXSamplerState* createSamplerState(GXSAMPLER_DESC *pSamplerDesc) = 0;
+	virtual IGXSamplerState* createSamplerState(GXSamplerDesc *pSamplerDesc) = 0;
 
 	//! установка выборки текстуры для слота uSlot, нумерация с 0
 	virtual void setSamplerState(IGXSamplerState *pState, UINT uSlot) = 0;
@@ -362,13 +362,13 @@ public:
 	//########################################################################
 
 	//! возвращает статистику текущего кадра
-	virtual const GX_FRAME_STATS* getFrameStats() = 0;
+	virtual const GXFrameStats* getFrameStats() = 0;
 
 	//! возвращает статистику занятой памяти адаптером
-	virtual const GX_ADAPTER_MEMORY_STATS* getMemoryStats() = 0;
+	virtual const GXAdapterMemoryStats* getMemoryStats() = 0;
 
 	//! возвращает описание адаптера
-	virtual const GX_ADAPTER_DESC* getAdapterDesc() = 0;
+	virtual const GXAdapterDesc* getAdapterDesc() = 0;
 
 
 	// http://www.gamedev.ru/terms/StencilBuffer

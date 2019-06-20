@@ -11,7 +11,7 @@ See the license in LICENSE
 #include <common/types.h>
 
 //! статистика текущего кадра
-struct GX_FRAME_STATS
+struct GXFrameStats
 {
 	//! количество вызовов DrawIndexedPrimitive и иных функций отрисовки
 	UINT uDIPcount;
@@ -41,7 +41,7 @@ struct GX_FRAME_STATS
 /*! статистика занятой памяти адаптера
  @note Занятая память в байтах
 */
-struct GX_ADAPTER_MEMORY_STATS
+struct GXAdapterMemoryStats
 {
 	/*! память занятая текстурами
 	 @fixme: Handle mipmaps properly!
@@ -62,7 +62,7 @@ struct GX_ADAPTER_MEMORY_STATS
 };
 
 //! описание GPU
-struct GX_ADAPTER_DESC
+struct GXAdapterDesc
 {
 	//! название адаптера
 	wchar_t szDescription[128];
