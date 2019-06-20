@@ -28,16 +28,16 @@ enum GXBUFFERLOCK
 //##########################################################################
 
 //! Тип использования буфера
-enum GX_BUFFER_USAGE
+enum GXBUFFER_USAGE
 {
 	//! данные никогда не обновлятся, нет доступа с CPU
-	GX_BUFFER_USAGE_STATIC = 0x01,
+	GXBUFFER_USAGE_STATIC = 0x01,
 
 	//! данные будут обновляться, но не каждый кадр, есть доступ с CPU на запись
-	GX_BUFFER_USAGE_DYNAMIC = 0x02,
+	GXBUFFER_USAGE_DYNAMIC = 0x02,
 
 	//! данные будут обновляться каждый кадр, есть доступ с CPU на запись
-	GX_BUFFER_USAGE_STREAM = 0x04,
+	GXBUFFER_USAGE_STREAM = 0x04,
 };
 
 
@@ -158,7 +158,7 @@ enum GXDECLUSAGE
 };
 
 //! @todo Выяснить: надо ли?
-#define GXDECLLIST { \
+#define GX_DECL_LIST { \
 	"POSITION",      \
 	"TEXCOORD",      \
 	"NORMAL",        \
@@ -199,7 +199,7 @@ struct GXVertexElement
 /*! финальная строка декларации вершин
  @note Каждая декларация должна заканчиваться данной макрофункцией
 */
-#define GXDECL_END() {0xFF,0,GXDECLTYPE_UNUSED,(GXDECLUSAGE)0, GXDECLSPEC_PER_VERTEX_DATA}
+#define GX_DECL_END() {0xFF,0,GXDECLTYPE_UNUSED,(GXDECLUSAGE)0, GXDECLSPEC_PER_VERTEX_DATA}
 
 //##########################################################################
 

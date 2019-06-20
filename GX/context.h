@@ -74,18 +74,18 @@ public:
 
 	/*! создание вершинного буфера
 	 @param size - размер буфера в байтах, размер_структуры * количество_вершин
-	 @param usage - тип использования из #GX_BUFFER_USAGE
-	 @param pInitData - данные для заполнения, если буфер статичный (usage == GX_BUFFER_USAGE_STATIC) тогда pInitData единственный способ заполнить буфер
+	 @param usage - тип использования из #GXBUFFER_USAGE
+	 @param pInitData - данные для заполнения, если буфер статичный (usage == GXBUFFER_USAGE_STATIC) тогда pInitData единственный способ заполнить буфер
 	*/
-	virtual IGXVertexBuffer* createVertexBuffer(size_t size, GX_BUFFER_USAGE usage, void *pInitData = NULL) = 0;
+	virtual IGXVertexBuffer* createVertexBuffer(size_t size, GXBUFFER_USAGE usage, void *pInitData = NULL) = 0;
 
 	/*! создание индексного буфера
 	 @param size - размер буфера в байтах, размер_структуры * количество_индексов
-	 @param usage - тип использования из #GX_BUFFER_USAGE
+	 @param usage - тип использования из #GXBUFFER_USAGE
 	 @param it - тип индексов из #GXINDEXTYPE
-	 @param pInitData - данные для заполнения, если буфер статичный (usage == GX_BUFFER_USAGE_STATIC) тогда pInitData единственный способ заполнить буфер
+	 @param pInitData - данные для заполнения, если буфер статичный (usage == GXBUFFER_USAGE_STATIC) тогда pInitData единственный способ заполнить буфер
 	*/
-	virtual IGXIndexBuffer* createIndexBuffer(size_t size, GX_BUFFER_USAGE usage, GXINDEXTYPE it, void *pInitData = NULL) = 0;
+	virtual IGXIndexBuffer* createIndexBuffer(size_t size, GXBUFFER_USAGE usage, GXINDEXTYPE it, void *pInitData = NULL) = 0;
 
 	//! установка индексного буфера
 	virtual void setIndexBuffer(IGXIndexBuffer *pBuff) = 0;

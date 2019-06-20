@@ -27,13 +27,13 @@ See the license in LICENSE
 !{*/
 
 //! Флаг очистки буфера цвета
-#define GXCLEAR_COLOR 0x00000001
+#define GX_CLEAR_COLOR 0x00000001
 
 //! Флаг очистки буфера глубины
-#define GXCLEAR_DEPTH 0x00000002
+#define GX_CLEAR_DEPTH 0x00000002
 
 //! Флаг очистки stencil буфера
-#define GXCLEAR_STENCIL 0x00000004
+#define GX_CLEAR_STENCIL 0x00000004
 
 //!}
 
