@@ -5,8 +5,8 @@ Site: dogmanet.ru
 See the license in LICENSE
 *****************************************************/
 
-#ifndef __IBASE_H
-#define __IBASE_H
+#ifndef __GXIBASE_H
+#define __GXIBASE_H
 
 #include <common/types.h>
 

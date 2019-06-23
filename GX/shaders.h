@@ -5,11 +5,11 @@ Site: dogmanet.ru
 See the license in LICENSE
 *****************************************************/
 
-#ifndef __SHADERS_H
-#define __SHADERS_H
+#ifndef __GXSHADERS_H
+#define __GXSHADERS_H
 
 #include <common/types.h>
-#include <ibase.h>
+#include "ibase.h"
 
 /*
 В шейдере 14 слотов, по одному на константу, нумерация с 0, первая объявленная константа имеет слот 0, вторая 1 и т.д.

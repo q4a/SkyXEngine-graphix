@@ -251,19 +251,19 @@ BOOL CGXContext::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindo
 	m_pDevice->GetDeviceCaps(&m_dxCaps);
 
 
-	GXSAMPLER_DESC samplerDesc;
+	GXSamplerDesc samplerDesc;
 	memset(&samplerDesc, 0, sizeof(samplerDesc));
 	samplerDesc.uMaxAnisotropy = 1;
 	m_pDefaultSamplerState = createSamplerState(&samplerDesc);
 
-	GXRASTERIZER_DESC rasterizerDesc;
+	GXRasterizerDesc rasterizerDesc;
 	memset(&rasterizerDesc, 0, sizeof(rasterizerDesc));
 	rasterizerDesc.fillMode = GXFILL_SOLID;
 	rasterizerDesc.cullMode = GXCULL_BACK;
 	rasterizerDesc.bDepthClipEnable = TRUE;
 	m_pDefaultRasterizerState = createRasterizerState(&rasterizerDesc);
 
-	GXDEPTH_STENCIL_DESC depthStencilDesc;
+	GXDepthStencilDesc depthStencilDesc;
 	memset(&depthStencilDesc, 0, sizeof(depthStencilDesc));
 	depthStencilDesc.bDepthEnable = TRUE;
 	depthStencilDesc.bEnableDepthWrite = TRUE;
@@ -272,7 +272,7 @@ BOOL CGXContext::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindo
 
 	m_pDefaultDepthStencilState = createDepthStencilState(&depthStencilDesc);
 
-	GXBLEND_DESC blendDesc;
+	GXBlendDesc blendDesc;
 	memset(&blendDesc, 0, sizeof(blendDesc));
 	blendDesc.renderTarget[0].u8RenderTargetWriteMask = GXCOLOR_WRITE_ENABLE_ALL;
 	
@@ -320,16 +320,16 @@ IGXVertexBuffer * CGXContext::createVertexBuffer(size_t size, UINT flags, void *
 	UINT usage = 0;
 	D3DPOOL pool = (flags & GX_BUFFER_ALLOWDISCARD) ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED;
 
-	if(flags & GX_BUFFER_USAGE_STATIC)
+	if(flags & GXBUFFER_USAGE_STATIC)
 	{
 		//usage = 0;
 		pBuff->m_isLockable = false;
 	}
-	if(flags & GX_BUFFER_USAGE_DYNAMIC && pool == D3DPOOL_DEFAULT)
+	if(flags & GXBUFFER_USAGE_DYNAMIC && pool == D3DPOOL_DEFAULT)
 	{
 		usage = D3DUSAGE_DYNAMIC;
 	}
-	if(flags & GX_BUFFER_USAGE_STREAM)
+	if(flags & GXBUFFER_USAGE_STREAM)
 	{
 		pool = D3DPOOL_DEFAULT;
 		usage |= D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC;
@@ -374,16 +374,16 @@ IGXIndexBuffer * CGXContext::createIndexBuffer(size_t size, UINT flags, GXINDEXT
 	UINT usage = 0;
 	D3DPOOL pool = (flags & GX_BUFFER_ALLOWDISCARD) ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED;
 
-	if(flags & GX_BUFFER_USAGE_STATIC)
+	if(flags & GXBUFFER_USAGE_STATIC)
 	{
 		pBuff->m_isLockable = false;
 		//usage = 0;
 	}
-	if(flags & GX_BUFFER_USAGE_DYNAMIC && pool == D3DPOOL_DEFAULT)
+	if(flags & GXBUFFER_USAGE_DYNAMIC && pool == D3DPOOL_DEFAULT)
 	{
 		usage = D3DUSAGE_DYNAMIC;
 	}
-	if(flags & GX_BUFFER_USAGE_STREAM)
+	if(flags & GXBUFFER_USAGE_STREAM)
 	{
 		pool = D3DPOOL_DEFAULT;
 		usage |= D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC;
@@ -480,7 +480,7 @@ void CGXContext::destroyVertexBuffer(IGXVertexBuffer * pBuff)
 	mem_delete(pBuff);
 }
 
-IGXVertexDeclaration * CGXContext::createVertexDeclaration(const GXVERTEXELEMENT * pDecl)
+IGXVertexDeclaration * CGXContext::createVertexDeclaration(const GXVertexElement * pDecl)
 {
 	CGXVertexDeclaration * vd = new CGXVertexDeclaration(m_pDevice, this, pDecl);
 
@@ -1061,7 +1061,7 @@ GLuint CGXContext::GetShaderPart(GLenum type, const DString & name, UINT flags, 
 	return(pSH);
 }*/
 
-IGXVertexShader * CGXContext::createVertexShader(const char * szFile, GXMACRO *pDefs)
+IGXVertexShader * CGXContext::createVertexShader(const char * szFile, GXMacro *pDefs)
 {
 	ID3DXBuffer *pShaderBlob = 0;
 	ID3DXBuffer *pErrorBlob = 0;
@@ -1093,7 +1093,7 @@ IGXVertexShader * CGXContext::createVertexShader(const char * szFile, GXMACRO *p
 	
 	return(pShader);
 }
-IGXVertexShader * CGXContext::createVertexShaderFromString(const char * szCode, GXMACRO *pDefs)
+IGXVertexShader * CGXContext::createVertexShaderFromString(const char * szCode, GXMacro *pDefs)
 {
 	ID3DXBuffer *pShaderBlob;
 	ID3DXBuffer *pErrorBlob;
@@ -1173,7 +1173,7 @@ void CGXContext::destroyVertexShader(IGXVertexShader * pSH)
 	mem_delete(pSH);
 }
 
-IGXPixelShader * CGXContext::createPixelShader(const char * szFile, GXMACRO *pDefs)
+IGXPixelShader * CGXContext::createPixelShader(const char * szFile, GXMacro *pDefs)
 {
 	ID3DXBuffer *pShaderBlob = 0;
 	ID3DXBuffer *pErrorBlob = 0;
@@ -1248,7 +1248,7 @@ IGXPixelShader * CGXContext::createPixelShader(void *_pData, UINT uSize)
 
 	return(pShader);
 }
-IGXPixelShader * CGXContext::createPixelShaderFromString(const char * szCode, GXMACRO *pDefs)
+IGXPixelShader * CGXContext::createPixelShaderFromString(const char * szCode, GXMacro *pDefs)
 {
 	ID3DXBuffer *pShaderBlob;
 	ID3DXBuffer *pErrorBlob;
@@ -1391,7 +1391,7 @@ void CGXContext::logDXcall(const char *szCondeString, HRESULT hr)
 	debugMessage(GX_LOG_ERROR, str);
 }
 
-IGXSamplerState *CGXContext::createSamplerState(GXSAMPLER_DESC *pSamplerDesc)
+IGXSamplerState *CGXContext::createSamplerState(GXSamplerDesc *pSamplerDesc)
 {
 	CGXSamplerState *pSS = new CGXSamplerState(this);
 
@@ -1457,7 +1457,7 @@ IGXSamplerState *CGXContext::getSamplerState(UINT uSlot)
 	return(m_pSamplerState[uSlot]);
 }
 
-IGXRasterizerState *CGXContext::createRasterizerState(GXRASTERIZER_DESC *pRSDesc)
+IGXRasterizerState *CGXContext::createRasterizerState(GXRasterizerDesc *pRSDesc)
 {
 	CGXRasterizerState *pRS = new CGXRasterizerState(this);
 
@@ -1518,7 +1518,7 @@ void CGXContext::setScissorRect(int iTop, int iRight, int iBottom, int iLeft)
 }
 
 
-IGXDepthStencilState *CGXContext::createDepthStencilState(GXDEPTH_STENCIL_DESC *pDSDesc)
+IGXDepthStencilState *CGXContext::createDepthStencilState(GXDepthStencilDesc *pDSDesc)
 {
 	CGXDepthStencilState *pDS = new CGXDepthStencilState(this);
 	pDS->m_desc = *pDSDesc;
@@ -1572,7 +1572,7 @@ void CGXContext::setStencilRef(UINT uVal)
 }
 
 
-IGXBlendState *CGXContext::createBlendState(GXBLEND_DESC *pBSDesc)
+IGXBlendState *CGXContext::createBlendState(GXBlendDesc *pBSDesc)
 {
 	CGXBlendState *pBS = new CGXBlendState(this);
 	if(pBSDesc->bAlphaToCoverageEnable)
@@ -1827,7 +1827,7 @@ IGXTexture2D *CGXContext::createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLe
 	pTex->m_uHeight = uHeight;
 	pTex->m_uWidth = uWidth;
 	pTex->m_bWasReset = true;
-	pTex->m_bAutoResize = !!(uTexUsageFlags & GX_TEXUSAGE_AUTORESIZE);
+	pTex->m_bAutoResize = !!(uTexUsageFlags & GX_TEXFLAG_AUTORESIZE);
 	pTex->m_uMipLevels = uMipLevels;
 	if(pTex->m_bAutoResize)
 	{
@@ -1842,12 +1842,12 @@ IGXTexture2D *CGXContext::createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLe
 	{
 		pool = D3DPOOL_DEFAULT;
 	}
-	if(uTexUsageFlags & GX_TEXUSAGE_RENDERTARGET)
+	if(uTexUsageFlags & GX_TEXFLAG_RENDERTARGET)
 	{
 		pool = D3DPOOL_DEFAULT;
 		usage |= D3DUSAGE_RENDERTARGET;
 	}
-	if(uTexUsageFlags & GX_TEXUSAGE_AUTOGENMIPMAPS)
+	if(uTexUsageFlags & GX_TEXFLAG_AUTOGENMIPMAPS)
 	{
 		usage |= D3DUSAGE_AUTOGENMIPMAP;
 	}
@@ -1864,7 +1864,7 @@ IGXTexture2D *CGXContext::createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLe
 		m_aResettableTextures2D.push_back(pTex);
 	}
 
-	if(!(usage & GX_TEXUSAGE_RENDERTARGET) && pInitData)
+	if(!(usage & GX_TEXFLAG_RENDERTARGET) && pInitData)
 	{
 		if(pool != D3DPOOL_DEFAULT)
 		{
@@ -1906,7 +1906,7 @@ IGXTextureCube *CGXContext::createTextureCube(UINT uSize, UINT uMipLevels, UINT 
 	pTex->m_format = format;
 	pTex->m_uSize = uSize;
 	pTex->m_bWasReset = true;
-	pTex->m_bAutoResize = !!(uTexUsageFlags & GX_TEXUSAGE_AUTORESIZE); 
+	pTex->m_bAutoResize = !!(uTexUsageFlags & GX_TEXFLAG_AUTORESIZE); 
 	pTex->m_uMipLevels = uMipLevels;
 	if(pTex->m_bAutoResize)
 	{
@@ -1920,12 +1920,12 @@ IGXTextureCube *CGXContext::createTextureCube(UINT uSize, UINT uMipLevels, UINT 
 	{
 		pool = D3DPOOL_DEFAULT;
 	}
-	if(uTexUsageFlags & GX_TEXUSAGE_RENDERTARGET)
+	if(uTexUsageFlags & GX_TEXFLAG_RENDERTARGET)
 	{
 		pool = D3DPOOL_DEFAULT;
 		usage |= D3DUSAGE_RENDERTARGET;
 	}
-	if(uTexUsageFlags & GX_TEXUSAGE_AUTOGENMIPMAPS)
+	if(uTexUsageFlags & GX_TEXFLAG_AUTOGENMIPMAPS)
 	{
 		usage |= D3DUSAGE_AUTOGENMIPMAP;
 	}

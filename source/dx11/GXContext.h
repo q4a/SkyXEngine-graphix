@@ -57,13 +57,13 @@ public:
 
 	void clear(UINT what, GXCOLOR color = 0, float fDepth = 1.0f, UINT uStencil = 0) override;
 
-	IGXVertexBuffer* createVertexBuffer(size_t size, GX_BUFFER_USAGE usage, void *pInitData = NULL) override;
-	IGXIndexBuffer* createIndexBuffer(size_t size, GX_BUFFER_USAGE usage, GXINDEXTYPE it, void *pInitData = NULL) override;
+	IGXVertexBuffer* createVertexBuffer(size_t size, GXBUFFER_USAGE usage, void *pInitData = NULL) override;
+	IGXIndexBuffer* createIndexBuffer(size_t size, GXBUFFER_USAGE usage, GXINDEXTYPE it, void *pInitData = NULL) override;
 	
 	void destroyIndexBuffer(IGXIndexBuffer * pBuff);
 	void destroyVertexBuffer(IGXVertexBuffer * pBuff);
 
-	IGXVertexDeclaration* createVertexDeclaration(const GXVERTEXELEMENT *pDecl) override;
+	IGXVertexDeclaration* createVertexDeclaration(const GXVertexElement *pDecl) override;
 	void destroyVertexDeclaration(IGXVertexDeclaration * pDecl);
 
 	void setIndexBuffer(IGXIndexBuffer *pBuff) override;
@@ -85,23 +85,23 @@ public:
 	//void destroyShader(IGXShader * pSH);
 	//void setShader(IGXShader * pSH);
 
-	IGXVertexShader* createVertexShader(const char *szFile, GXMACRO *pDefs = NULL) override;
-	IGXVertexShader* createVertexShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) override;
+	IGXVertexShader* createVertexShader(const char *szFile, GXMacro *pDefs = NULL) override;
+	IGXVertexShader* createVertexShaderFromString(const char * szCode, GXMacro *pDefs = NULL) override;
 	IGXVertexShader* createVertexShaderFromBin(void *pData, UINT uSize) override;
 	void setVertexShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) override;
 
-	IGXPixelShader* createPixelShader(const char *szFile, GXMACRO *pDefs = NULL) override;
-	IGXPixelShader* createPixelShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) override;
+	IGXPixelShader* createPixelShader(const char *szFile, GXMacro *pDefs = NULL) override;
+	IGXPixelShader* createPixelShaderFromString(const char * szCode, GXMacro *pDefs = NULL) override;
 	IGXPixelShader* createPixelShaderFromBin(void *pData, UINT uSize) override;
 	void setPixelShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) override;
 
-	IGXGeometryShader* createGeometryShader(const char *szFile, GXMACRO *pDefs = NULL) override;
-	IGXGeometryShader* createGeometryShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) override;
+	IGXGeometryShader* createGeometryShader(const char *szFile, GXMacro *pDefs = NULL) override;
+	IGXGeometryShader* createGeometryShaderFromString(const char * szCode, GXMacro *pDefs = NULL) override;
 	IGXGeometryShader* createGeometryShaderFromBin(void *pData, UINT uSize) override;
 	void setGeometryShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) override;
 
-	IGXComputeShader* createComputeShader(const char *szFile, GXMACRO *pDefs = NULL) override;
-	IGXComputeShader* createComputeShaderFromString(const char * szCode, GXMACRO *pDefs = NULL) override;
+	IGXComputeShader* createComputeShader(const char *szFile, GXMacro *pDefs = NULL) override;
+	IGXComputeShader* createComputeShaderFromString(const char * szCode, GXMacro *pDefs = NULL) override;
 	IGXComputeShader* createComputeShaderFromBin(void *pData, UINT uSize) override;
 	void setComputeShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) override;
 
@@ -148,25 +148,25 @@ public:
 	void setUnorderedAccessViewCS(IGXBaseTexture *pUAV, UINT uStage = 0) override;
 	IGXBaseTexture* getUnorderedAccessViewCS(UINT uStage = 0) override;
 	
-	IGXBlendState* createBlendState(GXBLEND_DESC *pBlendDesc) override;
+	IGXBlendState* createBlendState(GXBlendDesc *pBlendDesc) override;
 	void destroyBlendState(IGXBlendState *pState);
 	void setBlendState(IGXBlendState *pState) override;
 	IGXBlendState* getBlendState() override;
 	void setBlendFactor(GXCOLOR val) override;
 
-	IGXDepthStencilState* createDepthStencilState(GXDEPTH_STENCIL_DESC *pDSDesc) override;
+	IGXDepthStencilState* createDepthStencilState(GXDepthStencilDesc *pDSDesc) override;
 	void destroyDepthStencilState(IGXDepthStencilState *pState);
 	void setDepthStencilState(IGXDepthStencilState *pState) override;
 	IGXDepthStencilState* getDepthStencilState() override;
 	void setStencilRef(UINT uVal) override;
 
-	IGXRasterizerState* createRasterizerState(GXRASTERIZER_DESC *pDSDesc) override;
+	IGXRasterizerState* createRasterizerState(GXRasterizerDesc *pDSDesc) override;
 	void destroyRasterizerState(IGXRasterizerState *pState);
 	void setRasterizerState(IGXRasterizerState *pState) override;
 	IGXRasterizerState* getRasterizerState() override;
 	void setScissorRect(int iTop, int iRight, int iBottom, int iLeft) override;
 
-	IGXSamplerState* createSamplerState(GXSAMPLER_DESC *pSamplerDesc) override;
+	IGXSamplerState* createSamplerState(GXSamplerDesc *pSamplerDesc) override;
 	void destroySamplerState(IGXSamplerState *pState);
 	void setSamplerState(IGXSamplerState *pState, UINT uSlot) override;
 	IGXSamplerState* getSamplerState(UINT uSlot) override;
@@ -196,15 +196,15 @@ public:
 	GXTEXTURE_TYPE getTextureTypeFromFile(const char *szFile) override;
 	bool saveTextureToFile(const char *szTarget, IGXBaseTexture *pTexture) override;
 
-	const GX_FRAME_STATS* getFrameStats() override
+	const GXFrameStats* getFrameStats() override
 	{
 		return(&m_frameStats);
 	}
-	const GX_GPU_MEMORY_STATS* getMemoryStats() override
+	const GXAdapterMemoryStats* getMemoryStats() override
 	{
 		return(&m_memoryStats);
 	}
-	const GX_ADAPTER_DESC* getAdapterDesc() override
+	const GXAdapterDesc* getAdapterDesc() override
 	{
 		return(&m_adapterDesc);
 	}
@@ -265,9 +265,9 @@ protected:
 	void onLostDevice();
 	void onResetDevice();
 
-	GX_FRAME_STATS m_frameStats;
-	GX_GPU_MEMORY_STATS m_memoryStats;
-	GX_ADAPTER_DESC m_adapterDesc;
+	GXFrameStats m_frameStats;
+	GXAdapterMemoryStats m_memoryStats;
+	GXAdapterDesc m_adapterDesc;
 
 	HWND m_hWnd;
 
@@ -291,7 +291,7 @@ protected:
 
 	IGXBlendState *m_pBlendState = NULL;
 	IGXBlendState *m_pDefaultBlendState = NULL;
-	GXCOLOR m_blendFactor = GXCOLOR_ARGB(255, 255, 255, 255);
+	GXCOLOR m_blendFactor = GX_COLOR_ARGB(255, 255, 255, 255);
 
 	IGXDepthStencilSurface *m_pDepthStencilSurface = NULL;
 	IGXDepthStencilSurface *m_pDefaultDepthStencilSurface = NULL;

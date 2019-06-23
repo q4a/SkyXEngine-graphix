@@ -5,11 +5,11 @@ Site: dogmanet.ru
 See the license in LICENSE
 *****************************************************/
 
-#ifndef __SURFACES_H
-#define __SURFACES_H
+#ifndef __GXSURFACES_H
+#define __GXSURFACES_H
 
 #include <common/types.h>
-#include <ibase.h>
+#include "ibase.h"
 
 //##########################################################################
 

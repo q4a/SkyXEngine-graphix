@@ -9,7 +9,7 @@ void CGXVertexDeclaration::Release()
 	}
 }
 
-CGXVertexDeclaration::CGXVertexDeclaration(IDirect3DDevice9 *pDevice, CGXContext * pRender, const GXVERTEXELEMENT * pDecl):
+CGXVertexDeclaration::CGXVertexDeclaration(IDirect3DDevice9 *pDevice, CGXContext * pRender, const GXVertexElement * pDecl):
 	m_pRender(pRender)
 {
 	UINT uDeclCount = 0;

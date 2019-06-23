@@ -5,11 +5,11 @@ Site: dogmanet.ru
 See the license in LICENSE
 *****************************************************/
 
-#ifndef __STATES_H
-#define __STATES_H
+#ifndef __GXSTATES_H
+#define __GXSTATES_H
 
 #include <common/types.h>
-#include <ibase.h>
+#include "ibase.h"
 
 //##########################################################################
 

@@ -187,15 +187,15 @@ IGXVertexBuffer * CGXContext::createVertexBuffer(size_t size, UINT flags, void *
 	m_pGL->glBindBuffer(GL_ARRAY_BUFFER, pBuff->m_pBuffer);
 	UINT usage = GL_STATIC_DRAW;
 
-	if(flags & GX_BUFFER_USAGE_STATIC)
+	if(flags & GXBUFFER_USAGE_STATIC)
 	{
 		usage = GL_STATIC_DRAW;
 	}
-	if(flags & GX_BUFFER_USAGE_DYNAMIC)
+	if(flags & GXBUFFER_USAGE_DYNAMIC)
 	{
 		usage = GL_DYNAMIC_DRAW;
 	}
-	if(flags & GX_BUFFER_USAGE_STREAM)
+	if(flags & GXBUFFER_USAGE_STREAM)
 	{
 		usage = GL_STREAM_DRAW;
 	}
@@ -218,15 +218,15 @@ IGXIndexBuffer * CGXContext::createIndexBuffer(size_t size, UINT flags, GXINDEXT
 	m_pGL->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pBuff->m_pBuffer);
 	UINT usage = GL_STATIC_DRAW;
 
-	if(flags & GX_BUFFER_USAGE_STATIC)
+	if(flags & GXBUFFER_USAGE_STATIC)
 	{
 		usage = GL_STATIC_DRAW;
 	}
-	if(flags & GX_BUFFER_USAGE_DYNAMIC)
+	if(flags & GXBUFFER_USAGE_DYNAMIC)
 	{
 		usage = GL_DYNAMIC_DRAW;
 	}
-	if(flags & GX_BUFFER_USAGE_STREAM)
+	if(flags & GXBUFFER_USAGE_STREAM)
 	{
 		usage = GL_STREAM_DRAW;
 	}
@@ -282,7 +282,7 @@ void CGXContext::destroyVertexBuffer(IGXVertexBuffer * pBuff)
 	mem_delete(pBuff);
 }
 
-IGXVertexDeclaration * CGXContext::createVertexDeclaration(const GXVERTEXELEMENT * pDecl)
+IGXVertexDeclaration * CGXContext::createVertexDeclaration(const GXVertexElement * pDecl)
 {
 	CGXVertexDeclaration * vd = new CGXVertexDeclaration(this, pDecl);
 

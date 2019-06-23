@@ -39,7 +39,7 @@ public:
 	void destroyIndexBuffer(IGXIndexBuffer * pBuff);
 	void destroyVertexBuffer(IGXVertexBuffer * pBuff);
 
-	IGXVertexDeclaration * createVertexDeclaration(const GXVERTEXELEMENT * pDecl);
+	IGXVertexDeclaration * createVertexDeclaration(const GXVertexElement * pDecl);
 	void destroyVertexDeclaration(IGXVertexDeclaration * pDecl);
 
 	void setIndexBuffer(IGXIndexBuffer * pBuff);

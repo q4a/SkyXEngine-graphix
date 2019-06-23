@@ -5,11 +5,12 @@ Site: dogmanet.ru
 See the license in LICENSE
 *****************************************************/
 
-#ifndef __TEXTURES_H
-#define __TEXTURES_H
+#ifndef __GXTEXTURES_H
+#define __GXTEXTURES_H
 
 #include <common/types.h>
-#include <ibase.h>
+#include "ibase.h"
+#include "surfaces.h"
 
 //! deprecated тип блокировки текстур
 enum GXTEXLOCK
