@@ -40,7 +40,7 @@ struct GXMacro
 /*! финальная строка массива макроопределений
  @note Каждый массив должен заканчиваться данной макрофункцией
 */
-#define GX_MACRO_END() {0,0}
+#define GX_MACRO_END() {0, 0}
 
 //##########################################################################
 
@@ -49,7 +49,9 @@ class IGXConstantBuffer: public IGXBaseInterface
 {
 public:
 
-	//! обновление данных буфера
+	/*! обновление данных буфера
+	 @param pData указатель на буфер с данными
+	*/
 	virtual void update(const void *pData) = 0;
 
 	//! возвращает размер буфера в байтах
@@ -61,7 +63,10 @@ class IGXShaderBase: public IGXBaseInterface
 {
 public:
 
-	//записывает бинарный код шейдера в pData, в pSize размер в байтах
+	/*! записывает бинарный код шейдера в pData, в pSize размер в байтах
+	 @param pData не инициализированный (нулевой) указатель на буфер
+	 @param pSize указатель на размер буфера в байтах
+	*/
 	virtual void getData(void *pData, UINT *pSize) = 0;
 };
 
@@ -109,9 +114,17 @@ public:
 class IGXShaderSet: public IGXBaseInterface
 {
 public:
+
+	//! возвращает указатель на интерфейс пиксельного шейдера
 	virtual IGXPixelShader* getPixelShader() = 0;
+
+	//! возвращает указатель на интерфейс геометрического шейдера
 	virtual IGXGeometryShader* getGeometryShader() = 0;
+
+	//! возвращает указатель на интерфейс вершинного шейдера
 	virtual IGXVertexShader* getVertexShader() = 0;
+
+	//! возвращает указатель на интерфейс вычислительного шейдера
 	virtual IGXComputeShader* getComputeShader() = 0;
 };
 

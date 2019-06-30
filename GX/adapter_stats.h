@@ -61,7 +61,7 @@ struct GXAdapterMemoryStats
 	size_t sizeShaderConstBytes;
 };
 
-//! описание GPU
+//! описание адаптера
 struct GXAdapterDesc
 {
 	//! название адаптера
