@@ -15,7 +15,7 @@ class CGXSamplerState: public IGXSamplerState
 	CGXContext *m_pRender;
 	ID3D11SamplerState *m_pStateBlock;
 
-	GXSAMPLER_DESC m_desc;
+	GXSamplerDesc m_desc;
 
 	void onDevRst();
 

@@ -5,7 +5,7 @@ void CGXVertexDeclaration::Release()
 	m_pRender->destroyVertexDeclaration(this);
 }
 
-CGXVertexDeclaration::CGXVertexDeclaration(CGXContext * pRender, const GXVERTEXELEMENT * pDecl):
+CGXVertexDeclaration::CGXVertexDeclaration(CGXContext * pRender, const GXVertexElement * pDecl):
 	m_pRender(pRender),
 	m_uDeclCount(0),
 	m_pDeclItems(NULL)

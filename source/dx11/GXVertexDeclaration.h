@@ -7,7 +7,7 @@ class CGXVertexDeclaration: public IGXVertexDeclaration
 {
 	friend class CGXContext;
 	
-	CGXVertexDeclaration(ID3D11Device *pDevice, CGXContext *pRender, const GXVERTEXELEMENT *pDecl);
+	CGXVertexDeclaration(ID3D11Device *pDevice, CGXContext *pRender, const GXVertexElement *pDecl);
 	~CGXVertexDeclaration();
 	CGXContext *m_pRender;
 		

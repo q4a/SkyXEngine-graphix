@@ -18,7 +18,7 @@ class CGXVertexDeclaration: public IGXVertexDeclaration
 		const GLvoid * pointer​;
 	};
 
-	CGXVertexDeclaration(CGXContext * pRender, const GXVERTEXELEMENT * pDecl);
+	CGXVertexDeclaration(CGXContext * pRender, const GXVertexElement * pDecl);
 	~CGXVertexDeclaration();
 	CGXContext * m_pRender;
 

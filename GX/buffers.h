@@ -5,8 +5,8 @@ Site: dogmanet.ru
 See the license in LICENSE
 *****************************************************/
 
-#ifndef __BUFFERS_H
-#define __BUFFERS_H
+#ifndef __GXBUFFERS_H
+#define __GXBUFFERS_H
 
 #include <common/types.h>
 #include "ibase.h"

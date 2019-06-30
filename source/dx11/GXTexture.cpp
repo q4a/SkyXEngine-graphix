@@ -173,7 +173,7 @@ IGXSurface* CGXTexture2D::asRenderTarget()
 {
 	if(!(m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET))
 	{
-		m_pRender->debugMessage(GX_LOG_ERROR, "Unable to use CGXTexture2D::asRenderTarget() on texture created without GX_TEXUSAGE_RENDERTARGET flag!");
+		m_pRender->debugMessage(GX_LOG_ERROR, "Unable to use CGXTexture2D::asRenderTarget() on texture created without GX_TEXFLAG_RENDERTARGET flag!");
 		return(NULL);
 	}
 	
@@ -229,7 +229,7 @@ IGXSurface* CGXTexture3D::asRenderTarget()
 {
 	if(!(m_descTex3D.BindFlags & D3D11_BIND_RENDER_TARGET))
 	{
-		m_pRender->debugMessage(GX_LOG_ERROR, "Unable to use CGXTexture3D::asRenderTarget() on texture created without GX_TEXUSAGE_RENDERTARGET flag!");
+		m_pRender->debugMessage(GX_LOG_ERROR, "Unable to use CGXTexture3D::asRenderTarget() on texture created without GX_TEXFLAG_RENDERTARGET flag!");
 		return(NULL);
 	}
 	if(m_pSurfaceRT)
@@ -404,7 +404,7 @@ IGXSurface* CGXTextureCube::asRenderTarget()
 {
 	if(!(m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET))
 	{
-		m_pRender->debugMessage(GX_LOG_ERROR, "Unable to use CGXTextureCube::asRenderTarget() on texture created without GX_TEXUSAGE_RENDERTARGET flag!");
+		m_pRender->debugMessage(GX_LOG_ERROR, "Unable to use CGXTextureCube::asRenderTarget() on texture created without GX_TEXFLAG_RENDERTARGET flag!");
 		return(NULL);
 	}
 	if(m_pSurfaceRT)

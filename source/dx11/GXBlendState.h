@@ -15,7 +15,7 @@ class CGXBlendState: public IGXBlendState
 
 	CGXContext *m_pRender;
 	ID3D11BlendState *m_pStateBlock = NULL;
-	GXBLEND_DESC m_desc;
+	GXBlendDesc m_desc;
 
 	void onDevLost();
 	void onDevRst();

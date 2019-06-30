@@ -31,15 +31,15 @@ void CGXDepthStencilState::onDevRst()
 	dsDesc.StencilEnable = m_desc.useStencilTest;
 	dsDesc.StencilReadMask = m_desc.u8StencilReadMask;
 	dsDesc.StencilWriteMask = m_desc.u8StencilWriteMask;
-	dsDesc.FrontFace.StencilFunc = (D3D11_COMPARISON_FUNC)m_desc.stencilTestFront.cmpFuncStencil;
-	dsDesc.FrontFace.StencilPassOp = (D3D11_STENCIL_OP)m_desc.stencilTestFront.stencilOpPass;
-	dsDesc.FrontFace.StencilFailOp = (D3D11_STENCIL_OP)m_desc.stencilTestFront.stencilOpFail;
-	dsDesc.FrontFace.StencilDepthFailOp = (D3D11_STENCIL_OP)m_desc.stencilTestFront.stencilOpDepthFail;
+	dsDesc.FrontFace.StencilFunc = (D3D11_COMPARISON_FUNC)m_desc.stencilTestFront.cmpFunc;
+	dsDesc.FrontFace.StencilPassOp = (D3D11_STENCIL_OP)m_desc.stencilTestFront.opPass;
+	dsDesc.FrontFace.StencilFailOp = (D3D11_STENCIL_OP)m_desc.stencilTestFront.opFail;
+	dsDesc.FrontFace.StencilDepthFailOp = (D3D11_STENCIL_OP)m_desc.stencilTestFront.opDepthFail;
 
-	dsDesc.BackFace.StencilFunc = (D3D11_COMPARISON_FUNC)m_desc.stencilTestBack.cmpFuncStencil;
-	dsDesc.BackFace.StencilPassOp = (D3D11_STENCIL_OP)m_desc.stencilTestBack.stencilOpPass;
-	dsDesc.BackFace.StencilFailOp = (D3D11_STENCIL_OP)m_desc.stencilTestBack.stencilOpFail;
-	dsDesc.BackFace.StencilDepthFailOp = (D3D11_STENCIL_OP)m_desc.stencilTestBack.stencilOpDepthFail;
+	dsDesc.BackFace.StencilFunc = (D3D11_COMPARISON_FUNC)m_desc.stencilTestBack.cmpFunc;
+	dsDesc.BackFace.StencilPassOp = (D3D11_STENCIL_OP)m_desc.stencilTestBack.opPass;
+	dsDesc.BackFace.StencilFailOp = (D3D11_STENCIL_OP)m_desc.stencilTestBack.opFail;
+	dsDesc.BackFace.StencilDepthFailOp = (D3D11_STENCIL_OP)m_desc.stencilTestBack.opDepthFail;
 
 	DX_CALL(m_pDevice->CreateDepthStencilState(&dsDesc, &m_pStateBlock));
 }

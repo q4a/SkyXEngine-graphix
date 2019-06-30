@@ -5,8 +5,8 @@ Site: dogmanet.ru
 See the license in LICENSE
 *****************************************************/
 
-#ifndef __CONTEXT_H
-#define __CONTEXT_H
+#ifndef __GXCONTEXT_H
+#define __GXCONTEXT_H
 
 #include "color.h"
 #include "ibase.h"

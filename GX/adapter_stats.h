@@ -5,8 +5,8 @@ Site: dogmanet.ru
 See the license in LICENSE
 *****************************************************/
 
-#ifndef __GPU_STATS_H
-#define __GPU_STATS_H
+#ifndef __GXADAPTER_STATS_H
+#define __GXADAPTER_STATS_H
 
 #include <common/types.h>
 
@@ -68,7 +68,7 @@ struct GXAdapterDesc
 	wchar_t szDescription[128];
 
 	//! размер видеопамяти в байтах
-	size_t sizeTotalmemory;
+	size_t sizeTotalMemory;
 };
 
 #endif

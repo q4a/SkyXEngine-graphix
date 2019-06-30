@@ -5,8 +5,8 @@ Site: dogmanet.ru
 See the license in LICENSE
 *****************************************************/
 
-#ifndef __COLOR_H
-#define __COLOR_H
+#ifndef __GXCOLOR_H
+#define __GXCOLOR_H
 
 #include <common/types.h>
 

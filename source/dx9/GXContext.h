@@ -54,7 +54,7 @@ public:
 	void destroyIndexBuffer(IGXIndexBuffer * pBuff);
 	void destroyVertexBuffer(IGXVertexBuffer * pBuff);
 
-	IGXVertexDeclaration * createVertexDeclaration(const GXVERTEXELEMENT * pDecl);
+	IGXVertexDeclaration * createVertexDeclaration(const GXVertexElement * pDecl);
 	void destroyVertexDeclaration(IGXVertexDeclaration * pDecl);
 
 	void setIndexBuffer(IGXIndexBuffer * pBuff);
@@ -74,13 +74,13 @@ public:
 	//void destroyShader(IGXShader * pSH);
 	//void setShader(IGXShader * pSH);
 
-	IGXVertexShader * createVertexShader(const char * szFile, GXMACRO *pDefs = NULL);
-	IGXVertexShader * createVertexShaderFromString(const char * szCode, GXMACRO *pDefs = NULL);
+	IGXVertexShader * createVertexShader(const char * szFile, GXMacro *pDefs = NULL);
+	IGXVertexShader * createVertexShaderFromString(const char * szCode, GXMacro *pDefs = NULL);
 	IGXVertexShader * createVertexShader(void *pData, UINT uSize);
 	void destroyVertexShader(IGXVertexShader * pSH);
 
-	IGXPixelShader * createPixelShader(const char * szFile, GXMACRO *pDefs = NULL);
-	IGXPixelShader * createPixelShaderFromString(const char * szCode, GXMACRO *pDefs = NULL);
+	IGXPixelShader * createPixelShader(const char * szFile, GXMacro *pDefs = NULL);
+	IGXPixelShader * createPixelShaderFromString(const char * szCode, GXMacro *pDefs = NULL);
 	IGXPixelShader * createPixelShader(void *pData, UINT uSize);
 	void destroyPixelShader(IGXPixelShader * pSH);
 
@@ -118,25 +118,25 @@ public:
 	void setTexture(IGXBaseTexture *pTexture, UINT uStage = 0);
 	IGXBaseTexture *getTexture(UINT uStage = 0);
 
-	IGXBlendState *createBlendState(GXBLEND_DESC *pBlendDesc);
+	IGXBlendState *createBlendState(GXBlendDesc *pBlendDesc);
 	void destroyBlendState(IGXBlendState *pState);
 	void setBlendState(IGXBlendState *pState);
 	IGXBlendState *getBlendState();
 	void setBlendFactor(GXCOLOR val);
 
-	IGXDepthStencilState *createDepthStencilState(GXDEPTH_STENCIL_DESC *pDSDesc);
+	IGXDepthStencilState *createDepthStencilState(GXDepthStencilDesc *pDSDesc);
 	void destroyDepthStencilState(IGXDepthStencilState *pState);
 	void setDepthStencilState(IGXDepthStencilState *pState);
 	IGXDepthStencilState *getDepthStencilState();
 	void setStencilRef(UINT uVal);
 
-	IGXRasterizerState *createRasterizerState(GXRASTERIZER_DESC *pDSDesc);
+	IGXRasterizerState *createRasterizerState(GXRasterizerDesc *pDSDesc);
 	void destroyRasterizerState(IGXRasterizerState *pState);
 	void setRasterizerState(IGXRasterizerState *pState);
 	IGXRasterizerState *getRasterizerState();
 	void setScissorRect(int iTop, int iRight, int iBottom, int iLeft);
 
-	IGXSamplerState *createSamplerState(GXSAMPLER_DESC *pSamplerDesc);
+	IGXSamplerState *createSamplerState(GXSamplerDesc *pSamplerDesc);
 	void destroySamplerState(IGXSamplerState *pState);
 	void setSamplerState(IGXSamplerState *pState, UINT uSlot);
 	IGXSamplerState *getSamplerState(UINT uSlot);
@@ -159,7 +159,7 @@ public:
 	GXTEXTURE_TYPE getTextureTypeFromFile(const char *szFile);
 	bool saveTextureToFile(const char *szTarget, IGXBaseTexture *pTexture);
 
-	const GX_FRAME_STATS *getFrameStats()
+	const GXFrameStats *getFrameStats()
 	{
 		return(&m_frameStats);
 	}
@@ -213,7 +213,7 @@ protected:
 
 	IGXBlendState *m_pBlendState = NULL;
 	IGXBlendState *m_pDefaultBlendState = NULL;
-	GXCOLOR m_blendFactor = GXCOLOR_ARGB(255, 255, 255, 255);
+	GXCOLOR m_blendFactor = GX_COLOR_ARGB(255, 255, 255, 255);
 
 	IGXDepthStencilSurface *m_pDepthStencilSurface = NULL;
 	IDirect3DSurface9 *m_pDefaultDepthStencilSurface = NULL;
@@ -268,7 +268,7 @@ protected:
 	void _endInstancing();
 	void _updateStats(UINT uPrimCount);
 
-	GX_FRAME_STATS m_frameStats;
+	GXFrameStats m_frameStats;
 };
 
 #endif

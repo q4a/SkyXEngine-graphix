@@ -10,7 +10,7 @@ void CGXVertexDeclaration::Release()
 	}
 }
 
-CGXVertexDeclaration::CGXVertexDeclaration(ID3D11Device *pDevice, CGXContext *pRender, const GXVERTEXELEMENT *pDecl):
+CGXVertexDeclaration::CGXVertexDeclaration(ID3D11Device *pDevice, CGXContext *pRender, const GXVertexElement *pDecl):
 	m_pRender(pRender)
 {
 	UINT uDeclCount = 0;
