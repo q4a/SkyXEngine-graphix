@@ -9,102 +9,102 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\source\dx11\GXBlendState.h">
+    <ClInclude Include="..\..\..\source\dx11\GXBlendState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx11\GXContext.h">
+    <ClInclude Include="..\..\..\source\dx11\GXContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx11\GXDepthStencilState.h">
+    <ClInclude Include="..\..\..\source\dx11\GXDepthStencilState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx11\GXDepthStencilSurface.h">
+    <ClInclude Include="..\..\..\source\dx11\GXDepthStencilSurface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx11\GXIndexBuffer.h">
+    <ClInclude Include="..\..\..\source\dx11\GXIndexBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx11\GXRasterizerState.h">
+    <ClInclude Include="..\..\..\source\dx11\GXRasterizerState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx11\GXRenderBuffer.h">
+    <ClInclude Include="..\..\..\source\dx11\GXRenderBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx11\GXSamplerState.h">
+    <ClInclude Include="..\..\..\source\dx11\GXSamplerState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx11\GXShader.h">
+    <ClInclude Include="..\..\..\source\dx11\GXShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx11\GXSurface.h">
+    <ClInclude Include="..\..\..\source\dx11\GXSurface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx11\GXSwapChain.h">
+    <ClInclude Include="..\..\..\source\dx11\GXSwapChain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx11\GXTexture.h">
+    <ClInclude Include="..\..\..\source\dx11\GXTexture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx11\GXVertexBuffer.h">
+    <ClInclude Include="..\..\..\source\dx11\GXVertexBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx11\GXVertexDeclaration.h">
+    <ClInclude Include="..\..\..\source\dx11\GXVertexDeclaration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx11\GXConstantBuffer.h">
+    <ClInclude Include="..\..\..\source\dx11\GXConstantBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\graphix.h">
+    <ClInclude Include="..\..\..\graphix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\source\dx11\GXBlendState.cpp">
+    <ClCompile Include="..\..\..\source\dx11\GXBlendState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx11\GXContext.cpp">
+    <ClCompile Include="..\..\..\source\dx11\GXContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx11\GXDepthStencilState.cpp">
+    <ClCompile Include="..\..\..\source\dx11\GXDepthStencilState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx11\GXDepthStencilSurface.cpp">
+    <ClCompile Include="..\..\..\source\dx11\GXDepthStencilSurface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx11\GXIndexBuffer.cpp">
+    <ClCompile Include="..\..\..\source\dx11\GXIndexBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx11\GXRasterizerState.cpp">
+    <ClCompile Include="..\..\..\source\dx11\GXRasterizerState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx11\GXRenderBuffer.cpp">
+    <ClCompile Include="..\..\..\source\dx11\GXRenderBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx11\GXSamplerState.cpp">
+    <ClCompile Include="..\..\..\source\dx11\GXSamplerState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx11\GXShader.cpp">
+    <ClCompile Include="..\..\..\source\dx11\GXShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx11\GXSurface.cpp">
+    <ClCompile Include="..\..\..\source\dx11\GXSurface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx11\GXSwapChain.cpp">
+    <ClCompile Include="..\..\..\source\dx11\GXSwapChain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx11\GXTexture.cpp">
+    <ClCompile Include="..\..\..\source\dx11\GXTexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx11\GXVertexBuffer.cpp">
+    <ClCompile Include="..\..\..\source\dx11\GXVertexBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx11\GXVertexDeclaration.cpp">
+    <ClCompile Include="..\..\..\source\dx11\GXVertexDeclaration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx11\dllmain.cpp">
+    <ClCompile Include="..\..\..\source\dx11\dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx11\GXConstantBuffer.cpp">
+    <ClCompile Include="..\..\..\source\dx11\GXConstantBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

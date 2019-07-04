@@ -9,96 +9,96 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\source\dx9\GXContext.h">
+    <ClInclude Include="..\..\..\source\dx9\GXContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx9\GXIndexBuffer.h">
+    <ClInclude Include="..\..\..\source\dx9\GXIndexBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx9\GXRenderBuffer.h">
+    <ClInclude Include="..\..\..\source\dx9\GXRenderBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx9\GXShader.h">
+    <ClInclude Include="..\..\..\source\dx9\GXShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx9\GXVertexBuffer.h">
+    <ClInclude Include="..\..\..\source\dx9\GXVertexBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx9\GXVertexDeclaration.h">
+    <ClInclude Include="..\..\..\source\dx9\GXVertexDeclaration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx9\GXSamplerState.h">
+    <ClInclude Include="..\..\..\source\dx9\GXSamplerState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx9\GXRasterizerState.h">
+    <ClInclude Include="..\..\..\source\dx9\GXRasterizerState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx9\GXDepthStencilState.h">
+    <ClInclude Include="..\..\..\source\dx9\GXDepthStencilState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx9\GXBlendState.h">
+    <ClInclude Include="..\..\..\source\dx9\GXBlendState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx9\GXDepthStencilSurface.h">
+    <ClInclude Include="..\..\..\source\dx9\GXDepthStencilSurface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx9\GXSurface.h">
+    <ClInclude Include="..\..\..\source\dx9\GXSurface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx9\GXTexture.h">
+    <ClInclude Include="..\..\..\source\dx9\GXTexture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\graphix.h">
+    <ClInclude Include="..\..\..\graphix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\source\dx9\GXSwapChain.h">
+    <ClInclude Include="..\..\..\source\dx9\GXSwapChain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\source\dx9\GXContext.cpp">
+    <ClCompile Include="..\..\..\source\dx9\GXContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx9\GXIndexBuffer.cpp">
+    <ClCompile Include="..\..\..\source\dx9\GXIndexBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx9\GXRenderBuffer.cpp">
+    <ClCompile Include="..\..\..\source\dx9\GXRenderBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx9\GXShader.cpp">
+    <ClCompile Include="..\..\..\source\dx9\GXShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx9\GXVertexBuffer.cpp">
+    <ClCompile Include="..\..\..\source\dx9\GXVertexBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx9\GXVertexDeclaration.cpp">
+    <ClCompile Include="..\..\..\source\dx9\GXVertexDeclaration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx9\dllmain.cpp">
+    <ClCompile Include="..\..\..\source\dx9\dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx9\GXSamplerState.cpp">
+    <ClCompile Include="..\..\..\source\dx9\GXSamplerState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx9\GXRasterizerState.cpp">
+    <ClCompile Include="..\..\..\source\dx9\GXRasterizerState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx9\GXDepthStencilState.cpp">
+    <ClCompile Include="..\..\..\source\dx9\GXDepthStencilState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx9\GXBlendState.cpp">
+    <ClCompile Include="..\..\..\source\dx9\GXBlendState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx9\GXDepthStencilSurface.cpp">
+    <ClCompile Include="..\..\..\source\dx9\GXDepthStencilSurface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx9\GXSurface.cpp">
+    <ClCompile Include="..\..\..\source\dx9\GXSurface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx9\GXTexture.cpp">
+    <ClCompile Include="..\..\..\source\dx9\GXTexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\source\dx9\GXSwapChain.cpp">
+    <ClCompile Include="..\..\..\source\dx9\GXSwapChain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

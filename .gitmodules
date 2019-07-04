@@ -1,0 +1,3 @@
+[submodule "sdks/common"]
+	path = sdks/common
+	url = https://dev.ds-servers.com/sip/common.git

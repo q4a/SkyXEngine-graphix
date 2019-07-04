@@ -192,9 +192,7 @@ ModelManifest.xml
 
 *.phpt
 libs/
-
-source/s4g/tests/failed/
-source/s4g/tests/
+build/
 
 *.old
 *.orig

@@ -19,40 +19,40 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\graphix.h" />
-    <ClInclude Include="..\..\..\..\source\dx11\GXBlendState.h" />
-    <ClInclude Include="..\..\..\..\source\dx11\GXConstantBuffer.h" />
-    <ClInclude Include="..\..\..\..\source\dx11\GXContext.h" />
-    <ClInclude Include="..\..\..\..\source\dx11\GXDepthStencilState.h" />
-    <ClInclude Include="..\..\..\..\source\dx11\GXDepthStencilSurface.h" />
-    <ClInclude Include="..\..\..\..\source\dx11\GXIndexBuffer.h" />
-    <ClInclude Include="..\..\..\..\source\dx11\GXRasterizerState.h" />
-    <ClInclude Include="..\..\..\..\source\dx11\GXRenderBuffer.h" />
-    <ClInclude Include="..\..\..\..\source\dx11\GXSamplerState.h" />
-    <ClInclude Include="..\..\..\..\source\dx11\GXShader.h" />
-    <ClInclude Include="..\..\..\..\source\dx11\GXSurface.h" />
-    <ClInclude Include="..\..\..\..\source\dx11\GXSwapChain.h" />
-    <ClInclude Include="..\..\..\..\source\dx11\GXTexture.h" />
-    <ClInclude Include="..\..\..\..\source\dx11\GXVertexBuffer.h" />
-    <ClInclude Include="..\..\..\..\source\dx11\GXVertexDeclaration.h" />
+    <ClInclude Include="..\..\..\graphix.h" />
+    <ClInclude Include="..\..\..\source\dx11\GXBlendState.h" />
+    <ClInclude Include="..\..\..\source\dx11\GXConstantBuffer.h" />
+    <ClInclude Include="..\..\..\source\dx11\GXContext.h" />
+    <ClInclude Include="..\..\..\source\dx11\GXDepthStencilState.h" />
+    <ClInclude Include="..\..\..\source\dx11\GXDepthStencilSurface.h" />
+    <ClInclude Include="..\..\..\source\dx11\GXIndexBuffer.h" />
+    <ClInclude Include="..\..\..\source\dx11\GXRasterizerState.h" />
+    <ClInclude Include="..\..\..\source\dx11\GXRenderBuffer.h" />
+    <ClInclude Include="..\..\..\source\dx11\GXSamplerState.h" />
+    <ClInclude Include="..\..\..\source\dx11\GXShader.h" />
+    <ClInclude Include="..\..\..\source\dx11\GXSurface.h" />
+    <ClInclude Include="..\..\..\source\dx11\GXSwapChain.h" />
+    <ClInclude Include="..\..\..\source\dx11\GXTexture.h" />
+    <ClInclude Include="..\..\..\source\dx11\GXVertexBuffer.h" />
+    <ClInclude Include="..\..\..\source\dx11\GXVertexDeclaration.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\source\dx11\dllmain.cpp" />
-    <ClCompile Include="..\..\..\..\source\dx11\GXBlendState.cpp" />
-    <ClCompile Include="..\..\..\..\source\dx11\GXConstantBuffer.cpp" />
-    <ClCompile Include="..\..\..\..\source\dx11\GXContext.cpp" />
-    <ClCompile Include="..\..\..\..\source\dx11\GXDepthStencilState.cpp" />
-    <ClCompile Include="..\..\..\..\source\dx11\GXDepthStencilSurface.cpp" />
-    <ClCompile Include="..\..\..\..\source\dx11\GXIndexBuffer.cpp" />
-    <ClCompile Include="..\..\..\..\source\dx11\GXRasterizerState.cpp" />
-    <ClCompile Include="..\..\..\..\source\dx11\GXRenderBuffer.cpp" />
-    <ClCompile Include="..\..\..\..\source\dx11\GXSamplerState.cpp" />
-    <ClCompile Include="..\..\..\..\source\dx11\GXShader.cpp" />
-    <ClCompile Include="..\..\..\..\source\dx11\GXSurface.cpp" />
-    <ClCompile Include="..\..\..\..\source\dx11\GXSwapChain.cpp" />
-    <ClCompile Include="..\..\..\..\source\dx11\GXTexture.cpp" />
-    <ClCompile Include="..\..\..\..\source\dx11\GXVertexBuffer.cpp" />
-    <ClCompile Include="..\..\..\..\source\dx11\GXVertexDeclaration.cpp" />
+    <ClCompile Include="..\..\..\source\dx11\dllmain.cpp" />
+    <ClCompile Include="..\..\..\source\dx11\GXBlendState.cpp" />
+    <ClCompile Include="..\..\..\source\dx11\GXConstantBuffer.cpp" />
+    <ClCompile Include="..\..\..\source\dx11\GXContext.cpp" />
+    <ClCompile Include="..\..\..\source\dx11\GXDepthStencilState.cpp" />
+    <ClCompile Include="..\..\..\source\dx11\GXDepthStencilSurface.cpp" />
+    <ClCompile Include="..\..\..\source\dx11\GXIndexBuffer.cpp" />
+    <ClCompile Include="..\..\..\source\dx11\GXRasterizerState.cpp" />
+    <ClCompile Include="..\..\..\source\dx11\GXRenderBuffer.cpp" />
+    <ClCompile Include="..\..\..\source\dx11\GXSamplerState.cpp" />
+    <ClCompile Include="..\..\..\source\dx11\GXShader.cpp" />
+    <ClCompile Include="..\..\..\source\dx11\GXSurface.cpp" />
+    <ClCompile Include="..\..\..\source\dx11\GXSwapChain.cpp" />
+    <ClCompile Include="..\..\..\source\dx11\GXTexture.cpp" />
+    <ClCompile Include="..\..\..\source\dx11\GXVertexBuffer.cpp" />
+    <ClCompile Include="..\..\..\source\dx11\GXVertexDeclaration.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DAFA20F5-5162-4F21-99AF-DB8084D3C557}</ProjectGuid>
@@ -104,28 +104,24 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
-    <OutDir>../../../../../../build/bin/</OutDir>
-    <IncludePath>../../../../../../source/;../../../../../;$(VC_IncludePath);$(WindowsSDK_IncludePath);;../../../../sdks/dx11sdk/Include;</IncludePath>
-    <LibraryPath>../../../../../../libs/;../../../../sdks/dx11sdk/Lib/x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
+    <OutDir>../../../build/bin/</OutDir>
+    <IncludePath>../../../sdks/;$(VC_IncludePath);$(WindowsSDK_IncludePath);../../../sdks/dx11sdk/Include;</IncludePath>
+    <LibraryPath>../../../libs/;../../../sdks/dx11sdk/Lib/x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>../../../../../../source/;../../../../../;$(VC_IncludePath);$(WindowsSDK_IncludePath);;../../../../sdks/dx11sdk/Include;</IncludePath>
-    <LibraryPath>../../../../../../libs/;../../../../sdks/dx11sdk/Lib/x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
-    <LinkIncremental>true</LinkIncremental>
-    <OutDir>../../../../../../build/bin64/</OutDir>
+    <IncludePath>../../../sdks/;$(VC_IncludePath);$(WindowsSDK_IncludePath);../../../sdks/dx11sdk/Include;</IncludePath>
+    <LibraryPath>../../../libs/;../../../sdks/dx11sdk/Lib/x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
+    <OutDir>../../../build/bin64/</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-    <OutDir>../../../../../../build/bin/</OutDir>
-    <IncludePath>../../../../../../source/;../../../../../;$(VC_IncludePath);$(WindowsSDK_IncludePath);;../../../../sdks/dx11sdk/Include;</IncludePath>
-    <LibraryPath>../../../../../../libs/;../../../../sdks/dx11sdk/Lib/x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
+    <OutDir>../../../build/bin/</OutDir>
+    <IncludePath>../../../sdks/;$(VC_IncludePath);$(WindowsSDK_IncludePath);../../../sdks/dx11sdk/Include;</IncludePath>
+    <LibraryPath>../../../libs/;../../../sdks/dx11sdk/Lib/x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>../../../../../../source/;../../../../../;$(VC_IncludePath);$(WindowsSDK_IncludePath);;../../../../sdks/dx11sdk/Include;</IncludePath>
-    <LibraryPath>../../../../../../libs/;../../../../sdks/dx11sdk/Lib/x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
-    <LinkIncremental>false</LinkIncremental>
-    <OutDir>../../../../../../build/bin64/</OutDir>
+    <IncludePath>../../../sdks/;$(VC_IncludePath);$(WindowsSDK_IncludePath);../../../sdks/dx11sdk/Include;</IncludePath>
+    <LibraryPath>../../../libs/;../../../sdks/dx11sdk/Lib/x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
+    <OutDir>../../../build/bin64/</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -141,7 +137,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>../../../../../../libs/$(TargetName)_d.lib</ImportLibrary>
+      <ImportLibrary>../../../libs/$(TargetName)_d.lib</ImportLibrary>
       <AdditionalDependencies>Crypt32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -159,7 +155,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>../../../../../../libs/$(TargetName)_d.lib</ImportLibrary>
+      <ImportLibrary>../../../libs/$(TargetName)_d.lib</ImportLibrary>
       <AdditionalDependencies>Crypt32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -180,7 +176,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>../../../../../../libs/$(TargetName).lib</ImportLibrary>
+      <ImportLibrary>../../../libs/$(TargetName).lib</ImportLibrary>
       <AdditionalDependencies>Crypt32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -201,7 +197,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>../../../../../../libs/$(TargetName).lib</ImportLibrary>
+      <ImportLibrary>../../../libs/$(TargetName).lib</ImportLibrary>
       <AdditionalDependencies>Crypt32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

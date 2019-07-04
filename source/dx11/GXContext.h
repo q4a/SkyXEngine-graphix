@@ -1,7 +1,7 @@
 #ifndef _CGXContext_H_
 #define _CGXContext_H_
 
-#include <graphix/graphix.h>
+#include "../../graphix.h"
 #include <common/array.h>
 
 #include <d3d11.h>
