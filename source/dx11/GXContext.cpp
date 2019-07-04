@@ -29,11 +29,18 @@
 #	define SHADER_FLAGS (D3DCOMPILE_OPTIMIZATION_LEVEL3 | D3DCOMPILE_PARTIAL_PRECISION | D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY) 
 #endif
 
+CGXContext *CGXContext::ms_pInstance = NULL;
+
 CGXContext::CGXContext():
 	m_pCurIndexBuffer(NULL),
 	m_drawPT(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST),
 	m_pCurRenderBuffer(NULL)
 {
+	if(ms_pInstance)
+	{
+		ms_pInstance->log(GX_LOG_ERROR, "Cannot init second instance!\n");
+	}
+	ms_pInstance = this;
 	memset(&m_sync_state, 0, sizeof(m_sync_state));
 	//memset(&m_dwCurrentSamplerStates, 0, sizeof(m_dwCurrentSamplerStates));
 	memset(&m_pSamplerState, 0, sizeof(m_pSamplerState));
@@ -50,6 +57,11 @@ CGXContext::CGXContext():
 void CGXContext::Release()
 {
 	delete this;
+}
+
+void CGXContext::setLogger(IGXLogger *pLogger)
+{
+	m_pLogger = pLogger;
 }
 
 bool CGXContext::beginFrame()
@@ -168,7 +180,7 @@ BOOL CGXContext::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindo
 		D3D_FEATURE_LEVEL_9_2,
 		D3D_FEATURE_LEVEL_9_1
 	};
-
+	log(GX_LOG_INFO, "Initializing %s context\n", (creationFlags & D3D11_CREATE_DEVICE_DEBUG) ? "debug" : "release");
 	if(FAILED(DX_CALL(D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, featureLevels, ARRAYSIZE(featureLevels), D3D11_SDK_VERSION, &m_pDevice, nullptr, &m_pDeviceContext))))
 	{
 		return(FALSE);
@@ -201,6 +213,9 @@ BOOL CGXContext::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindo
 	{
 		lstrcpyW(m_adapterDesc.szDescription, L"Unknown device");
 	}
+
+	log(GX_LOG_INFO, "Adapter: %S\n", m_adapterDesc.szDescription);
+	log(GX_LOG_INFO, "Available video memory: %uMB\n", (UINT)(m_adapterDesc.sizeTotalMemory / 1024 / 1024));
 
 	mem_release(pDXGIAdapter);
 
@@ -244,12 +259,14 @@ BOOL CGXContext::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindo
 	IGXSurface *pColorTarget = m_pDefaultSwapChain->getColorTarget();
 	setColorTarget(pColorTarget);
 	mem_release(pColorTarget);
-
+	
+	log(GX_LOG_INFO, "Context ready!\n\n");
 	return(TRUE);
 }
 
 CGXContext::~CGXContext()
 {
+	ms_pInstance = NULL;
 	mem_release(m_pDefaultDepthStencilSurface);
 	mem_release(m_pDefaultRasterizerState);
 	mem_release(m_pDefaultSamplerState);
@@ -854,23 +871,61 @@ UINT CGXContext::getIndexSize(DXGI_FORMAT idx)
 	return(1);
 }
 
-IGXVertexShader* CGXContext::createVertexShader(const char *szFile, GXMacro *pDefs)
+static ID3DBlob* CompileShader(CGXContext *pContext, const char *szFile, GXMacro *pDefs, const char *szProfile)
 {
 	ID3DBlob *pShaderBlob = NULL;
 	ID3DBlob *pErrorBlob = NULL;
-	if(FAILED(DX_CALL(D3DX11CompileFromFileA(szFile, (D3D_SHADER_MACRO*)pDefs, NULL, "main", "vs_4_0", SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL))))
+	bool isFailed = FAILED(DX_CALL(D3DX11CompileFromFileA(szFile, (D3D_SHADER_MACRO*)pDefs, NULL, "main", szProfile, SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL)));
+	
+	if(pErrorBlob)
 	{
-		if(pErrorBlob)
-		{
-			size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
-			char *str = (char*)alloca(s + 33);
-			sprintf(str, "Unable to create vertex shader: %s", (char*)pErrorBlob->GetBufferPointer());
-			debugMessage(GX_LOG_ERROR, str);
-			mem_release(pErrorBlob);
-			return(NULL);
-		}
+		pContext->log(GX_LOG_INFO, "Compiling shader %s\n", szFile);
+		size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
+		char *str = (char*)alloca(s + 27);
+		sprintf(str, "%s: \n%s", isFailed ? "Unable to create shader" : "Shader warning", (char*)pErrorBlob->GetBufferPointer());
+		pContext->debugMessage(isFailed ? GX_LOG_ERROR : GX_LOG_WARN, str);
+		mem_release(pErrorBlob);
 	}
-	mem_release(pErrorBlob);
+
+	if(isFailed)
+	{
+		return(NULL);
+	}
+
+	return(pShaderBlob);
+}
+
+static ID3DBlob* CompileShaderFromString(CGXContext *pContext, const char *szCode, GXMacro *pDefs, const char *szProfile)
+{
+	ID3DBlob *pShaderBlob = NULL;
+	ID3DBlob *pErrorBlob = NULL;
+	bool isFailed = FAILED(DX_CALL(D3DX11CompileFromMemory(szCode, strlen(szCode), "memory.vs", (D3D_SHADER_MACRO*)pDefs, NULL, "main", szProfile, SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL)));
+
+	if(pErrorBlob)
+	{
+		size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
+		char *str = (char*)alloca(s + 27);
+		sprintf(str, "%s: \n%s", isFailed ? "Unable to create shader" : "Shader warning", (char*)pErrorBlob->GetBufferPointer());
+		pContext->debugMessage(isFailed ? GX_LOG_ERROR : GX_LOG_WARN, str);
+		mem_release(pErrorBlob);
+	}
+
+	if(isFailed)
+	{
+		return(NULL);
+	}
+
+	return(pShaderBlob);
+}
+
+IGXVertexShader* CGXContext::createVertexShader(const char *szFile, GXMacro *pDefs)
+{
+	ID3DBlob *pShaderBlob = CompileShader(this, szFile, pDefs, "vs_4_0");
+
+	if(!pShaderBlob)
+	{
+		return(NULL);
+	}
 
 	IGXVertexShader *pShader = createVertexShaderFromBin(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
@@ -880,21 +935,12 @@ IGXVertexShader* CGXContext::createVertexShader(const char *szFile, GXMacro *pDe
 }
 IGXVertexShader* CGXContext::createVertexShaderFromString(const char *szCode, GXMacro *pDefs)
 {
-	ID3DBlob *pShaderBlob = NULL;
-	ID3DBlob *pErrorBlob = NULL;
-	if(FAILED(DX_CALL(D3DX11CompileFromMemory(szCode, strlen(szCode), "memory.vs", (D3D_SHADER_MACRO*)pDefs, NULL, "main", "vs_4_0", SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL))))
+	ID3DBlob *pShaderBlob = CompileShaderFromString(this, szCode, pDefs, "vs_4_0");
+
+	if(!pShaderBlob)
 	{
-		if(pErrorBlob)
-		{
-			size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
-			char *str = (char*)alloca(s + 33);
-			sprintf(str, "Unable to create vertex shader: %s", (char*)pErrorBlob->GetBufferPointer());
-			debugMessage(GX_LOG_ERROR, str);
-			mem_release(pErrorBlob);
-			return(NULL);
-		}
+		return(NULL);
 	}
-	mem_release(pErrorBlob);
 
 	IGXVertexShader *pShader = createVertexShaderFromBin(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
@@ -930,21 +976,12 @@ void CGXContext::setVertexShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot)
 
 IGXPixelShader* CGXContext::createPixelShader(const char *szFile, GXMacro *pDefs)
 {
-	ID3DBlob *pShaderBlob = NULL;
-	ID3DBlob *pErrorBlob = NULL;
-	if(FAILED(DX_CALL(D3DX11CompileFromFileA(szFile, (D3D_SHADER_MACRO*)pDefs, NULL, "main", "ps_4_0", SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL))))
+	ID3DBlob *pShaderBlob = CompileShader(this, szFile, pDefs, "ps_4_0");
+
+	if(!pShaderBlob)
 	{
-		if(pErrorBlob)
-		{
-			size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
-			char *str = (char*)alloca(s + 33);
-			sprintf(str, "Unable to create pixel shader: %s", (char*)pErrorBlob->GetBufferPointer());
-			debugMessage(GX_LOG_ERROR, str);
-			mem_release(pErrorBlob);
-			return(NULL);
-		}
+		return(NULL);
 	}
-	mem_release(pErrorBlob);
 
 	IGXPixelShader *pShader = createPixelShaderFromBin(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
@@ -969,21 +1006,12 @@ IGXPixelShader* CGXContext::createPixelShaderFromBin(void *_pData, UINT uSize)
 }
 IGXPixelShader* CGXContext::createPixelShaderFromString(const char *szCode, GXMacro *pDefs)
 {
-	ID3DBlob *pShaderBlob = NULL;
-	ID3DBlob *pErrorBlob = NULL;
-	if(FAILED(DX_CALL(D3DX11CompileFromMemory(szCode, strlen(szCode), "memory.ps", (D3D_SHADER_MACRO*)pDefs, NULL, "main", "ps_4_0", SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL))))
+	ID3DBlob *pShaderBlob = CompileShaderFromString(this, szCode, pDefs, "ps_4_0");
+
+	if(!pShaderBlob)
 	{
-		if(pErrorBlob)
-		{
-			size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
-			char *str = (char*)alloca(s + 33);
-			sprintf(str, "Unable to create pixel shader: %s", (char*)pErrorBlob->GetBufferPointer());
-			debugMessage(GX_LOG_ERROR, str);
-			mem_release(pErrorBlob);
-			return(NULL);
-		}
+		return(NULL);
 	}
-	mem_release(pErrorBlob);
 
 	IGXPixelShader *pShader = createPixelShaderFromBin(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
@@ -1004,21 +1032,12 @@ void CGXContext::setPixelShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot)
 
 IGXGeometryShader* CGXContext::createGeometryShader(const char *szFile, GXMacro *pDefs)
 {
-	ID3DBlob *pShaderBlob = NULL;
-	ID3DBlob *pErrorBlob = NULL;
-	if(FAILED(DX_CALL(D3DX11CompileFromFileA(szFile, (D3D_SHADER_MACRO*)pDefs, NULL, "main", "gs_4_0", SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL))))
+	ID3DBlob *pShaderBlob = CompileShader(this, szFile, pDefs, "gs_4_0");
+
+	if(!pShaderBlob)
 	{
-		if(pErrorBlob)
-		{
-			size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
-			char *str = (char*)alloca(s + 35);
-			sprintf(str, "Unable to create geometry shader!\n%s", (char*)pErrorBlob->GetBufferPointer());
-			debugMessage(GX_LOG_ERROR, str);
-			mem_release(pErrorBlob);
-			return(NULL);
-		}
+		return(NULL);
 	}
-	mem_release(pErrorBlob);
 
 	IGXGeometryShader *pShader = createGeometryShaderFromBin(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
@@ -1043,22 +1062,12 @@ IGXGeometryShader* CGXContext::createGeometryShaderFromBin(void *_pData, UINT uS
 }
 IGXGeometryShader* CGXContext::createGeometryShaderFromString(const char *szCode, GXMacro *pDefs)
 {
-	ID3DBlob *pShaderBlob = NULL;
-	ID3DBlob *pErrorBlob = NULL;
-	if(FAILED(DX_CALL(D3DX11CompileFromMemory(szCode, strlen(szCode), "memory.gs", (D3D_SHADER_MACRO*)pDefs, NULL, "main", "gs_4_0", SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL))))
-	{
-		if(pErrorBlob)
-		{
-			size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
-			char *str = (char*)alloca(s + 35);
-			sprintf(str, "Unable to create geometry shader: %s", (char*)pErrorBlob->GetBufferPointer());
-			debugMessage(GX_LOG_ERROR, str);
-			mem_release(pErrorBlob);
-			return(NULL);
-		}
-	}
-	mem_release(pErrorBlob);
+	ID3DBlob *pShaderBlob = CompileShaderFromString(this, szCode, pDefs, "gs_4_0");
 
+	if(!pShaderBlob)
+	{
+		return(NULL);
+	}
 	IGXGeometryShader *pShader = createGeometryShaderFromBin(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
 	mem_release(pShaderBlob);
@@ -1078,24 +1087,16 @@ void CGXContext::setGeometryShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlo
 
 IGXComputeShader* CGXContext::createComputeShader(const char *szFile, GXMacro *pDefs)
 {
-	ID3DBlob *pShaderBlob = NULL;
-	ID3DBlob *pErrorBlob = NULL;
 	// Prefer higher CS shader profile when possible as CS 5.0 provides better performance on 11-class hardware
 	D3D_FEATURE_LEVEL fl = m_pDevice->GetFeatureLevel();
 	const char *szVersion = m_pDevice->GetFeatureLevel() >= D3D_FEATURE_LEVEL_11_0 ? "cs_5_0" : "cs_4_0";
-	if(FAILED(DX_CALL(D3DX11CompileFromFileA(szFile, (D3D_SHADER_MACRO*)pDefs, NULL, "main", szVersion, SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL))))
+
+	ID3DBlob *pShaderBlob = CompileShader(this, szFile, pDefs, szVersion);
+	
+	if(!pShaderBlob)
 	{
-		if(pErrorBlob)
-		{
-			size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
-			char *str = (char*)alloca(s + 35);
-			sprintf(str, "Unable to create compute shader!\n%s", (char*)pErrorBlob->GetBufferPointer());
-			debugMessage(GX_LOG_ERROR, str);
-			mem_release(pErrorBlob);
-			return(NULL);
-		}
+		return(NULL);
 	}
-	mem_release(pErrorBlob);
 
 	IGXComputeShader *pShader = createComputeShaderFromBin(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
@@ -1120,22 +1121,14 @@ IGXComputeShader* CGXContext::createComputeShaderFromBin(void *_pData, UINT uSiz
 }
 IGXComputeShader* CGXContext::createComputeShaderFromString(const char *szCode, GXMacro *pDefs)
 {
-	ID3DBlob *pShaderBlob = NULL;
-	ID3DBlob *pErrorBlob = NULL;
-	// Prefer higher CS shader profile when possible as CS 5.0 provides better performance on 11-class hardware
-	if(FAILED(DX_CALL(D3DX11CompileFromMemory(szCode, strlen(szCode), "memory.cs", (D3D_SHADER_MACRO*)pDefs, NULL, "main", m_pDevice->GetFeatureLevel() >= D3D_FEATURE_LEVEL_11_0 ? "cs_5_0" : "cs_4_0", SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL))))
+	D3D_FEATURE_LEVEL fl = m_pDevice->GetFeatureLevel();
+	const char *szVersion = m_pDevice->GetFeatureLevel() >= D3D_FEATURE_LEVEL_11_0 ? "cs_5_0" : "cs_4_0";
+	ID3DBlob *pShaderBlob = CompileShaderFromString(this, szCode, pDefs, szVersion);
+
+	if(!pShaderBlob)
 	{
-		if(pErrorBlob)
-		{
-			size_t s = strlen((char*)pErrorBlob->GetBufferPointer());
-			char *str = (char*)alloca(s + 35);
-			sprintf(str, "Unable to create compute shader: %s", (char*)pErrorBlob->GetBufferPointer());
-			debugMessage(GX_LOG_ERROR, str);
-			mem_release(pErrorBlob);
-			return(NULL);
-		}
+		return(NULL);
 	}
-	mem_release(pErrorBlob);
 
 	IGXComputeShader *pShader = createComputeShaderFromBin(pShaderBlob->GetBufferPointer(), (UINT)pShaderBlob->GetBufferSize());
 
@@ -1226,6 +1219,33 @@ void CGXContext::setRenderBuffer(IGXRenderBuffer *pBuff)
 	m_sync_state.bRenderBuffer = TRUE;
 }
 
+void CGXContext::log(GX_LOG lvl, const char *szFormat, ...)
+{
+	if(m_pLogger)
+	{
+		va_list va;
+		va_start(va, szFormat);
+		size_t len = _vscprintf(szFormat, va) + 1;
+		char * buf = (char*)alloca(len * sizeof(char));
+		vsprintf(buf, szFormat, va);
+		va_end(va);
+
+		switch(lvl)
+		{
+		case GX_LOG_INFO:
+			m_pLogger->logInfo(buf);
+			break;
+		case GX_LOG_WARN:
+			m_pLogger->logWarning(buf);
+			break;
+		case GX_LOG_ERROR:
+			m_pLogger->logError(buf);
+			break;
+		default:
+			break;
+		}
+	}
+}
 void CGXContext::debugMessage(GX_LOG lvl, const char *msg)
 {
 	switch(lvl)
@@ -1242,6 +1262,8 @@ void CGXContext::debugMessage(GX_LOG lvl, const char *msg)
 	}
 	OutputDebugString(msg);
 	OutputDebugString("\n");
+
+	ms_pInstance->log(lvl, "%s\n", msg);
 }
 
 void CGXContext::logDXcall(const char *szCondeString, HRESULT hr)
@@ -1920,7 +1942,7 @@ IGXTexture2D* CGXContext::createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLe
 
 	DX_CALL(m_pDevice->CreateShaderResourceView(pTex->m_pTexture, &pTex->m_descSRV, &pTex->m_pSRV));
 
-	addBytesTextures(getTextureMemPitch(pTex->m_uWidth, pTex->m_format) * pTex->m_uHeight, true, pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
+	addBytesTextures(getTextureMemPitch(pTex->m_uWidth, pTex->m_format) * pTex->m_uHeight, true, !!(pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET));
 
 	if(uTexUsageFlags & GX_TEXFLAG_UNORDERED_ACCESS)
 	{
@@ -2010,7 +2032,7 @@ IGXTexture3D* CGXContext::createTexture3D(UINT uWidth, UINT uHeight, UINT uDepth
 
 	DX_CALL(m_pDevice->CreateShaderResourceView(pTex->m_pTexture, &pTex->m_descSRV, &pTex->m_pSRV));
 
-	addBytesTextures(getTextureMemPitch(pTex->m_uDepth, pTex->m_format) * pTex->m_uWidth * pTex->m_uHeight, true, pTex->m_descTex3D.BindFlags & D3D11_BIND_RENDER_TARGET);
+	addBytesTextures(getTextureMemPitch(pTex->m_uDepth, pTex->m_format) * pTex->m_uWidth * pTex->m_uHeight, true, !!(pTex->m_descTex3D.BindFlags & D3D11_BIND_RENDER_TARGET));
 
 	if(uTexUsageFlags & GX_TEXFLAG_UNORDERED_ACCESS)
 	{
@@ -2081,7 +2103,7 @@ IGXTextureCube* CGXContext::createTextureCube(UINT uSize, UINT uMipLevels, UINT 
 
 	DX_CALL(m_pDevice->CreateShaderResourceView(pTex->m_pTexture, &pTex->m_descSRV, &pTex->m_pSRV));
 
-	addBytesTextures(getTextureMemPitch(pTex->m_uSize, pTex->m_format) * pTex->m_uSize * 6, true, pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
+	addBytesTextures(getTextureMemPitch(pTex->m_uSize, pTex->m_format) * pTex->m_uSize * 6, true, !!(pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET));
 
 	if(uTexUsageFlags & GX_TEXFLAG_UNORDERED_ACCESS)
 	{
@@ -2332,7 +2354,7 @@ IGXTexture2D* CGXContext::createTexture2DFromFile(const char *szFileName, UINT u
 
 	DX_CALL(m_pDevice->CreateShaderResourceView(pTex->m_pTexture, &pTex->m_descSRV, &pTex->m_pSRV));
 	
-	addBytesTextures(getTextureMemPitch(pTex->m_uWidth, pTex->m_format) * pTex->m_uHeight, true, pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
+	addBytesTextures(getTextureMemPitch(pTex->m_uWidth, pTex->m_format) * pTex->m_uHeight, true, !!(pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET));
 
 	return(pTex);
 }
@@ -2359,8 +2381,7 @@ IGXTextureCube* CGXContext::createTextureCubeFromFile(const char *szFileName, UI
 
 	DX_CALL(m_pDevice->CreateShaderResourceView(pTex->m_pTexture, &pTex->m_descSRV, &pTex->m_pSRV));
 
-	addBytesTextures(getTextureMemPitch(pTex->m_uSize, pTex->m_format) * pTex->m_uSize, true, pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
-
+	addBytesTextures(getTextureMemPitch(pTex->m_uSize, pTex->m_format) * pTex->m_uSize, true, !!(pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET));
 
 	return(pTex);
 }

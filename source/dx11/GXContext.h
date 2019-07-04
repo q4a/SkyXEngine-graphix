@@ -44,6 +44,7 @@ public:
 	BOOL initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindowed) override;
 	CGXContext();
 	void Release() override;
+	void setLogger(IGXLogger *pLogger) override;
 
 	void resize(int iWidth, int iHeight, bool isWindowed) override;
 
@@ -177,6 +178,7 @@ public:
 
 	IGXConstantBuffer* createConstantBuffer(UINT uSize) override;
 
+	void log(GX_LOG lvl, const char *msg, ...);
 	static void debugMessage(GX_LOG, const char *msg);
 	static void logDXcall(const char *szCodeString, HRESULT hr);
 
@@ -250,12 +252,15 @@ public:
 		}
 		m_frameStats.uUploadedBuffersShaderConst += uBytes;
 	}
+
 protected:
 	
 	ID3D11Device *m_pDevice = NULL;
 	ID3D11DeviceContext *m_pDeviceContext = NULL;
 	IDXGIDevice *m_pDXGIDevice = NULL;
 	IDXGIFactory *m_pDXGIFactory = NULL;
+	IGXLogger *m_pLogger = NULL;
+	static CGXContext *ms_pInstance;
 	//D3DPRESENT_PARAMETERS m_oD3DAPP;
 	//D3DCAPS9 m_dxCaps;
 	UINT m_uWindowWidth;

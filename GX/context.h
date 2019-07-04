@@ -38,6 +38,7 @@ public:
 	*/
 	virtual BOOL initContext(SXWINDOW hWnd, int iWidth, int iHeight, bool isWindowed) = 0;
 	virtual void Release() = 0;
+	virtual void setLogger(IGXLogger *pLogger) = 0;
 
 	//! изменение размеров области рендера
 	virtual void resize(int iWidth, int iHeight, bool isWindowed) = 0;

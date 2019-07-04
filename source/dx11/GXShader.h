@@ -20,12 +20,6 @@ class CGXVertexShader: public IGXVertexShader
 public:
 	void Release() override;
 
-	void setConstantF(UINT uStartRegister, const float *pConstantData, UINT uVector4fCount) override;
-	void setConstantI(UINT uStartRegister, const int *pConstantData, UINT uVector4iCount) override;
-	UINT getConstantCount() override;
-	UINT getConstantLocation(const char *szConstName) override;
-	UINT getConstantSizeV4(const char *szConstName) override;
-
 	void getData(void *pData, UINT *pSize) override;
 };
 
@@ -63,12 +57,6 @@ class CGXPixelShader: public IGXPixelShader
 
 public:
 	void Release() override;
-
-	void setConstantF(UINT uStartRegister, const float *pConstantData, UINT uVector4fCount) override;
-	void setConstantI(UINT uStartRegister, const int *pConstantData, UINT uVector4iCount) override;
-	UINT getConstantCount() override;
-	UINT getConstantLocation(const char *szConstName) override;
-	UINT getConstantSizeV4(const char *szConstName) override;
 	void getData(void *pData, UINT *pSize) override;
 };
 

@@ -18,11 +18,6 @@ See the license in LICENSE
 
 //##########################################################################
 
-//! @deprecated
-#define GX_SHADER_CONSTANT_FAIL ~0
-
-//##########################################################################
-
 /*! макроопределения передаваемые в шейдер
  @note В шейдере это выглядит так:
   #define szName szDefinition
@@ -73,15 +68,6 @@ public:
 //! интерфейс вершинного шейдера
 class IGXVertexShader: public IGXShaderBase
 {
-public:
-	//@DEPRECATED:
-	//@{
-	virtual void setConstantF(UINT uStartRegister, const float *pConstantData, UINT uVector4fCount) = 0;
-	virtual void setConstantI(UINT uStartRegister, const int *pConstantData, UINT uVector4iCount) = 0;
-	virtual UINT getConstantCount() = 0;
-	virtual UINT getConstantLocation(const char *szConstName) = 0;
-	virtual UINT getConstantSizeV4(const char *szConstName) = 0;
-	//@}
 };
 
 //! интерфейс геометрического шейдера
@@ -97,15 +83,6 @@ class IGXComputeShader: public IGXShaderBase
 //! интерфейс пиксельного шейдера
 class IGXPixelShader: public IGXShaderBase
 {
-public:
-	//@DEPRECATED:
-	//@{
-	virtual void setConstantF(UINT uStartRegister, const float *pConstantData, UINT uVector4fCount) = 0;
-	virtual void setConstantI(UINT uStartRegister, const int *pConstantData, UINT uVector4iCount) = 0;
-	virtual UINT getConstantCount() = 0;
-	virtual UINT getConstantLocation(const char *szConstName) = 0;
-	virtual UINT getConstantSizeV4(const char *szConstName) = 0;
-	//@}
 };
 
 //##########################################################################
