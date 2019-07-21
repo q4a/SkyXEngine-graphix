@@ -22,11 +22,11 @@
 
 #ifdef _DEBUG
 /* D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY */
-#	define SHADER_FLAGS (D3DCOMPILE_DEBUG | D3DCOMPILE_AVOID_FLOW_CONTROL | D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_PARTIAL_PRECISION | D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY)
+#	define SHADER_FLAGS (D3DCOMPILE_DEBUG | D3DCOMPILE_AVOID_FLOW_CONTROL | D3DCOMPILE_SKIP_OPTIMIZATION | /*D3DCOMPILE_PARTIAL_PRECISION | */D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY)
 //#	define SHADER_FLAGS (D3DXSHADER_DEBUG | D3DXSHADER_ENABLE_BACKWARDS_COMPATIBILITY | D3DXSHADER_AVOID_FLOW_CONTROL | D3DXSHADER_SKIPOPTIMIZATION)
 #else
 //#	define SHADER_FLAGS (D3DXSHADER_OPTIMIZATION_LEVEL3 | D3DXSHADER_ENABLE_BACKWARDS_COMPATIBILITY | D3DXSHADER_PARTIALPRECISION | D3DXSHADER_PREFER_FLOW_CONTROL)
-#	define SHADER_FLAGS (D3DCOMPILE_OPTIMIZATION_LEVEL3 | D3DCOMPILE_PARTIAL_PRECISION | D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY) 
+#	define SHADER_FLAGS (D3DCOMPILE_OPTIMIZATION_LEVEL3 | /*D3DCOMPILE_PARTIAL_PRECISION | */D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY) 
 #endif
 
 CGXContext *CGXContext::ms_pInstance = NULL;
@@ -232,6 +232,8 @@ BOOL CGXContext::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindo
 	memset(&samplerDesc, 0, sizeof(samplerDesc));
 	samplerDesc.uMaxAnisotropy = 1;
 	m_pDefaultSamplerState = createSamplerState(&samplerDesc);
+	m_pDeviceContext->VSSetSamplers(0, 1, &((CGXSamplerState*)m_pDefaultSamplerState)->m_pStateBlock);
+
 
 	GXRasterizerDesc rasterizerDesc;
 	memset(&rasterizerDesc, 0, sizeof(rasterizerDesc));
@@ -899,7 +901,27 @@ static ID3DBlob* CompileShaderFromString(CGXContext *pContext, const char *szCod
 {
 	ID3DBlob *pShaderBlob = NULL;
 	ID3DBlob *pErrorBlob = NULL;
-	bool isFailed = FAILED(DX_CALL(D3DX11CompileFromMemory(szCode, strlen(szCode), "memory.vs", (D3D_SHADER_MACRO*)pDefs, NULL, "main", szProfile, SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL)));
+
+	const char *szShaderFileName = "memory.vs";
+	char szFileName[256];
+	if(!memcmp(szCode, "#line ", 6))
+	{
+ 		UINT idx = 6;
+		while(szCode[idx] && szCode[idx] != '"')
+		{
+			++idx;
+		}
+		UINT uStartIdx = idx++ + 1;
+		while(szCode[idx] && szCode[idx] != '"')
+		{
+			++idx;
+		}
+		memcpy(szFileName, szCode + uStartIdx, idx - uStartIdx);
+		szFileName[idx - uStartIdx] = 0;
+		szShaderFileName = szFileName;
+	}
+
+	bool isFailed = FAILED(DX_CALL(D3DX11CompileFromMemory(szCode, strlen(szCode), szShaderFileName, (D3D_SHADER_MACRO*)pDefs, NULL, "main", szProfile, SHADER_FLAGS, 0, NULL, &pShaderBlob, &pErrorBlob, NULL)));
 
 	if(pErrorBlob)
 	{
@@ -1759,8 +1781,8 @@ IGXSurface* CGXContext::getColorTarget(UINT idx)
 void CGXContext::setTexture(IGXBaseTexture *pTexture, UINT uStage)
 {
 	assert(uStage < GX_MAX_TEXTURES);
-#if 0
-	if(m_pTextures[uStage] == pTexture)
+#if 1
+	if(!pTexture && m_pTextures[uStage] == pTexture)
 	{
 		return;
 	}
