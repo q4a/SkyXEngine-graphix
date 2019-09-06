@@ -37,11 +37,11 @@ enum GXTEXLOCK
 //! автоматическое изменение размера относительно цепочки вывода #IGXSwapChain
 #define GX_TEXFLAG_AUTORESIZE       0x00000004
 
-//! @deprecated, разрешено потерять данные, например при потере/восстановлении устройства в dx9
-#define GX_TEXFLAG_ALLOWDISCARD     0x00000008
-
 //! произвольный доступ для compute shader
 #define GX_TEXFLAG_UNORDERED_ACCESS 0x00000010
+
+//! pInitData для createTexture* содержит данные всех мипмапов в виде массива структур GXImageMip
+#define GX_TEXFLAG_INIT_ALL_MIPS    0x00000020
 
 //!@}
 
@@ -85,6 +85,14 @@ enum GXCUBEMAP_FACES
 	GXCUBEMAP_FACE_NEGATIVE_Z = 5,
 
 	GXCUBEMAP_FACE_FORCE_DWORD = 0x7fffffff
+};
+
+//##########################################################################
+
+struct GXImageMip
+{
+	byte *pData;
+	size_t sizeData;
 };
 
 //##########################################################################

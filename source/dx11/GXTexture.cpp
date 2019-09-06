@@ -3,7 +3,8 @@
 
 CGXTexture2D::~CGXTexture2D()
 {
-	m_pRender->addBytesTextures(-(int)m_pRender->getTextureMemPitch(m_uWidth, m_format) * m_uHeight, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
+	//m_pRender->addBytesTextures(-(int)m_pRender->getTextureMemPitch(m_uWidth, m_format) * m_uHeight, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
+	m_pRender->addBytesTextures(-m_iTotalSize, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
 	mem_release(m_pTexture);
 	mem_release(m_pSRV);
 	mem_release(m_pUAV);
@@ -268,7 +269,8 @@ GXTEXTURE_TYPE CGXTexture3D::getType()
 
 CGXTextureCube::~CGXTextureCube()
 {
-	m_pRender->addBytesTextures(-(int)m_pRender->getTextureMemPitch(m_uSize, m_format) * m_uSize * 6, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
+	m_pRender->addBytesTextures(-m_iTotalSize, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
+	//m_pRender->addBytesTextures(-(int)m_pRender->getTextureMemPitch(m_uSize, m_format) * m_uSize * 6, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
 	mem_release(m_pTexture);
 	mem_release(m_pSRV);
 	mem_release(m_pSurfaceRT);

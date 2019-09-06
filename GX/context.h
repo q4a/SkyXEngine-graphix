@@ -149,6 +149,7 @@ public:
 	*/
 	virtual void computeDispatch(UINT uThreadGroupCountX, UINT uThreadGroupCountY, UINT uThreadGroupCountZ) = 0;
 
+	//########################################################################
 
 	/*! создать вершинный шейдер загрузив код из файла szFile
 	 @param szFile путь до файла
@@ -183,6 +184,15 @@ public:
 	virtual IGXComputeShader* createComputeShaderFromBin(void *pData, UINT uSize) = 0;
 	virtual void setComputeShaderConstant(IGXConstantBuffer *pBuffer, UINT uSlot = 0) = 0;
 
+	/*
+	virtual IGXShaderBlob* createShaderBlob(GXSHADER_TYPE type, const char * szCode) = 0;
+	virtual IGXShaderBlob* createShaderBlob(GXSHADER_TYPE type, void *pData, UINT uSize) = 0;
+
+	virtual IGXVertexShader* createVS(IGXShaderBlob *pBlob) = 0;
+	virtual IGXPixelShader* createPS(IGXShaderBlob *pBlob) = 0;
+	virtual IGXGeometryShader* createGS(IGXShaderBlob *pBlob) = 0;
+	virtual IGXComputeShader* createCS(IGXShaderBlob *pBlob) = 0;
+	*/
 
 	//! создание набора шейдеров
 	virtual IGXShaderSet* createShader(IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL, IGXGeometryShader *pGS = NULL, IGXComputeShader *pCS = NULL) = 0;
@@ -190,7 +200,7 @@ public:
 	//! устанавливает набор шейдеров
 	virtual void setShader(IGXShaderSet *pSH) = 0;
 
-	//! возвращает текущий установленный набор шейдеров, если не установлен тогда 0
+	//! возвращает текущий установленный набор шейдеров, если не установлен тогда NULL
 	virtual IGXShaderSet* getShader() = 0;
 
 	//! создание константы размером uSize байт
@@ -272,6 +282,7 @@ public:
 	virtual IGXTextureCube* createTextureCube(UINT uSize, UINT uMipLevels, UINT uTexUsageFlags, GXFORMAT format, void *pInitData = NULL) = 0;
 
 	/*! загрузка 2D текстуры из файла
+	 @deprecated 
 	 @param szFileName путь до файла
 	 @param uTexUsageFlags флаги использования, дефайны GX_TEXFLAG_
 	 @param bAllowNonPowerOf2 разрешить текстуре иметь размеры не кратные степени 2,
@@ -298,10 +309,12 @@ public:
 	virtual IGXBaseTexture* getUnorderedAccessViewCS(UINT uStage = 0) = 0;
 
 	//! возвращает тип текстуры из файла
+	//! @deprecated
 	virtual GXTEXTURE_TYPE getTextureTypeFromFile(const char *szFile) = 0;
 
 	/*
 	 @todo сделать метод для сохранения surface
+	 @deprecated
 	*/
 	virtual bool saveTextureToFile(const char *szTarget, IGXBaseTexture *pTexture) = 0;
 

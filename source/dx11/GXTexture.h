@@ -19,6 +19,8 @@ protected:
 	bool m_isResettable = false;
 	bool m_bAutoResize = false;
 
+	int m_iTotalSize = 0;
+
 	UINT m_uWidth;
 	UINT m_uHeight;
 	D3D11_TEXTURE2D_DESC m_descTex2D;
@@ -119,6 +121,8 @@ protected:
 	bool m_bWasReset;
 	bool m_isResettable = false;
 	bool m_bAutoResize = false;
+
+	int m_iTotalSize = 0;
 
 	UINT m_uSize;
 	D3D11_TEXTURE2D_DESC m_descTex2D;

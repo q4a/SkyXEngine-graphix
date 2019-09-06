@@ -1920,30 +1920,61 @@ IGXTexture2D* CGXContext::createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLe
 		m_aResettableTextures2D.push_back(pTex);
 	}
 
+	pTex->m_iTotalSize = 0;
 
 	if(!(uTexUsageFlags & GX_TEXFLAG_RENDERTARGET) && pInitData)
 	{
 		pTex->m_bWasReset = false;
 
-		D3D11_SUBRESOURCE_DATA initData;
-		initData.pSysMem = pInitData;
-		initData.SysMemSlicePitch = NULL;
-		initData.SysMemPitch = getTextureMemPitch(uWidth, format);
-		addBytesTextures(initData.SysMemPitch * uHeight);
-
-		if(pTex->m_descTex2D.MipLevels == 1)
+		if(uTexUsageFlags & GX_TEXFLAG_INIT_ALL_MIPS)
 		{
-			DX_CALL(m_pDevice->CreateTexture2D(&pTex->m_descTex2D, &initData, &pTex->m_pTexture));
+			if(pTex->m_descTex2D.MipLevels == 0)
+			{
+				debugMessage(GX_LOG_ERROR, "Unsupported: GX_TEXFLAG_INIT_ALL_MIPS is not supported with GX_TEXFLAG_AUTOGENMIPMAPS");
+				mem_delete(pTex);
+				return(NULL);
+			}
+			D3D11_SUBRESOURCE_DATA *pSubresourceData = (D3D11_SUBRESOURCE_DATA*)alloca(sizeof(D3D11_SUBRESOURCE_DATA) * pTex->m_descTex2D.MipLevels);
+			GXImageMip *pData = (GXImageMip*)pInitData;
+			UINT uTmpWidth = uWidth;
+			UINT uTmpHeight = uHeight;
+			for(UINT i = 0; i < pTex->m_descTex2D.MipLevels; ++i)
+			{
+				pSubresourceData[i].pSysMem = pData[i].pData;
+				pSubresourceData[i].SysMemSlicePitch = 0;
+				pSubresourceData[i].SysMemPitch = getTextureMemPitch(uTmpWidth, format);
+				pTex->m_iTotalSize += (int)(pSubresourceData[i].SysMemPitch * uTmpHeight);
+				uTmpWidth >>= 1;
+				uTmpWidth = max(1, uTmpWidth);
+				uTmpHeight >>= 1;
+				uTmpHeight = max(1, uTmpHeight);
+			}
+
+			DX_CALL(m_pDevice->CreateTexture2D(&pTex->m_descTex2D, pSubresourceData, &pTex->m_pTexture));
 		}
 		else
 		{
-			DX_CALL(m_pDevice->CreateTexture2D(&pTex->m_descTex2D, NULL, &pTex->m_pTexture));
+			D3D11_SUBRESOURCE_DATA initData;
+			initData.pSysMem = pInitData;
+			initData.SysMemSlicePitch = 0;
+			initData.SysMemPitch = getTextureMemPitch(uWidth, format);
+			pTex->m_iTotalSize += (int)(initData.SysMemPitch * uHeight);
 
-			m_pDeviceContext->UpdateSubresource(pTex->m_pTexture, 0, NULL, pInitData, initData.SysMemPitch, 0);
-		}		
+			if(pTex->m_descTex2D.MipLevels == 1)
+			{
+				DX_CALL(m_pDevice->CreateTexture2D(&pTex->m_descTex2D, &initData, &pTex->m_pTexture));
+			}
+			else
+			{
+				DX_CALL(m_pDevice->CreateTexture2D(&pTex->m_descTex2D, NULL, &pTex->m_pTexture));
+
+				m_pDeviceContext->UpdateSubresource(pTex->m_pTexture, 0, NULL, pInitData, initData.SysMemPitch, 0);
+			}
+		}
 	}
 	else
 	{
+		pTex->m_iTotalSize += (int)(getTextureMemPitch(pTex->m_uWidth, pTex->m_format) * pTex->m_uHeight);
 		DX_CALL(m_pDevice->CreateTexture2D(&pTex->m_descTex2D, NULL, &pTex->m_pTexture));
 	}
 
@@ -1964,7 +1995,7 @@ IGXTexture2D* CGXContext::createTexture2D(UINT uWidth, UINT uHeight, UINT uMipLe
 
 	DX_CALL(m_pDevice->CreateShaderResourceView(pTex->m_pTexture, &pTex->m_descSRV, &pTex->m_pSRV));
 
-	addBytesTextures(getTextureMemPitch(pTex->m_uWidth, pTex->m_format) * pTex->m_uHeight, true, !!(pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET));
+	addBytesTextures(pTex->m_iTotalSize, true, !!(pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET));
 
 	if(uTexUsageFlags & GX_TEXFLAG_UNORDERED_ACCESS)
 	{
@@ -2010,6 +2041,13 @@ IGXTexture3D* CGXContext::createTexture3D(UINT uWidth, UINT uHeight, UINT uDepth
 	}
 	pTex->m_uMipLevels = pTex->m_descTex3D.MipLevels;
 	
+	if(uTexUsageFlags & GX_TEXFLAG_INIT_ALL_MIPS)
+	{
+		debugMessage(GX_LOG_ERROR, "Not implemented: GX_TEXFLAG_INIT_ALL_MIPS is not supported with 3D texture");
+		mem_delete(pTex);
+		return(NULL);
+	}
+
 	if(/*!(uTexUsageFlags & GX_TEXFLAG_RENDERTARGET) && */pInitData)
 	{
 		pTex->m_bWasReset = false;
@@ -2114,9 +2152,43 @@ IGXTextureCube* CGXContext::createTextureCube(UINT uSize, UINT uMipLevels, UINT 
 
 	if(pInitData)
 	{
-		debugMessage(GX_LOG_WARN, "Not implemented: Unable to implace init cube texture");
+		if(uTexUsageFlags & GX_TEXFLAG_INIT_ALL_MIPS)
+		{
+			if(pTex->m_descTex2D.MipLevels == 0)
+			{
+				debugMessage(GX_LOG_ERROR, "Unsupported: GX_TEXFLAG_INIT_ALL_MIPS is not supported with GX_TEXFLAG_AUTOGENMIPMAPS");
+				mem_delete(pTex);
+				return(NULL);
+			}
+			D3D11_SUBRESOURCE_DATA *pSubresourceData = (D3D11_SUBRESOURCE_DATA*)alloca(sizeof(D3D11_SUBRESOURCE_DATA) * pTex->m_descTex2D.MipLevels * pTex->m_descTex2D.ArraySize);
+			GXImageMip *pData = (GXImageMip*)pInitData;
+
+			for(UINT s = 0; s < pTex->m_descTex2D.ArraySize; ++s)
+			{
+				UINT uTmpSize = uSize;
+				for(UINT i = 0; i < pTex->m_descTex2D.MipLevels; ++i)
+				{
+					UINT idx = i + pTex->m_descTex2D.MipLevels * s;
+					pSubresourceData[idx].pSysMem = pData[idx].pData;
+					pSubresourceData[idx].SysMemSlicePitch = 0;
+					pSubresourceData[idx].SysMemPitch = getTextureMemPitch(uTmpSize, format);
+					uTmpSize >>= 1;
+					uTmpSize = max(1, uTmpSize);
+					pTex->m_iTotalSize += (int)(pSubresourceData[i].SysMemPitch * uTmpSize);
+					//addBytesTextures(pInitData[i].SysMemPitch * uTmpSize);
+				}
+			}
+			DX_CALL(m_pDevice->CreateTexture2D(&pTex->m_descTex2D, pSubresourceData, &pTex->m_pTexture));
+		}
+		else
+		{
+			debugMessage(GX_LOG_WARN, "Not implemented: Unable to implace init cube texture");
+		}
 	}
-	DX_CALL(m_pDevice->CreateTexture2D(&pTex->m_descTex2D, NULL, &pTex->m_pTexture));
+	else
+	{
+		DX_CALL(m_pDevice->CreateTexture2D(&pTex->m_descTex2D, NULL, &pTex->m_pTexture));
+	}
 
 	memset(&pTex->m_descSRV, 0, sizeof(pTex->m_descSRV));
 	pTex->m_descSRV.Format = pTex->m_descTex2D.Format;
@@ -2125,7 +2197,12 @@ IGXTextureCube* CGXContext::createTextureCube(UINT uSize, UINT uMipLevels, UINT 
 
 	DX_CALL(m_pDevice->CreateShaderResourceView(pTex->m_pTexture, &pTex->m_descSRV, &pTex->m_pSRV));
 
-	addBytesTextures(getTextureMemPitch(pTex->m_uSize, pTex->m_format) * pTex->m_uSize * 6, true, !!(pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET));
+	if(!pTex->m_iTotalSize)
+	{
+		pTex->m_iTotalSize = getTextureMemPitch(pTex->m_uSize, pTex->m_format) * pTex->m_uSize * 6;
+	}
+
+	addBytesTextures(pTex->m_iTotalSize, true, !!(pTex->m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET));
 
 	if(uTexUsageFlags & GX_TEXFLAG_UNORDERED_ACCESS)
 	{
@@ -2299,7 +2376,7 @@ UINT  CGXContext::getTextureMemPitch(UINT uWidth, GXFORMAT format)
 	{
 		int numBlocksWide = 0;
 		if(uWidth > 0)
-			numBlocksWide = max(1, uWidth / 4);
+			numBlocksWide = max(1, (uWidth+3) / 4);
 		return(numBlocksWide * bcnumBytesPerBlock);
 	}
 	else
