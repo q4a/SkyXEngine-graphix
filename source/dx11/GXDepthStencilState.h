@@ -1,27 +1,25 @@
 #ifndef _CGXDepthStencilState_H_
 #define _CGXDepthStencilState_H_
 
-#include "GXContext.h"
+#include "GXDevice.h"
 
 class CGXDepthStencilState: public IGXDepthStencilState
 {
 	friend class CGXContext;
+	friend class CGXDevice;
 
-	CGXDepthStencilState(CGXContext *pRender):
+	CGXDepthStencilState(CGXDevice *pRender):
 		m_pRender(pRender)
 	{
 	};
 	~CGXDepthStencilState();
 
-	CGXContext *m_pRender;
+	CGXDevice *m_pRender;
 	ID3D11DepthStencilState *m_pStateBlock = NULL;
 	GXDepthStencilDesc m_desc;
 
 	void onDevLost();
 	void onDevRst();
-
-public:
-	void Release() override;
 };
 
 #endif

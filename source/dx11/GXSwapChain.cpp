@@ -50,7 +50,7 @@ void CGXSwapChain::resize(int iWidth, int iHeight, bool isWindowed)
 	onDevRst();
 }
 
-CGXSwapChain::CGXSwapChain(CGXContext *pRender, int iWidth, int iHeight, SXWINDOW wnd, bool isWindowed):m_pRender(pRender)
+CGXSwapChain::CGXSwapChain(CGXDevice *pRender, int iWidth, int iHeight, SXWINDOW wnd, bool isWindowed):m_pRender(pRender)
 {
 	memset(&m_presentParameters, 0, sizeof(m_presentParameters));
 	if(iWidth < 1)
@@ -84,16 +84,10 @@ CGXSwapChain::~CGXSwapChain()
 {
 	onDevLost();
 	mem_release(m_pColorSurface);
+
+	m_pRender->destroySwapChain(this);
 }
 
-void CGXSwapChain::Release()
-{
-	--m_uRefCount;
-	if(!m_uRefCount)
-	{
-		m_pRender->destroySwapChain(this);
-	}
-}
 void CGXSwapChain::swapBuffers()
 {
 	if(m_pSwapChain)

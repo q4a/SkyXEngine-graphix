@@ -1,14 +1,5 @@
 #include "GXSamplerState.h"
 
-void CGXSamplerState::Release()
-{
-	--m_uRefCount;
-	if(!m_uRefCount)
-	{
-		m_pRender->destroySamplerState(this);
-	}
-}
-
 void CGXSamplerState::onDevRst()
 {
 	auto m_pDevice = m_pRender->getDXDevice();

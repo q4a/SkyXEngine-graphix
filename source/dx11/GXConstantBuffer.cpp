@@ -1,16 +1,7 @@
 #include "GXConstantBuffer.h"
+#include "GXContext.h"
 
-void CGXConstantBuffer::Release()
-{
-	--m_uRefCount;
-	if(!m_uRefCount)
-	{
-		m_pRender->addBytesShaderConst(-(int)m_uSize, true);
-		delete this;
-	}
-}
-
-CGXConstantBuffer::CGXConstantBuffer(CGXContext *pRender, UINT uSize):
+CGXConstantBuffer::CGXConstantBuffer(CGXDevice *pRender, UINT uSize):
 	m_pRender(pRender)
 {
 	D3D11_BUFFER_DESC bufferDesc;
@@ -22,11 +13,12 @@ CGXConstantBuffer::CGXConstantBuffer(CGXContext *pRender, UINT uSize):
 	m_uSize = uSize;
 	
 	DX_CALL(m_pRender->getDXDevice()->CreateBuffer(&bufferDesc, NULL, &m_pBuffer));
-	m_pRender->addBytesShaderConst(m_uSize, true);
+	m_pRender->addBytesShaderConst((int)m_uSize);
 }
 CGXConstantBuffer::~CGXConstantBuffer()
 {
 	mem_release(m_pBuffer);
+	m_pRender->addBytesShaderConst(-(int)m_uSize);
 }
 
 UINT CGXConstantBuffer::getSize()
@@ -34,8 +26,15 @@ UINT CGXConstantBuffer::getSize()
 	return(m_uSize);
 }
 
-void CGXConstantBuffer::update(const void *pData)
+void CGXConstantBuffer::update(const void *pData, IGXContext *pContext)
 {
-	m_pRender->getDXDeviceContext()->UpdateSubresource(m_pBuffer, 0, NULL, pData, 0, 0);
-	m_pRender->addBytesShaderConst(m_uSize);
+	if(!pContext)
+	{
+		pContext = m_pRender->getDirectContext();
+	}
+	
+	CGXContext *pCtx = (CGXContext*)pContext;
+
+	pCtx->getDXContext()->UpdateSubresource(m_pBuffer, 0, NULL, pData, 0, 0);
+	pCtx->addBytesShaderConst(m_uSize);
 }

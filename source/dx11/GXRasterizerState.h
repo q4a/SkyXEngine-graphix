@@ -1,28 +1,26 @@
 #ifndef _CGXRasterizerState_H_
 #define _CGXRasterizerState_H_
 
-#include "GXContext.h"
+#include "GXDevice.h"
 
 class CGXRasterizerState: public IGXRasterizerState
 {
 	friend class CGXContext;
+	friend class CGXDevice;
 
-	CGXRasterizerState(CGXContext *pRender):
+	CGXRasterizerState(CGXDevice *pRender):
 		m_pRender(pRender)
 	{
 	}
 	~CGXRasterizerState();
 
-	CGXContext *m_pRender;
+	CGXDevice *m_pRender;
 	ID3D11RasterizerState *m_pStateBlock = NULL;
 	BOOL m_isScissorsEnabled = 0;
 	GXRasterizerDesc m_desc;
 
 	void onDevLost();
 	void onDevRst();
-
-public:
-	void Release() override;
 };
 
 #endif

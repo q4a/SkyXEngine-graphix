@@ -46,6 +46,6 @@ virtual IGXShaderBase* createShader(GX_SHADER_TYPE type, const char * szFile, GX
 #include "GX/shaders.h"
 #include "GX/adapter_stats.h"
 #include "GX/buffers.h"
-#include "GX/context.h"
+#include "GX/device.h"
 
 #endif

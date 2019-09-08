@@ -6,18 +6,17 @@
 class CGXRenderBuffer: public IGXRenderBuffer
 {
 	friend class CGXContext;
+	friend class CGXDevice;
 
-	CGXRenderBuffer(CGXContext *pRender, UINT uCountStreams, IGXVertexBuffer **ppVertexBuffers, IGXVertexDeclaration *pVertexDeclaration);
+	CGXRenderBuffer(CGXDevice *pRender, UINT uCountStreams, IGXVertexBuffer **ppVertexBuffers, IGXVertexDeclaration *pVertexDeclaration);
+	~CGXRenderBuffer();
 
-	CGXContext *m_pRender;
+	CGXDevice *m_pRender;
 
 	IGXVertexBuffer *m_ppVertexBuffers[GX_MAX_VSTREAM];
 	IGXVertexDeclaration *m_pVertexDeclaration;
 
 	UINT m_uStreamCount;
-
-public:
-	void Release() override;
 };
 
 #endif

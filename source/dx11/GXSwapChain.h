@@ -1,16 +1,16 @@
 #ifndef _CGXSwapChain_H_
 #define _CGXSwapChain_H_
 
-#include "GXContext.h"
+#include "GXDevice.h"
 
 class CGXSwapChain: public IGXSwapChain
 {
-	friend class CGXContext;
+	friend class CGXDevice;
 
-	CGXSwapChain(CGXContext *pRender, int iWidth, int iHeight, SXWINDOW wnd, bool isWindowed=true);
+	CGXSwapChain(CGXDevice *pRender, int iWidth, int iHeight, SXWINDOW wnd, bool isWindowed = true);
 	~CGXSwapChain();
 
-	CGXContext *m_pRender;
+	CGXDevice *m_pRender;
 	IDXGISwapChain *m_pSwapChain = NULL;
 	DXGI_SWAP_CHAIN_DESC m_presentParameters;
 	IGXSurface *m_pColorSurface;
@@ -22,7 +22,6 @@ class CGXSwapChain: public IGXSwapChain
 	void resize(int iWidth, int iHeight, bool isWindowed = true);
 
 public:
-	void Release() override;
 	void swapBuffers() override;
 	IGXSurface* getColorTarget() override;
 };

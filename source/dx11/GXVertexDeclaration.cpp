@@ -1,16 +1,7 @@
 ﻿#include "GXVertexDeclaration.h"
 #include <cstdio>
 
-void CGXVertexDeclaration::Release()
-{
-	--m_uRefCount;
-	if(!m_uRefCount)
-	{
-		m_pRender->destroyVertexDeclaration(this);
-	}
-}
-
-CGXVertexDeclaration::CGXVertexDeclaration(ID3D11Device *pDevice, CGXContext *pRender, const GXVertexElement *pDecl):
+CGXVertexDeclaration::CGXVertexDeclaration(ID3D11Device *pDevice, CGXDevice *pRender, const GXVertexElement *pDecl):
 	m_pRender(pRender)
 {
 	UINT uDeclCount = 0;
@@ -26,7 +17,7 @@ CGXVertexDeclaration::CGXVertexDeclaration(ID3D11Device *pDevice, CGXContext *pR
 	{
 		if(pDecl[i].u8Stream >= GX_MAX_VSTREAM)
 		{
-			CGXContext::debugMessage(GX_LOG_ERROR, "Unable to create vertex declaration: Stream >= GX_MAX_VSTREAM!");
+			CGXDevice::debugMessage(GX_LOG_ERROR, "Unable to create vertex declaration: Stream >= GX_MAX_VSTREAM!");
 			return;
 		}
 		if(m_u8SpecSpec[pDecl[i].u8Stream] == (GXDECLSPEC)-1)
@@ -35,7 +26,7 @@ CGXVertexDeclaration::CGXVertexDeclaration(ID3D11Device *pDevice, CGXContext *pR
 		}
 		else if(m_u8SpecSpec[pDecl[i].u8Stream] != pDecl[i].spec)
 		{
-			CGXContext::debugMessage(GX_LOG_ERROR, "Unable to create vertex declaration: vertex instance specs in a stream must be the same!");
+			CGXDevice::debugMessage(GX_LOG_ERROR, "Unable to create vertex declaration: vertex instance specs in a stream must be the same!");
 			return;
 		}
 	}
@@ -186,7 +177,7 @@ CGXVertexDeclaration::CGXVertexDeclaration(ID3D11Device *pDevice, CGXContext *pR
 	{
 		if(pErrorBlob)
 		{
-			m_pRender->debugMessage(GX_LOG_ERROR, (char*)pErrorBlob->GetBufferPointer());
+			CGXDevice::debugMessage(GX_LOG_ERROR, (char*)pErrorBlob->GetBufferPointer());
 		}
 	}
 	mem_release(pErrorBlob);

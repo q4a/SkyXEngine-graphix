@@ -1,19 +1,20 @@
 #ifndef _IDSRvertexBuffer_H_
 #define _IDSRvertexBuffer_H_
 
-#include "GXContext.h"
+#include "GXDevice.h"
 
 class CGXVertexBuffer: public IGXVertexBuffer
 {
 	friend class CGXContext;
+	friend class CGXDevice;
 
-	CGXVertexBuffer(CGXContext *pRender):
+	CGXVertexBuffer(CGXDevice *pRender):
 		m_pRender(pRender)
 	{
 	}
 	~CGXVertexBuffer();
 
-	CGXContext *m_pRender;
+	CGXDevice *m_pRender;
 	ID3D11Buffer *m_pBuffer;
 	//D3DFORMAT m_format;
 	bool m_wasReset = true;

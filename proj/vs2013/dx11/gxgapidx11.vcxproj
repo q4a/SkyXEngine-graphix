@@ -25,6 +25,7 @@
     <ClInclude Include="..\..\..\source\dx11\GXContext.h" />
     <ClInclude Include="..\..\..\source\dx11\GXDepthStencilState.h" />
     <ClInclude Include="..\..\..\source\dx11\GXDepthStencilSurface.h" />
+    <ClInclude Include="..\..\..\source\dx11\GXDevice.h" />
     <ClInclude Include="..\..\..\source\dx11\GXIndexBuffer.h" />
     <ClInclude Include="..\..\..\source\dx11\GXRasterizerState.h" />
     <ClInclude Include="..\..\..\source\dx11\GXRenderBuffer.h" />
@@ -43,6 +44,7 @@
     <ClCompile Include="..\..\..\source\dx11\GXContext.cpp" />
     <ClCompile Include="..\..\..\source\dx11\GXDepthStencilState.cpp" />
     <ClCompile Include="..\..\..\source\dx11\GXDepthStencilSurface.cpp" />
+    <ClCompile Include="..\..\..\source\dx11\GXDevice.cpp" />
     <ClCompile Include="..\..\..\source\dx11\GXIndexBuffer.cpp" />
     <ClCompile Include="..\..\..\source\dx11\GXRasterizerState.cpp" />
     <ClCompile Include="..\..\..\source\dx11\GXRenderBuffer.cpp" />

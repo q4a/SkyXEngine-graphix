@@ -1,15 +1,16 @@
 ﻿#ifndef _IDSGvertexDeclarationOgl_H_
 #define _IDSGvertexDeclarationOgl_H_
 
-#include "GXContext.h"
+#include "GXDevice.h"
 
 class CGXVertexDeclaration: public IGXVertexDeclaration
 {
 	friend class CGXContext;
-	
-	CGXVertexDeclaration(ID3D11Device *pDevice, CGXContext *pRender, const GXVertexElement *pDecl);
+	friend class CGXDevice;
+
+	CGXVertexDeclaration(ID3D11Device *pDevice, CGXDevice *pRender, const GXVertexElement *pDecl);
 	~CGXVertexDeclaration();
-	CGXContext *m_pRender;
+	CGXDevice *m_pRender;
 		
 	
 	ID3D11InputLayout *m_pDeclaration = NULL;
@@ -17,9 +18,6 @@ class CGXVertexDeclaration: public IGXVertexDeclaration
 	byte m_u8StreamCount;
 	byte m_u8StreamStride[GX_MAX_VSTREAM];
 	GXDECLSPEC m_u8SpecSpec[GX_MAX_VSTREAM];
-
-public:
-	void Release() override;
 };
 
 #endif

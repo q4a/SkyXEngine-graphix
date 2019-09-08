@@ -1,13 +1,21 @@
 #include "GXTexture.h"
 #include "GXSurface.h"
+#include "GXDevice.h"
 
 CGXTexture2D::~CGXTexture2D()
 {
+	for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
+	{
+		mem_release(m_apSurfaces[i]);
+	}
+
 	//m_pRender->addBytesTextures(-(int)m_pRender->getTextureMemPitch(m_uWidth, m_format) * m_uHeight, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
-	m_pRender->addBytesTextures(-m_iTotalSize, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
+	m_pRender->addBytesTextures(-m_iTotalSize, !!(m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET));
 	mem_release(m_pTexture);
 	mem_release(m_pSRV);
 	mem_release(m_pUAV);
+
+	m_pRender->destroyTexture2D(this);
 }
 
 GXFORMAT CGXTexture2D::getFormat()
@@ -28,19 +36,6 @@ UINT CGXTexture2D::getWidth()
 UINT CGXTexture2D::getHeight()
 {
 	return(m_uHeight);
-}
-
-void CGXTexture2D::Release()
-{
-	--m_uRefCount;
-	if(!m_uRefCount)
-	{
-		for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
-		{
-			mem_release(m_apSurfaces[i]);
-		}
-		m_pRender->destroyTexture2D(this);
-	}
 }
 
 IGXSurface* CGXTexture2D::getMipmap(UINT n)
@@ -109,7 +104,7 @@ void CGXTexture2D::onDevLost()
 		}
 	}
 
-	m_pRender->addBytesTextures(-(int)m_pRender->getTextureMemPitch(m_uWidth, m_format) * m_uHeight, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
+	m_pRender->addBytesTextures(-(int)m_pRender->getTextureMemPitch(m_uWidth, m_format) * m_uHeight, !!(m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET));
 }
 void CGXTexture2D::onDevRst(UINT uScreenWidth, UINT uScreenHeight)
 {
@@ -148,7 +143,7 @@ void CGXTexture2D::onDevRst(UINT uScreenWidth, UINT uScreenHeight)
 		DX_CALL(m_pRender->getDXDevice()->CreateUnorderedAccessView(m_pTexture, &m_descUAV, &m_pUAV));
 	}
 
-	m_pRender->addBytesTextures(m_pRender->getTextureMemPitch(m_uWidth, m_format) * m_uHeight, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
+	m_pRender->addBytesTextures(m_pRender->getTextureMemPitch(m_uWidth, m_format) * m_uHeight, !!(m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET));
 
 	for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
 	{
@@ -185,7 +180,7 @@ IGXSurface* CGXTexture2D::asRenderTarget()
 
 CGXTexture3D::~CGXTexture3D()
 {
-	m_pRender->addBytesTextures(-(int)m_pRender->getTextureMemPitch(m_uDepth, m_format) * m_uWidth * m_uHeight, true, m_descTex3D.BindFlags & D3D11_BIND_RENDER_TARGET);
+	m_pRender->addBytesTextures(-(int)m_pRender->getTextureMemPitch(m_uDepth, m_format) * m_uWidth * m_uHeight, !!(m_descTex3D.BindFlags & D3D11_BIND_RENDER_TARGET));
 	mem_release(m_pTexture);
 	mem_release(m_pSRV);
 	mem_release(m_pSurfaceRT);
@@ -215,15 +210,6 @@ UINT CGXTexture3D::getHeight()
 UINT CGXTexture3D::getDepth()
 {
 	return(m_uDepth);
-}
-
-void CGXTexture3D::Release()
-{
-	--m_uRefCount;
-	if(!m_uRefCount)
-	{
-		delete this;
-	}
 }
 
 IGXSurface* CGXTexture3D::asRenderTarget()
@@ -269,25 +255,18 @@ GXTEXTURE_TYPE CGXTexture3D::getType()
 
 CGXTextureCube::~CGXTextureCube()
 {
-	m_pRender->addBytesTextures(-m_iTotalSize, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
+	m_pRender->addBytesTextures(-m_iTotalSize, !!(m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET));
 	//m_pRender->addBytesTextures(-(int)m_pRender->getTextureMemPitch(m_uSize, m_format) * m_uSize * 6, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
 	mem_release(m_pTexture);
 	mem_release(m_pSRV);
 	mem_release(m_pSurfaceRT);
 	mem_release(m_pUAV);
-}
 
-void CGXTextureCube::Release()
-{
-	--m_uRefCount;
-	if(!m_uRefCount)
+	for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
 	{
-		for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
-		{
-			mem_release(m_apSurfaces[i]);
-		}
-		m_pRender->destroyTextureCube(this);
+		mem_release(m_apSurfaces[i]);
 	}
+	m_pRender->destroyTextureCube(this);
 }
 
 IGXSurface* CGXTextureCube::getMipmap(GXCUBEMAP_FACES face, UINT n)
@@ -326,13 +305,13 @@ ID3D11ShaderResourceView* CGXTextureCube::getDXTexture()
 
 bool CGXTextureCube::lock(void **ppData, GXCUBEMAP_FACES face, GXTEXLOCK mode)
 {
-	CGXContext::debugMessage(GX_LOG_ERROR, "Not implemented: CGXTexture2D::lock");
+	CGXDevice::debugMessage(GX_LOG_ERROR, "Not implemented: CGXTexture2D::lock");
 	return(false);
 }
 
 void CGXTextureCube::unlock()
 {
-	CGXContext::debugMessage(GX_LOG_ERROR, "Not implemented: CGXTexture2D::unlock");
+	CGXDevice::debugMessage(GX_LOG_ERROR, "Not implemented: CGXTexture2D::unlock");
 }
 
 GXFORMAT CGXTextureCube::getFormat()
@@ -358,7 +337,7 @@ void CGXTextureCube::onDevLost()
 			((CGXSurface*)m_apSurfaces[i])->releaseRT();
 		}
 	}
-	m_pRender->addBytesTextures(-(int)m_pRender->getTextureMemPitch(m_uSize, m_format) * m_uSize * 6, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
+	m_pRender->addBytesTextures(-(int)m_pRender->getTextureMemPitch(m_uSize, m_format) * m_uSize * 6, !!(m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET));
 }
 void CGXTextureCube::onDevRst(UINT uScreenHeight)
 {
@@ -381,7 +360,7 @@ void CGXTextureCube::onDevRst(UINT uScreenHeight)
 		DX_CALL(m_pRender->getDXDevice()->CreateUnorderedAccessView(m_pTexture, &m_descUAV, &m_pUAV));
 	}
 
-	m_pRender->addBytesTextures(m_pRender->getTextureMemPitch(m_uSize, m_format) * m_uSize * 6, true, m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET);
+	m_pRender->addBytesTextures(m_pRender->getTextureMemPitch(m_uSize, m_format) * m_uSize * 6, !!(m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET));
 
 	for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
 	{

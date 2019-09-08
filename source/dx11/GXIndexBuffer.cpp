@@ -1,11 +1,12 @@
 #include "GXIndexBuffer.h"
+#include "GXDevice.h"
 
 void CGXIndexBuffer::Release()
 {
 	--m_uRefCount;
 	if(!m_uRefCount)
 	{
-		m_pRender->destroyIndexBuffer(this);
+		delete this;
 	}
 }
 
@@ -25,7 +26,7 @@ bool CGXIndexBuffer::lock(void **ppData, GXBUFFERLOCK mode)
 	{
 		m_wasReset = false;
 
-		m_pRender->addBytesIndices(m_uSize);
+		((CGXContext*)m_pRender->getDirectContext())->addBytesIndices(m_uSize);
 		*ppData = srs.pData;
 		return(true);
 	}
@@ -40,6 +41,7 @@ void CGXIndexBuffer::unlock()
 CGXIndexBuffer::~CGXIndexBuffer()
 {
 	mem_release(m_pBuffer);
+	m_pRender->destroyIndexBuffer(this);
 }
 
 bool CGXIndexBuffer::wasReset()

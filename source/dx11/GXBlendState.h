@@ -1,27 +1,25 @@
 #ifndef _CGXBlendState_H_
 #define _CGXBlendState_H_
 
-#include "GXContext.h"
+#include "GXDevice.h"
 
 class CGXBlendState: public IGXBlendState
 {
 	friend class CGXContext;
+	friend class CGXDevice;
 
-	CGXBlendState(CGXContext *pRender):
+	CGXBlendState(CGXDevice *pRender):
 		m_pRender(pRender)
 	{
 	};
 	~CGXBlendState();
 
-	CGXContext *m_pRender;
+	CGXDevice *m_pRender;
 	ID3D11BlendState *m_pStateBlock = NULL;
 	GXBlendDesc m_desc;
 
 	void onDevLost();
 	void onDevRst();
-
-public:
-	void Release() override;
 };
 
 #endif

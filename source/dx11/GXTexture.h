@@ -1,15 +1,16 @@
 #ifndef _CGXTexture_H_
 #define _CGXTexture_H_
 
-#include "GXContext.h"
+#include "GXDevice.h"
 
 class CGXTexture2D: public IGXTexture2D
 {
 	friend class CGXContext;
+	friend class CGXDevice;
 
 protected:
-	CGXContext *m_pRender;
-	CGXTexture2D(CGXContext *pRender): 
+	CGXDevice *m_pRender;
+	CGXTexture2D(CGXDevice *pRender):
 		m_pRender(pRender)
 	{
 	}
@@ -38,8 +39,6 @@ protected:
 
 	Array<IGXSurface*> m_apSurfaces;
 public:
-	void Release() override;
-
 	IGXSurface* getMipmap(UINT i = 0) override;
 
 	UINT getWidth() override;
@@ -63,10 +62,11 @@ public:
 class CGXTexture3D: public IGXTexture3D
 {
 	friend class CGXContext;
+	friend class CGXDevice;
 
 protected:
-	CGXContext *m_pRender;
-	CGXTexture3D(CGXContext *pRender): 
+	CGXDevice *m_pRender;
+	CGXTexture3D(CGXDevice *pRender):
 		m_pRender(pRender)
 	{
 	}
@@ -88,8 +88,6 @@ protected:
 
 	IGXSurface *m_pSurfaceRT = NULL;
 public:
-	void Release() override;
-
 	UINT getWidth() override;
 	UINT getHeight() override;
 	UINT getDepth() override;
@@ -109,10 +107,11 @@ public:
 class CGXTextureCube: public IGXTextureCube
 {
 	friend class CGXContext;
+	friend class CGXDevice;
 
 protected:
-	CGXContext *m_pRender;
-	CGXTextureCube(CGXContext *pRender): 
+	CGXDevice *m_pRender;
+	CGXTextureCube(CGXDevice *pRender):
 		m_pRender(pRender)
 	{
 	}
@@ -144,8 +143,6 @@ protected:
 
 	IGXSurface *m_pSurfaceRT = NULL;
 public:
-	void Release() override;
-
 	IGXSurface* getMipmap(GXCUBEMAP_FACES face, UINT i = 0) override;
 
 	UINT getSize() override;

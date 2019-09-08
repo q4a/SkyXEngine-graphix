@@ -1,17 +1,10 @@
 #include "GXDepthStencilSurface.h"
 
-void CGXDepthStencilSurface::Release()
-{
-	--m_uRefCount;
-	if(!m_uRefCount)
-	{
-		m_pRender->destroyDepthStencilSurface(this);
-	}
-}
 
 CGXDepthStencilSurface::~CGXDepthStencilSurface()
 {
 	onDevLost();
+	m_pRender->destroyDepthStencilSurface(this);
 }
 
 void CGXDepthStencilSurface::onDevLost()

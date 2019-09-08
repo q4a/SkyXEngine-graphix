@@ -1,24 +1,22 @@
 #ifndef _GXCONSTANTBUFFER_H_
 #define _GXCONSTANTBUFFER_H_
 
-#include "GXContext.h"
+#include "GXDevice.h"
 
 class CGXConstantBuffer: public IGXConstantBuffer
 {
 	friend class CGXContext;
+	friend class CGXDevice;
 
-	CGXConstantBuffer(CGXContext *pRender, UINT uSize);
+	CGXConstantBuffer(CGXDevice *pRender, UINT uSize);
 	~CGXConstantBuffer();
 
-	void update(const void *pData) override;
+	void update(const void *pData, IGXContext *pContext = NULL) override;
 	UINT getSize() override;
 
-	CGXContext *m_pRender;
+	CGXDevice *m_pRender;
 	ID3D11Buffer *m_pBuffer;
 	UINT m_uSize;
-
-public:
-	void Release() override;
 };
 
 #endif

@@ -1,19 +1,20 @@
 #ifndef _CGXDepthStencilSurface_H_
 #define _CGXDepthStencilSurface_H_
 
-#include "GXContext.h"
+#include "GXDevice.h"
 
 class CGXDepthStencilSurface: public IGXDepthStencilSurface
 {					  
 	friend class CGXContext;
+	friend class CGXDevice;
 
-	CGXDepthStencilSurface(CGXContext * pRender):
+	CGXDepthStencilSurface(CGXDevice * pRender):
 		m_pRender(pRender)
 	{
 	}
 	~CGXDepthStencilSurface();
 
-	CGXContext *m_pRender;
+	CGXDevice *m_pRender;
 	ID3D11DepthStencilView *m_pSurface = NULL;
 	ID3D11Texture2D *m_pBuffer = NULL;
 
@@ -26,9 +27,6 @@ class CGXDepthStencilSurface: public IGXDepthStencilSurface
 
 	void onDevLost();
 	void onDevRst(UINT uScreenWidth, UINT uScreenHeight);
-
-public:
-	void Release() override;
 };
 
 #endif

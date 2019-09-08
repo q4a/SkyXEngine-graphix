@@ -27,7 +27,14 @@ public:
 	}
 
 	//! декрементирует счетчик ссылок, если количество ссылок == 0 тогда освобождает/удаляет данные
-	virtual void Release() = 0;
+	virtual void Release()
+	{
+		--m_uRefCount;
+		if(!m_uRefCount)
+		{
+			delete this;
+		}
+	}
 };
 
 #endif

@@ -6,14 +6,15 @@
 class CGXIndexBuffer: public IGXIndexBuffer
 {
 	friend class CGXContext;
+	friend class CGXDevice;
 
-	CGXIndexBuffer(CGXContext *pRender):
+	CGXIndexBuffer(CGXDevice *pRender):
 		m_pRender(pRender)
 	{
 	}
 	~CGXIndexBuffer();
 
-	CGXContext *m_pRender;
+	CGXDevice *m_pRender;
 	ID3D11Buffer *m_pBuffer;
 	DXGI_FORMAT m_format;
 	bool m_wasReset = true;

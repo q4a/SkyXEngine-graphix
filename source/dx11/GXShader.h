@@ -6,14 +6,15 @@
 class CGXVertexShader: public IGXVertexShader
 {
 	friend class CGXContext;
+	friend class CGXDevice;
 
-	CGXVertexShader(CGXContext *pRender):
+	CGXVertexShader(CGXDevice *pRender):
 		m_pRender(pRender)
 	{
 	}
 	~CGXVertexShader();
 
-	CGXContext *m_pRender;
+	CGXDevice *m_pRender;
 	ID3D11VertexShader *m_pShader = NULL;
 	ID3DBlob *m_pShaderBlob = NULL;
 
@@ -26,13 +27,14 @@ public:
 class CGXGeometryShader: public IGXGeometryShader
 {
 	friend class CGXContext;
+	friend class CGXDevice;
 
-	CGXGeometryShader(CGXContext *pRender):
+	CGXGeometryShader(CGXDevice *pRender):
 		m_pRender(pRender)
 	{}
 	~CGXGeometryShader();
 
-	CGXContext *m_pRender;
+	CGXDevice *m_pRender;
 	ID3D11GeometryShader *m_pShader = NULL;
 	ID3DBlob *m_pShaderBlob = NULL;
 
@@ -44,14 +46,15 @@ public:
 class CGXPixelShader: public IGXPixelShader
 {
 	friend class CGXContext;
+	friend class CGXDevice;
 
-	CGXPixelShader(CGXContext *pRender):
+	CGXPixelShader(CGXDevice *pRender):
 		m_pRender(pRender)
 	{
 	}
 	~CGXPixelShader();
 
-	CGXContext *m_pRender;
+	CGXDevice *m_pRender;
 	ID3D11PixelShader *m_pShader = NULL;
 	ID3DBlob *m_pShaderBlob = NULL;
 
@@ -63,14 +66,15 @@ public:
 class CGXComputeShader: public IGXComputeShader
 {
 	friend class CGXContext;
+	friend class CGXDevice;
 
-	CGXComputeShader(CGXContext *pRender):
+	CGXComputeShader(CGXDevice *pRender):
 		m_pRender(pRender)
 	{
 	}
 	~CGXComputeShader();
 
-	CGXContext *m_pRender;
+	CGXDevice *m_pRender;
 	ID3D11ComputeShader *m_pShader = NULL;
 	ID3DBlob *m_pShaderBlob = NULL;
 
@@ -83,8 +87,9 @@ public:
 class CGXShader: public IGXShaderSet
 {
 	friend class CGXContext;
+	friend class CGXDevice;
 
-	CGXShader(CGXContext *pRender, IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL, IGXGeometryShader *pGS = NULL, IGXComputeShader *pCS = NULL):
+	CGXShader(CGXDevice *pRender, IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL, IGXGeometryShader *pGS = NULL, IGXComputeShader *pCS = NULL):
 		m_pRender(pRender),
 		m_pVShader((CGXVertexShader*)pVS),
 		m_pPShader((CGXPixelShader*)pPS),
@@ -116,7 +121,7 @@ class CGXShader: public IGXShaderSet
 		mem_release(m_pCShader);
 	}
 
-	CGXContext *m_pRender;
+	CGXDevice *m_pRender;
 	CGXVertexShader *m_pVShader;
 	CGXPixelShader *m_pPShader;
 	CGXGeometryShader *m_pGShader;

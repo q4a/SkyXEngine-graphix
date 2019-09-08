@@ -17,8 +17,6 @@ class CGXVertexDeclaration: public IGXVertexDeclaration
 	byte m_u8StreamStride[GX_MAX_VSTREAM];
 	GXDECLSPEC m_u8SpecSpec[GX_MAX_VSTREAM];
 
-public:
-	void Release();
 };
 
 #endif

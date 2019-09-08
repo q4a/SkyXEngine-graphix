@@ -40,14 +40,16 @@ struct GXMacro
 //##########################################################################
 
 //! интерфейс константы для шейдера
+class IGXContext;
 class IGXConstantBuffer: public IGXBaseInterface
 {
 public:
 
 	/*! обновление данных буфера
 	 @param pData указатель на буфер с данными
+	 @param pContext указатель контекст, в котором нужно произвести обновление
 	*/
-	virtual void update(const void *pData) = 0;
+	virtual void update(const void *pData, IGXContext *pContext = NULL) = 0;
 
 	//! возвращает размер буфера в байтах
 	virtual UINT getSize() = 0;
