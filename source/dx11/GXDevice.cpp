@@ -18,10 +18,57 @@
 #include "GXContext.h"
 
 #include <cstdio>
+#include <mutex>
+
+//##########################################################################
+
+class CThreadsafeCounter
+{
+	ID m_idCounter;
+	std::mutex m_mutex;
+
+public:
+	CThreadsafeCounter()
+	{
+		m_idCounter = -1;
+	}
+
+	ID getNext()
+	{
+		m_mutex.lock();
+		++m_idCounter;
+
+		if(m_idCounter >= GX_MAX_THREADS)
+		{
+			assert(!"thread counter exceeded");
+			// wrap back to the first worker index
+			m_idCounter = 1;
+		}
+
+		ID val = m_idCounter;
+		m_mutex.unlock();
+		return(val);
+	}
+};
+
+static ID GXGetThreadID()
+{
+	static CThreadsafeCounter s_threadCounter;
+
+	const ID c_idNullIndex = -1;
+	__declspec(thread) static ID s_idThreadIndex = c_idNullIndex;
+	if(s_idThreadIndex == c_idNullIndex)
+	{
+		s_idThreadIndex = s_threadCounter.getNext();
+		assert(s_idThreadIndex < GX_MAX_THREADS);
+	}
+
+	return(s_idThreadIndex);
+}
+
+//##########################################################################
 
 //флаги компиляции шейдеров
-
-
 #ifdef _DEBUG
 /* D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY */
 #	define SHADER_FLAGS (D3DCOMPILE_DEBUG | D3DCOMPILE_AVOID_FLOW_CONTROL | D3DCOMPILE_SKIP_OPTIMIZATION | /*D3DCOMPILE_PARTIAL_PRECISION | */D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY)
@@ -42,6 +89,7 @@ CGXDevice::CGXDevice()
 	ms_pInstance = this;
 	memset(&m_memoryStats, 0, sizeof(m_memoryStats));
 	memset(&m_adapterDesc, 0, sizeof(m_adapterDesc));
+	memset(&m_pContexts, 0, sizeof(m_pContexts));
 }
 
 CGXDevice::~CGXDevice()
@@ -53,12 +101,19 @@ CGXDevice::~CGXDevice()
 	mem_release(m_pDefaultDepthStencilState);
 
 	ms_pInstance = NULL;
-	mem_release(m_pDXGIFactory);
-	mem_release(m_pDXGIDevice);
-	mem_release(m_pDevice);
+
+	for(int i = 1; i <= m_iLastIndirectContext; ++i)
+	{
+		mem_release(m_pContexts[i]);
+	}
+
 	//mem_release(m_pDeviceContext);
 	mem_delete(m_pDirectContext);
 	mem_release(m_pDefaultSwapChain);
+
+	mem_release(m_pDXGIFactory);
+	mem_release(m_pDXGIDevice);
+	mem_release(m_pDevice);
 }
 
 void CGXDevice::Release()
@@ -139,6 +194,8 @@ void CGXDevice::resize(int iWidth, int iHeight, bool isWindowed)
 BOOL CGXDevice::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindowed)
 {
 	m_hWnd = (HWND)wnd;
+
+	assert(GXGetThreadID() == 0);
 
 	UINT creationFlags = D3D11_CREATE_DEVICE_SINGLETHREADED;
 #if defined(_DEBUG)
@@ -231,6 +288,7 @@ BOOL CGXDevice::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindow
 
 
 	m_pDirectContext = new CGXContext(m_pDeviceContext, this, true);
+	m_pContexts[0] = m_pDirectContext;
 
 	m_pDefaultSwapChain = createSwapChain(m_uWindowWidth, m_uWindowHeight, wnd, isWindowed);
 	m_pDirectContext->setColorTarget(NULL);
@@ -1608,10 +1666,35 @@ IGXConstantBuffer* CGXDevice::createConstantBuffer(UINT uSize)
 	return(new CGXConstantBuffer(this, uSize));
 }
 
-IGXContext* CGXDevice::getDirectContext()
+IGXContext* CGXDevice::getThreadContext()
 {
-	m_pDirectContext->AddRef();
-	return(m_pDirectContext);
+	//m_pDirectContext->AddRef();
+	ID idThread = GXGetThreadID();
+
+	if(!m_pContexts[idThread])
+	{
+		m_pContexts[idThread] = createIndirectContext();
+		if(m_iLastIndirectContext < idThread)
+		{
+			m_iLastIndirectContext = idThread;
+		}
+	}
+
+	return(m_pContexts[idThread]);
+}
+
+void CGXDevice::executeThreadContexts()
+{
+	assert(GXGetThreadID() == 0);
+
+	for(int i = 1; i <= m_iLastIndirectContext; ++i)
+	{
+		if(m_pContexts[i])
+		{
+			m_pDirectContext->executeIndirectContext(m_pContexts[i]);
+			mem_release(((CGXContext*)m_pContexts[i])->m_pCommandList);
+		}
+	}
 }
 
 IGXContext* CGXDevice::createIndirectContext()

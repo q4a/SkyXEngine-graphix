@@ -14,6 +14,7 @@
 #include "GXTexture.h"
 #include "GXSwapChain.h"
 #include "GXConstantBuffer.h"
+#include "GXContextState.h"
 
 #include <cstdio>
 
@@ -30,6 +31,10 @@ CGXContext::CGXContext(ID3D11DeviceContext *pDXContext, CGXDevice *pGXDevice, bo
 	memset(&m_pTexturesVS, 0, sizeof(m_pTexturesVS));
 	memset(&m_pTexturesCS, 0, sizeof(m_pTexturesCS));
 	memset(&m_pUAVsCS, 0, sizeof(m_pUAVsCS));
+	memset(&m_pPSConstant, 0, sizeof(m_pPSConstant));
+	memset(&m_pVSConstant, 0, sizeof(m_pVSConstant));
+	memset(&m_pCSConstant, 0, sizeof(m_pCSConstant));
+	memset(&m_pGSConstant, 0, sizeof(m_pGSConstant));
 
 	m_pDefaultDepthStencilSurface = m_pGXDevice->m_pDefaultDepthStencilSurface;
 	m_pDefaultRasterizerState = m_pGXDevice->m_pDefaultRasterizerState;
@@ -48,23 +53,46 @@ CGXContext::~CGXContext()
 {
 	mem_release(m_pCommandList);
 	mem_release(m_pDeviceContext);
-
+	
+	//! @todo: release all referenced resources!
 
 	mem_release(m_pDefaultDepthStencilSurface);
 	mem_release(m_pDefaultRasterizerState);
 	mem_release(m_pDefaultSamplerState);
 	mem_release(m_pDefaultBlendState);
 	mem_release(m_pDefaultDepthStencilState);
+
+	for(UINT i = 0; i < GX_MAX_SHADER_CONST; ++i)
+	{
+		mem_release(m_pVSConstant[i]);
+		mem_release(m_pPSConstant[i]);
+		mem_release(m_pGSConstant[i]);
+		mem_release(m_pCSConstant[i]);
+	}
 }
 
 void CGXContext::beginIndirect()
 {
+	if(m_isDirect)
+	{
+		return;
+	}
+
+	mem_release(m_pCommandList);
 	memset(&m_frameStats, 0, sizeof(m_frameStats));
 }
 void CGXContext::endIndirect()
 {
+	if(m_isDirect)
+	{
+		return;
+	}
+
 	mem_release(m_pCommandList);
 	DX_CALL(m_pDeviceContext->FinishCommandList(FALSE, &m_pCommandList));
+
+
+	memset(&m_sync_state, 1, sizeof(m_sync_state));
 }
 
 void CGXContext::executeIndirectContext(IGXContext *pContext)
@@ -76,15 +104,20 @@ void CGXContext::executeIndirectContext(IGXContext *pContext)
 	if(pCtx->m_pCommandList)
 	{
 		m_pDeviceContext->ExecuteCommandList(pCtx->m_pCommandList, TRUE);
+
+		m_frameStats.uDIPcount += pCtx->m_frameStats.uDIPcount;
+		m_frameStats.uLineCount += pCtx->m_frameStats.uLineCount;
+		m_frameStats.uPointCount += pCtx->m_frameStats.uPointCount;
+		m_frameStats.uPolyCount += pCtx->m_frameStats.uPolyCount;
+		m_frameStats.uUploadedBuffersIndices += pCtx->m_frameStats.uUploadedBuffersIndices;
+		m_frameStats.uUploadedBuffersShaderConst += pCtx->m_frameStats.uUploadedBuffersShaderConst;
+		m_frameStats.uUploadedBuffersTextures += pCtx->m_frameStats.uUploadedBuffersTextures;
+		m_frameStats.uUploadedBuffersVertexes += pCtx->m_frameStats.uUploadedBuffersVertexes;
 	}
 	else
 	{
-		CGXDevice::debugMessage(GX_LOG_WARN, "executeIndirectContext(): Context has no command list recorded!\n");
+		//CGXDevice::debugMessage(GX_LOG_WARN, "executeIndirectContext(): Context has no command list recorded!\n");
 	}
-}
-void CGXContext::cloneState(IGXContext *pContext)
-{
-	assert(!"Implement me!");
 }
 bool CGXContext::beginFrame()
 {
@@ -94,6 +127,118 @@ bool CGXContext::beginFrame()
 }
 void CGXContext::endFrame()
 {
+}
+
+#define GXCOPY_REF(field) field; if(field){field->AddRef();}
+
+IGXContextState* CGXContext::getCurrentState()
+{
+	CGXContextState *pState = new CGXContextState();
+
+	pState->m_pCurRenderBuffer = GXCOPY_REF(m_pCurRenderBuffer);
+	pState->m_pCurIndexBuffer = GXCOPY_REF(m_pCurIndexBuffer);
+
+	for(UINT i = 0; i < GX_MAX_SAMPLERS; ++i)
+	{
+		pState->m_pSamplerState[i] = GXCOPY_REF(m_pSamplerState[i]);
+	}
+
+	pState->m_pRasterizerState = GXCOPY_REF(m_pRasterizerState);
+	pState->m_pDepthStencilState = GXCOPY_REF(m_pDepthStencilState);
+	pState->m_uStencilRef = m_uStencilRef;
+	pState->m_pBlendState = GXCOPY_REF(m_pBlendState);
+	pState->m_blendFactor = m_blendFactor;
+	pState->m_pDepthStencilSurface = GXCOPY_REF(m_pDepthStencilSurface);
+
+	for(UINT i = 0; i < GX_MAX_COLORTARGETS; ++i)
+	{
+		pState->m_pColorTarget[i] = GXCOPY_REF(m_pColorTarget[i]);
+	}
+
+	for(UINT i = 0; i < GX_MAX_TEXTURES; ++i)
+	{
+		pState->m_pTextures[i] = GXCOPY_REF(m_pTextures[i]);
+		pState->m_pTexturesVS[i] = GXCOPY_REF(m_pTexturesVS[i]);
+		pState->m_pTexturesCS[i] = GXCOPY_REF(m_pTexturesCS[i]);
+	}
+
+	for(UINT i = 0; i < GX_MAX_UAV_TEXTURES; ++i)
+	{
+		pState->m_pUAVsCS[i] = GXCOPY_REF(m_pUAVsCS[i]);
+	}
+
+	pState->m_pShader = GXCOPY_REF(m_pShader);
+	pState->m_rcScissors = m_rcScissors;
+	pState->m_gxPT = m_gxPT;
+
+	for(UINT i = 0; i < GX_MAX_SHADER_CONST; ++i)
+	{
+		pState->m_pVSConstant[i] = GXCOPY_REF(m_pVSConstant[i]);
+		pState->m_pPSConstant[i] = GXCOPY_REF(m_pPSConstant[i]);
+		pState->m_pGSConstant[i] = GXCOPY_REF(m_pGSConstant[i]);
+		pState->m_pCSConstant[i] = GXCOPY_REF(m_pCSConstant[i]);
+	}
+
+	return(pState);
+}
+#undef GXCOPY_REF
+void CGXContext::setFullState(IGXContextState *pState_)
+{
+	assert(pState_);
+	CGXContextState *pState = (CGXContextState*)pState_;
+
+	setRenderBuffer(pState->m_pCurRenderBuffer);
+	setIndexBuffer(pState->m_pCurIndexBuffer);
+
+	for(UINT i = 0; i < GX_MAX_SAMPLERS; ++i)
+	{
+		setSamplerState(pState->m_pSamplerState[i], i);
+	}
+
+	setRasterizerState(pState->m_pRasterizerState);
+	setDepthStencilState(pState->m_pDepthStencilState);
+	setStencilRef(pState->m_uStencilRef);
+	setBlendState(pState->m_pBlendState);
+	setBlendFactor(pState->m_blendFactor);
+	if(pState->m_pDepthStencilSurface)
+	{
+		setDepthStencilSurface(pState->m_pDepthStencilSurface);
+	}
+	else
+	{
+		unsetDepthStencilSurface();
+	}
+
+	for(UINT i = 0; i < GX_MAX_COLORTARGETS; ++i)
+	{
+		setColorTarget(pState->m_pColorTarget[i], i);
+	}
+
+	for(UINT i = 0; i < GX_MAX_TEXTURES; ++i)
+	{
+		setPSTexture(pState->m_pTextures[i], i);
+		setVSTexture(pState->m_pTexturesVS[i], i);
+		setCSTexture(pState->m_pTexturesCS[i], i);
+	}
+
+	for(UINT i = 0; i < GX_MAX_UAV_TEXTURES; ++i)
+	{
+		setCSUnorderedAccessView(pState->m_pUAVsCS[i], i);
+	}
+
+	setShader(pState->m_pShader);
+
+	setScissorRect(pState->m_rcScissors.top, pState->m_rcScissors.right, pState->m_rcScissors.bottom, pState->m_rcScissors.left);
+
+	setPrimitiveTopology(pState->m_gxPT);
+
+	for(UINT i = 0; i < GX_MAX_SHADER_CONST; ++i)
+	{
+		setVSConstant(pState->m_pVSConstant[i], i);
+		setPSConstant(pState->m_pPSConstant[i], i);
+		setGSConstant(pState->m_pGSConstant[i], i);
+		setCSConstant(pState->m_pCSConstant[i], i);
+	}
 }
 
 void CGXContext::clear(UINT what, GXCOLOR color, float fDepth, UINT uStencil)
@@ -489,6 +634,7 @@ void CGXContext::syncronize(UINT flags)
 
 void CGXContext::setPrimitiveTopology(GXPRIMITIVETOPOLOGY pt)
 {
+	m_gxPT = pt;
 	switch(pt)
 	{
 	case GXPT_POINTLIST:
@@ -506,51 +652,81 @@ void CGXContext::setPrimitiveTopology(GXPRIMITIVETOPOLOGY pt)
 	case GXPT_TRIANGLESTRIP:
 		m_drawPT = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 		break;
+	default:
+		assert(!"Unknown primitive topology!");
 	}
 }
 
 void CGXContext::setVSConstant(IGXConstantBuffer *pBuffer, UINT uSlot)
 {
 	//@TODO: defer this
+
+	assert(uSlot < GX_MAX_SHADER_CONST);
+
 	ID3D11Buffer *pBuf = NULL;
 	if(pBuffer)
 	{
 		pBuf = ((CGXConstantBuffer*)pBuffer)->m_pBuffer;
+		pBuffer->AddRef();
 	}
 	m_pDeviceContext->VSSetConstantBuffers(uSlot, 1, &pBuf);
+
+	mem_release(m_pVSConstant[uSlot]);
+	m_pVSConstant[uSlot] = pBuffer;
 }
 
 void CGXContext::setPSConstant(IGXConstantBuffer *pBuffer, UINT uSlot)
 {
 	//@TODO: defer this
+
+	assert(uSlot < GX_MAX_SHADER_CONST);
+
 	ID3D11Buffer *pBuf = NULL;
 	if(pBuffer)
 	{
 		pBuf = ((CGXConstantBuffer*)pBuffer)->m_pBuffer;
+		pBuffer->AddRef();
 	}
 	m_pDeviceContext->PSSetConstantBuffers(uSlot, 1, &pBuf);
+
+	mem_release(m_pPSConstant[uSlot]);
+	m_pPSConstant[uSlot] = pBuffer;
 }
 
 void CGXContext::setGSConstant(IGXConstantBuffer *pBuffer, UINT uSlot)
 {
 	//@TODO: defer this
+
+	assert(uSlot < GX_MAX_SHADER_CONST);
+
 	ID3D11Buffer *pBuf = NULL;
 	if(pBuffer)
 	{
 		pBuf = ((CGXConstantBuffer*)pBuffer)->m_pBuffer;
+		pBuffer->AddRef();
 	}
 	m_pDeviceContext->GSSetConstantBuffers(uSlot, 1, &pBuf);
+
+	mem_release(m_pGSConstant[uSlot]);
+	m_pGSConstant[uSlot] = pBuffer;
 }
 
 void CGXContext::setCSConstant(IGXConstantBuffer *pBuffer, UINT uSlot)
 {
 	//@TODO: defer this
+
+	assert(uSlot < GX_MAX_SHADER_CONST);
+
 	ID3D11Buffer *pBuf = NULL;
 	if(pBuffer)
 	{
 		pBuf = ((CGXConstantBuffer*)pBuffer)->m_pBuffer;
+		pBuffer->AddRef();
 	}
 	m_pDeviceContext->CSSetConstantBuffers(uSlot, 1, &pBuf);
+
+	mem_release(m_pCSConstant[uSlot]);
+	m_pCSConstant[uSlot] = pBuffer;
 }
 
 void CGXContext::setShader(IGXShaderSet *pSH)

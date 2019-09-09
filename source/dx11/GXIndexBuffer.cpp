@@ -26,7 +26,7 @@ bool CGXIndexBuffer::lock(void **ppData, GXBUFFERLOCK mode)
 	{
 		m_wasReset = false;
 
-		((CGXContext*)m_pRender->getDirectContext())->addBytesIndices(m_uSize);
+		((CGXContext*)m_pRender->getThreadContext())->addBytesIndices(m_uSize);
 		*ppData = srs.pData;
 		return(true);
 	}

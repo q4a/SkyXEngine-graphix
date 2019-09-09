@@ -26,14 +26,9 @@ UINT CGXConstantBuffer::getSize()
 	return(m_uSize);
 }
 
-void CGXConstantBuffer::update(const void *pData, IGXContext *pContext)
+void CGXConstantBuffer::update(const void *pData)
 {
-	if(!pContext)
-	{
-		pContext = m_pRender->getDirectContext();
-	}
-	
-	CGXContext *pCtx = (CGXContext*)pContext;
+	CGXContext *pCtx = (CGXContext*)m_pRender->getThreadContext();
 
 	pCtx->getDXContext()->UpdateSubresource(m_pBuffer, 0, NULL, pData, 0, 0);
 	pCtx->addBytesShaderConst(m_uSize);

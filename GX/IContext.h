@@ -17,6 +17,7 @@ See the license in LICENSE
 #include "shaders.h"
 #include "adapter_stats.h"
 #include "buffers.h"
+#include "IContextState.h"
 
 class IGXContext: public IGXBaseInterface
 {
@@ -33,9 +34,6 @@ public:
 	//! запускает выполнение команд, накопленных в отложенном контексте
 	virtual void executeIndirectContext(IGXContext *pContext) = 0;
 
-	//! копирует текущее состояние основного контекста в отложенный
-	virtual void cloneState(IGXContext *pContext) = 0;
-
 	//! начало кадра, вызывается до рендера
 	virtual bool beginFrame() = 0;
 
@@ -44,6 +42,12 @@ public:
 
 	//! возвращает статистику текущего кадра
 	virtual const GXFrameStats* getFrameStats() = 0;
+
+	//! возвращает объект состояния контекста, все установленные стейты, шейдеры, текстуры и прочее
+	virtual IGXContextState* getCurrentState() = 0;
+
+	//! загружает состояние из объекта
+	virtual void setFullState(IGXContextState *pState) = 0;
 
 	//##########################################################################
 

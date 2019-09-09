@@ -11,7 +11,7 @@ class CGXConstantBuffer: public IGXConstantBuffer
 	CGXConstantBuffer(CGXDevice *pRender, UINT uSize);
 	~CGXConstantBuffer();
 
-	void update(const void *pData, IGXContext *pContext = NULL) override;
+	void update(const void *pData) override;
 	UINT getSize() override;
 
 	CGXDevice *m_pRender;

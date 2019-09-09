@@ -1,6 +1,7 @@
 #include "GXTexture.h"
 #include "GXSurface.h"
 #include "GXDevice.h"
+#include "GXContext.h"
 
 CGXTexture2D::~CGXTexture2D()
 {
@@ -64,12 +65,12 @@ IGXSurface* CGXTexture2D::getMipmap(UINT n)
 bool CGXTexture2D::lock(void **ppData, GXTEXLOCK mode)
 {
 	D3D11_MAPPED_SUBRESOURCE sr;
-	if(FAILED(DX_CALL(m_pRender->getDXDeviceContext()->Map(m_pTexture, 0, (mode == GXTL_WRITE) ? D3D11_MAP_WRITE_DISCARD : D3D11_MAP_READ, 0, &sr))))
+	if(FAILED(DX_CALL(((CGXContext*)m_pRender->getThreadContext())->getDXDeviceContext()->Map(m_pTexture, 0, (mode == GXTL_WRITE) ? D3D11_MAP_WRITE_DISCARD : D3D11_MAP_READ, 0, &sr))))
 	{
 		return(false);
 	}
 
-	m_pRender->addBytesTextures(sr.RowPitch * m_uHeight);
+	((CGXContext*)m_pRender->getThreadContext())->addBytesTextures(sr.RowPitch * m_uHeight);
 
 	*ppData = sr.pData;
 	return(true);
@@ -77,12 +78,12 @@ bool CGXTexture2D::lock(void **ppData, GXTEXLOCK mode)
 
 void CGXTexture2D::unlock()
 {
-	m_pRender->getDXDeviceContext()->Unmap(m_pTexture, 0);
+	((CGXContext*)m_pRender->getThreadContext())->getDXDeviceContext()->Unmap(m_pTexture, 0);
 }
 
 void CGXTexture2D::update(void *pData)
 {
-	m_pRender->getDXDeviceContext()->UpdateSubresource(m_pTexture, 0, NULL, pData, m_pRender->getTextureMemPitch(m_uWidth, m_format), 0);
+	((CGXContext*)m_pRender->getThreadContext())->getDXDeviceContext()->UpdateSubresource(m_pTexture, 0, NULL, pData, m_pRender->getTextureMemPitch(m_uWidth, m_format), 0);
 }
 
 ID3D11ShaderResourceView* CGXTexture2D::getDXTexture()

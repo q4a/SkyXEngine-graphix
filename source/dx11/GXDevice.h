@@ -50,7 +50,8 @@ public:
 
 	void resize(int iWidth, int iHeight, bool isWindowed) override;
 
-	IGXContext* getDirectContext() override;
+	IGXContext* getThreadContext() override;
+	void executeThreadContexts() override;
 	IGXContext* createIndirectContext() override;
 	
 	IGXSwapChain* createSwapChain(UINT uWidth, UINT uHeight, SXWINDOW wnd) override;
@@ -156,12 +157,14 @@ public:
 protected:
 	
 	ID3D11Device *m_pDevice = NULL;
-	ID3D11DeviceContext *m_pDeviceContext = NULL;
+	ID3D11DeviceContext *m_pDeviceContext;
 	IDXGIDevice *m_pDXGIDevice = NULL;
 	IDXGIFactory *m_pDXGIFactory = NULL;
 	IGXLogger *m_pLogger = NULL;
 	static CGXDevice *ms_pInstance;
 	CGXContext *m_pDirectContext = NULL;
+	IGXContext *m_pContexts[GX_MAX_THREADS];
+	int m_iLastIndirectContext = 0;
 
 	UINT m_uWindowWidth;
 	UINT m_uWindowHeight;

@@ -8,7 +8,7 @@
 
 class CGXContext: public IGXContext
 {
-	friend class CGXContext;
+	friend class CGXDevice;
 
 public:
 	CGXContext(ID3D11DeviceContext *pDXContext, CGXDevice *pGXDevice, bool isDirect);
@@ -35,13 +35,15 @@ public:
 	void endIndirect() override;
 
 	void executeIndirectContext(IGXContext *pContext) override;
-	void cloneState(IGXContext *pContext) override;
 	bool beginFrame() override;
 	void endFrame() override;
 	bool isDirect() override
 	{
 		return(m_isDirect);
 	}
+
+	IGXContextState* getCurrentState() override;
+	void setFullState(IGXContextState *pState) override;
 
 	void clear(UINT what, GXCOLOR color = 0, float fDepth = 1.0f, UINT uStencil = 0) override;
 
@@ -143,6 +145,7 @@ protected:
 
 	IGXVertexDeclaration *m_pCurVertexDecl;
 	D3D_PRIMITIVE_TOPOLOGY m_drawPT = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	GXPRIMITIVETOPOLOGY m_gxPT = GXPT_TRIANGLELIST;
 
 	IGXSamplerState *m_pSamplerState[GX_MAX_SAMPLERS];
 	IGXSamplerState *m_pDefaultSamplerState = NULL;
@@ -168,6 +171,11 @@ protected:
 	IGXBaseTexture *m_pTexturesVS[GX_MAX_TEXTURES];
 	IGXBaseTexture *m_pTexturesCS[GX_MAX_TEXTURES];
 	IGXBaseTexture *m_pUAVsCS[GX_MAX_UAV_TEXTURES];
+
+	IGXConstantBuffer *m_pVSConstant[GX_MAX_SHADER_CONST];
+	IGXConstantBuffer *m_pPSConstant[GX_MAX_SHADER_CONST];
+	IGXConstantBuffer *m_pGSConstant[GX_MAX_SHADER_CONST];
+	IGXConstantBuffer *m_pCSConstant[GX_MAX_SHADER_CONST];
 
 	IGXShaderSet *m_pShader = NULL;
 

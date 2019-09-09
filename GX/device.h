@@ -10,6 +10,8 @@ See the license in LICENSE
 
 #include "IContext.h"
 
+#define GX_MAX_THREADS 64
+
 //##########################################################################
 
 //! интерфейс графического контекста
@@ -38,8 +40,11 @@ public:
 
 	//##########################################################################
 
-	//! возвращает основной контекст рендера
-	virtual IGXContext* getDirectContext() = 0;
+	//! возвращает контекст рендера текущего потока
+	virtual IGXContext* getThreadContext() = 0;
+
+	//! запускает на выполнение команды, накопленные в контекстах потоков
+	virtual void executeThreadContexts() = 0;
 
 	//! создает непрямой контекст для работы из другого потока
 	virtual IGXContext* createIndirectContext() = 0;
