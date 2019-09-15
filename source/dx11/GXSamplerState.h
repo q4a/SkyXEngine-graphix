@@ -19,7 +19,7 @@ class CGXSamplerState: public IGXSamplerState
 	}
 
 	CGXDevice *m_pRender;
-	ID3D11SamplerState *m_pStateBlock;
+	ID3D11SamplerState *m_pStateBlock = NULL;
 
 	GXSamplerDesc m_desc;
 

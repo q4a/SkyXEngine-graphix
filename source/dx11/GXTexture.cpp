@@ -99,7 +99,7 @@ void CGXTexture2D::onDevLost()
 	for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
 	{
 		mem_release(((CGXSurface*)m_apSurfaces[i])->m_pSurface);
-		if(m_descTex2D.BindFlags | D3D11_BIND_RENDER_TARGET)
+		if(m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET)
 		{
 			((CGXSurface*)m_apSurfaces[i])->releaseRT();
 		}
@@ -154,7 +154,7 @@ void CGXTexture2D::onDevRst(UINT uScreenWidth, UINT uScreenHeight)
 		pSurf->m_pSurface = m_pTexture;
 		m_pTexture->AddRef();
 
-		if(m_descTex2D.BindFlags | D3D11_BIND_RENDER_TARGET)
+		if(m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET)
 		{
 			((CGXSurface*)m_apSurfaces[i])->initRT();
 		}
@@ -285,7 +285,7 @@ IGXSurface* CGXTextureCube::getMipmap(GXCUBEMAP_FACES face, UINT n)
 	pSurface->m_uMipmapNumber = n;
 	pSurface->m_uMipmapTotal = m_descTex2D.MipLevels;
 	pSurface->m_face = face;
-	if(m_descTex2D.BindFlags | D3D11_BIND_RENDER_TARGET)
+	if(m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET)
 	{
 		pSurface->initRT();
 	}
@@ -333,7 +333,7 @@ void CGXTextureCube::onDevLost()
 	for(UINT i = 0, l = m_apSurfaces.size(); i < l; ++i)
 	{
 		mem_release(((CGXSurface*)m_apSurfaces[i])->m_pSurface);
-		if(m_descTex2D.BindFlags | D3D11_BIND_RENDER_TARGET)
+		if(m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET)
 		{
 			((CGXSurface*)m_apSurfaces[i])->releaseRT();
 		}
@@ -370,7 +370,7 @@ void CGXTextureCube::onDevRst(UINT uScreenHeight)
 		pSurf->m_pSurface = m_pTexture;
 		m_pTexture->AddRef();
 
-		if(m_descTex2D.BindFlags | D3D11_BIND_RENDER_TARGET)
+		if(m_descTex2D.BindFlags & D3D11_BIND_RENDER_TARGET)
 		{
 			((CGXSurface*)m_apSurfaces[i])->initRT();
 		}

@@ -18,7 +18,7 @@ void CGXBlendState::onDevRst()
 	blendDesc.IndependentBlendEnable = m_desc.useIndependentBlend;
 	for(int i = 0; i < (blendDesc.IndependentBlendEnable ? 8 : 1); ++i)
 	{
-		if(blendDesc.RenderTarget[i].BlendEnable = m_desc.renderTarget[i].useBlend)
+		if((blendDesc.RenderTarget[i].BlendEnable = m_desc.renderTarget[i].useBlend))
 		{
 			blendDesc.RenderTarget[i].SrcBlend = (D3D11_BLEND)m_desc.renderTarget[i].blendSrcColor;
 			blendDesc.RenderTarget[i].DestBlend = (D3D11_BLEND)m_desc.renderTarget[i].blendDestColor;

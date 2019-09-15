@@ -35,6 +35,7 @@ CGXContext::CGXContext(ID3D11DeviceContext *pDXContext, CGXDevice *pGXDevice, bo
 	memset(&m_pVSConstant, 0, sizeof(m_pVSConstant));
 	memset(&m_pCSConstant, 0, sizeof(m_pCSConstant));
 	memset(&m_pGSConstant, 0, sizeof(m_pGSConstant));
+	memset(&m_frameStats, 0, sizeof(m_frameStats));
 
 	m_pDefaultDepthStencilSurface = m_pGXDevice->m_pDefaultDepthStencilSurface;
 	m_pDefaultRasterizerState = m_pGXDevice->m_pDefaultRasterizerState;
