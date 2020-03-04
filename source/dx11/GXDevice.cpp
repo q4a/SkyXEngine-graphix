@@ -201,21 +201,31 @@ BOOL CGXDevice::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindow
 #if defined(_DEBUG)
 	creationFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
-	D3D_FEATURE_LEVEL featureLevels[] =
-	{
-		D3D_FEATURE_LEVEL_11_1,
-		D3D_FEATURE_LEVEL_11_0,
-		D3D_FEATURE_LEVEL_10_1,
-		D3D_FEATURE_LEVEL_10_0,
-		D3D_FEATURE_LEVEL_9_3,
-		D3D_FEATURE_LEVEL_9_2,
-		D3D_FEATURE_LEVEL_9_1
-	};
 	log(GX_LOG_INFO, "Initializing %s context\n", (creationFlags & D3D11_CREATE_DEVICE_DEBUG) ? "debug" : "release");
-	if(FAILED(DX_CALL(D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, featureLevels, ARRAYSIZE(featureLevels), D3D11_SDK_VERSION, &m_pDevice, nullptr, &m_pDeviceContext))))
+	D3D_FEATURE_LEVEL featureLevels111[] =
 	{
-		return(FALSE);
+		D3D_FEATURE_LEVEL_11_1
+	};
+	if(FAILED(DX_CALL(D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, featureLevels111, ARRAYSIZE(featureLevels111), D3D11_SDK_VERSION, &m_pDevice, nullptr, &m_pDeviceContext))))
+	{
+		log(GX_LOG_INFO, "Unable to use DirectX11.1! Falling back to previous version\n");
+
+		D3D_FEATURE_LEVEL featureLevels[] =
+		{
+			D3D_FEATURE_LEVEL_11_0,
+			D3D_FEATURE_LEVEL_10_1,
+			D3D_FEATURE_LEVEL_10_0,
+			D3D_FEATURE_LEVEL_9_3,
+			D3D_FEATURE_LEVEL_9_2,
+			D3D_FEATURE_LEVEL_9_1
+		};
+		log(GX_LOG_INFO, "Initializing %s context\n", (creationFlags & D3D11_CREATE_DEVICE_DEBUG) ? "debug" : "release");
+		if(FAILED(DX_CALL(D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, featureLevels, ARRAYSIZE(featureLevels), D3D11_SDK_VERSION, &m_pDevice, nullptr, &m_pDeviceContext))))
+		{
+			return(FALSE);
+		}
 	}
+	
 
 	if(FAILED(DX_CALL(m_pDevice->QueryInterface(__uuidof(IDXGIDevice), (void **)&m_pDXGIDevice))))
 	{
