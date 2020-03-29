@@ -109,22 +109,22 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>../../../build/bin/</OutDir>
-    <IncludePath>../../../sdks/;$(VC_IncludePath);$(WindowsSDK_IncludePath);../../../sdks/dx11sdk/Include;</IncludePath>
-    <LibraryPath>../../../libs/;../../../sdks/dx11sdk/Lib/x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
+    <IncludePath>../../../sdks/;../../../sdks/DirectX/Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>../../../libs/;../../../sdks/DirectX/Lib/x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>../../../sdks/;$(VC_IncludePath);$(WindowsSDK_IncludePath);../../../sdks/dx11sdk/Include;</IncludePath>
-    <LibraryPath>../../../libs/;../../../sdks/dx11sdk/Lib/x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
+    <IncludePath>../../../sdks/;../../../sdks/DirectX/Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>../../../libs/;../../../sdks/DirectX/Lib/x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
     <OutDir>../../../build/bin64/</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>../../../build/bin/</OutDir>
-    <IncludePath>../../../sdks/;$(VC_IncludePath);$(WindowsSDK_IncludePath);../../../sdks/dx11sdk/Include;</IncludePath>
-    <LibraryPath>../../../libs/;../../../sdks/dx11sdk/Lib/x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
+    <IncludePath>../../../sdks/;../../../sdks/DirectX/Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>../../../libs/;../../../sdks/DirectX/Lib/x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>../../../sdks/;$(VC_IncludePath);$(WindowsSDK_IncludePath);../../../sdks/dx11sdk/Include;</IncludePath>
-    <LibraryPath>../../../libs/;../../../sdks/dx11sdk/Lib/x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
+    <IncludePath>../../../sdks/;../../../sdks/DirectX/Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>../../../libs/;../../../sdks/DirectX/Lib/x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
     <OutDir>../../../build/bin64/</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
