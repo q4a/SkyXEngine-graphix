@@ -204,7 +204,11 @@ BOOL CGXDevice::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindow
 	log(GX_LOG_INFO, "Initializing %s context\n", (creationFlags & D3D11_CREATE_DEVICE_DEBUG) ? "debug" : "release");
 	D3D_FEATURE_LEVEL featureLevels111[] =
 	{
+		#ifdef D3D_FEATURE_LEVEL_11_1
 		D3D_FEATURE_LEVEL_11_1
+		#else
+		D3D_FEATURE_LEVEL_11_0
+		#endif
 	};
 	if(FAILED(DX_CALL(D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, featureLevels111, ARRAYSIZE(featureLevels111), D3D11_SDK_VERSION, &m_pDevice, nullptr, &m_pDeviceContext))))
 	{
