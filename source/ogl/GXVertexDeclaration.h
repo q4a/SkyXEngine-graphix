@@ -9,13 +9,13 @@ class CGXVertexDeclaration: public IGXVertexDeclaration
 
 	struct _declItem
 	{
-		UINT stream;
+		UINT8 stream;
 		GLuint index;
 		GLint size;
 		GLenum type​;
 		GLboolean normalized;
 		GLsizei stride​;
-		const GLvoid * pointer​;
+		const GLvoid * pointer​;//UINT16
 	};
 
 	CGXVertexDeclaration(CGXContext * pRender, const GXVertexElement * pDecl);

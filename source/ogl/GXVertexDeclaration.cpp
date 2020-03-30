@@ -5,12 +5,12 @@ void CGXVertexDeclaration::Release()
 	m_pRender->destroyVertexDeclaration(this);
 }
 
-CGXVertexDeclaration::CGXVertexDeclaration(CGXContext * pRender, const GXVertexElement * pDecl):
+CGXVertexDeclaration::CGXVertexDeclaration(CGXContext * pRender, const GXVertexElement *pDecl):
 	m_pRender(pRender),
 	m_uDeclCount(0),
 	m_pDeclItems(NULL)
 {
-	while(pDecl[m_uDeclCount++].Type != GXDECLTYPE_UNUSED);
+	while(pDecl[m_uDeclCount++].type != GXDECLTYPE_UNUSED);
 
 	m_uDeclCount--;
 
@@ -26,10 +26,10 @@ CGXVertexDeclaration::CGXVertexDeclaration(CGXContext * pRender, const GXVertexE
 			DS_FATAL((DStringW(L"Bad usage index ") + pDecl[i].UsageIndex).c_str());
 		}
 #endif
-		m_pDeclItems[i].stream = pDecl[i].Stream;
-		m_pDeclItems[i].pointer​ = (void*)pDecl[i].Offset;
-		m_pDeclItems[i].index = pDecl[i].Usage;
-		switch(pDecl[i].Type)
+		m_pDeclItems[i].stream = pDecl[i].u8Stream;
+		m_pDeclItems[i].pointer​ = (void*)pDecl[i].u16Offset;
+		m_pDeclItems[i].index = pDecl[i].usage;
+		switch(pDecl[i].type)
 		{
 		case GXDECLTYPE_FLOAT1:
 			m_pDeclItems[i].normalized = FALSE;
@@ -110,7 +110,7 @@ CGXVertexDeclaration::CGXVertexDeclaration(CGXContext * pRender, const GXVertexE
 			stride += 8;
 			break;
 
-		case GXDECLTYPE_UDEC3:
+		/*case GXDECLTYPE_UDEC3:
 			m_pDeclItems[i].normalized = FALSE;
 			m_pDeclItems[i].size = 3;
 			m_pDeclItems[i].type​ = GL_INT_2_10_10_10_REV;
@@ -122,7 +122,7 @@ CGXVertexDeclaration::CGXVertexDeclaration(CGXContext * pRender, const GXVertexE
 			m_pDeclItems[i].size = 3;
 			m_pDeclItems[i].type​ = GL_UNSIGNED_INT_2_10_10_10_REV;
 			stride += 32;
-			break;
+			break;*/
 
 		case GXDECLTYPE_FLOAT16_2:
 			m_pDeclItems[i].normalized = FALSE;
@@ -138,9 +138,9 @@ CGXVertexDeclaration::CGXVertexDeclaration(CGXContext * pRender, const GXVertexE
 			stride += 8;
 			break;
 
-		case GXDECLTYPE_GXCOLOR:
+		/*case GXDECLTYPE_GXCOLOR:
 			assert(!"Not implemented");
-			break;
+			break;*/
 		}
 		//glVertexAttribPointer
 	}

@@ -1,7 +1,7 @@
 #ifndef _CGXContext_H_
 #define _CGXContext_H_
 
-#include <graphix/graphix.h>
+#include "../../graphix.h"
 
 #include "GLPFN.h"
 
@@ -20,14 +20,79 @@ public:
 
 	void swapBuffers();
 
-	void beginFrame()
+	void beginIndirect() override {};
+	void endIndirect() override {};
+
+	void executeIndirectContext(IGXContext* pContext) override {};
+	bool beginFrame()
 	{
+		memset(&m_frameStats, 0, sizeof(m_frameStats));
+
+		return(true);
 	};
 	void endFrame()
 	{
 	};
+	bool isDirect() override
+	{
+		return(m_isDirect);
+	}
 
-	void setClearColor(const float4_t & color);
+	IGXContextState* getCurrentState() override { return nullptr; };
+	void setFullState(IGXContextState* pState) override {};
+
+	void clear(UINT what, GXCOLOR color = 0, float fDepth = 1.0f, UINT uStencil = 0) override {};
+
+	void drawIndexed(UINT uVertexCount, UINT uPrimitiveCount, UINT uStartIndexLocation, int iBaseVertexLocation) override {};
+	void drawIndexedInstanced(UINT uInstanceCount, UINT uVertexCount, UINT uPrimitiveCount, UINT uStartIndexLocation, int iBaseVertexLocation) override {};
+	void drawPrimitive(UINT uStartVertex, UINT uPrimitiveCount) override {};
+
+	void computeDispatch(UINT uThreadGroupCountX, UINT uThreadGroupCountY, UINT uThreadGroupCountZ) override {};
+
+	void setPrimitiveTopology(GXPRIMITIVETOPOLOGY pt) override;
+
+	void setVSConstant(IGXConstantBuffer* pBuffer, UINT uSlot = 0) override {};
+	void setPSConstant(IGXConstantBuffer* pBuffer, UINT uSlot = 0) override {};
+	void setGSConstant(IGXConstantBuffer* pBuffer, UINT uSlot = 0) override {};
+	void setCSConstant(IGXConstantBuffer* pBuffer, UINT uSlot = 0) override {};
+
+	void setShader(IGXShaderSet* pSH) override {};
+	IGXShaderSet* getShader() override { return nullptr; };
+
+	void setDepthStencilSurface(IGXDepthStencilSurface* pSurface) override {};
+	void unsetDepthStencilSurface() override {};
+	IGXDepthStencilSurface* getDepthStencilSurface() override { return nullptr; };
+
+	void downsampleColorTarget(IGXSurface* pSource, IGXSurface* pTarget) override {};
+
+	void setColorTarget(IGXSurface* pSurf, UINT idx = 0) override {};
+	IGXSurface* getColorTarget(UINT idx = 0) override { return nullptr; };
+
+	void setPSTexture(IGXBaseTexture* pTexture, UINT uStage = 0) override {};
+	IGXBaseTexture* getPSTexture(UINT uStage = 0) override { return nullptr; };
+	void setVSTexture(IGXBaseTexture* pTexture, UINT uStage = 0) override {};
+	IGXBaseTexture* getVSTexture(UINT uStage = 0) override { return nullptr; };
+	void setCSTexture(IGXBaseTexture* pTexture, UINT uStage = 0) override {};
+	IGXBaseTexture* getCSTexture(UINT uStage = 0) override { return nullptr; };
+	void setCSUnorderedAccessView(IGXBaseTexture* pUAV, UINT uStage = 0) override {};
+	IGXBaseTexture* getCSUnorderedAccessView(UINT uStage = 0) override { return nullptr; };
+
+	void setBlendState(IGXBlendState* pState) override {};
+	IGXBlendState* getBlendState() override { return nullptr; };
+	void setBlendFactor(GXCOLOR val) override {};
+
+	void setDepthStencilState(IGXDepthStencilState* pState) override {};
+	IGXDepthStencilState* getDepthStencilState() override { return nullptr; };
+	void setStencilRef(UINT uVal) override {};
+
+	void setRasterizerState(IGXRasterizerState* pState) override {};
+	IGXRasterizerState* getRasterizerState() override { return nullptr; };
+	void setScissorRect(int iTop, int iRight, int iBottom, int iLeft) override {};
+
+	void setSamplerState(IGXSamplerState* pState, UINT uSlot) override {};
+	IGXSamplerState* getSamplerState(UINT uSlot) override { return nullptr; };
+
+	void setClearColor(const float4_t& color);
 	void clearTarget();
 	void clearDepth(float val = 1.0f);
 	void clearStencil(UINT val = 0);
@@ -50,8 +115,6 @@ public:
 
 	void drawIndexed(UINT uIndexCount, UINT uStartIndexLocation, int iBaseVertexLocation);
 
-	void setPrimitiveTopology(GXPT pt);
-
 	//IGXShader * createShader(const char * pName, UINT flags = 0);
 	//void destroyShader(IGXShader * pSH);
 	//void setShader(IGXShader * pSH);
@@ -72,6 +135,11 @@ public:
 
 	IDSRGLPFN * m_pGL;
 
+	const GXFrameStats* getFrameStats() override
+	{
+		return(&m_frameStats);
+	}
+
 protected:
 	
 #if defined(_WINDOWS)
@@ -80,6 +148,10 @@ protected:
 #endif
 
 	SXWINDOW m_hWnd;
+
+	bool m_isDirect;
+
+	GXFrameStats m_frameStats;
 
 	//IDSRvertexBuffer * m_pCurVertexBuffer[MAXDSGVSTREAM];
 	IGXRenderBuffer * m_pCurRenderBuffer;

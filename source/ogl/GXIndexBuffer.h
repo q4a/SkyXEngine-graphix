@@ -13,9 +13,15 @@ class CGXIndexBuffer: public IGXIndexBuffer
 	};
 	CGXContext * m_pRender;
 	GLuint m_pBuffer;
+	bool m_wasReset = true;
 	UINT m_uIndexSize;
 public:
 	void Release();
+
+	bool lock(void** ppData, GXBUFFERLOCK mode) override;
+	void unlock() override;
+
+	bool wasReset() override;
 };
 
 #endif

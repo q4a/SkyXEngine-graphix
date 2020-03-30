@@ -12,8 +12,14 @@ class CGXVertexBuffer: public IGXVertexBuffer
 	};
 	CGXContext * m_pRender;
 	GLuint m_pBuffer;
+	bool m_wasReset = true;
 public:
 	void Release();
+
+	bool lock(void** ppData, GXBUFFERLOCK mode) override;
+	void unlock() override;
+
+	bool wasReset() override;
 };
 
 #endif

@@ -199,10 +199,9 @@ IGXVertexBuffer * CGXContext::createVertexBuffer(size_t size, UINT flags, void *
 	{
 		usage = GL_STREAM_DRAW;
 	}
-	if(flags & GX_BUFFER_POOL_DEFAULT)
-	{
-
-	}
+	//if(flags & GX_BUFFER_POOL_DEFAULT)
+	//{
+	//}
 
 	m_pGL->glBufferData(GL_ARRAY_BUFFER, size, pInitData, usage);
 
@@ -237,9 +236,9 @@ IGXIndexBuffer * CGXContext::createIndexBuffer(size_t size, UINT flags, GXINDEXT
 
 	switch(it)
 	{
-	case GXIT_UBYTE:
-		pBuff->m_uIndexSize = GL_UNSIGNED_BYTE;
-		break;
+	//case GXIT_UBYTE:
+	//	pBuff->m_uIndexSize = GL_UNSIGNED_BYTE;
+	//	break;
 	case GXIT_UINT16:
 		pBuff->m_uIndexSize = GL_UNSIGNED_SHORT;
 		break;
@@ -394,7 +393,7 @@ void CGXContext::syncronize()
 	
 }
 
-void CGXContext::setPrimitiveTopology(GXPT pt)
+void CGXContext::setPrimitiveTopology(GXPRIMITIVETOPOLOGY pt)
 {
 	switch(pt)
 	{
@@ -413,9 +412,9 @@ void CGXContext::setPrimitiveTopology(GXPT pt)
 	case GXPT_TRIANGLESTRIP:
 		m_drawPT = GL_TRIANGLE_STRIP;
 		break;
-	case GXPT_TRIANGLEFAN:
-		m_drawPT = GL_TRIANGLE_FAN;
-		break;
+	//case GXPT_TRIANGLEFAN:
+	//	m_drawPT = GL_TRIANGLE_FAN;
+	//	break;
 	}
 }
 
