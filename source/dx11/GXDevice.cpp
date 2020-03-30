@@ -1,4 +1,4 @@
-﻿#include "GXDevice.h"
+#include "GXDevice.h"
 
 #include "GXIndexBuffer.h"
 #include "GXVertexBuffer.h"

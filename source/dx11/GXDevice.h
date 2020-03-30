@@ -15,6 +15,9 @@
 #pragma comment(lib, "d3dx11.lib")
 #pragma comment(lib, "DxErr.lib")
 #pragma comment(lib, "d3dcompiler.lib")
+#if _MSC_VER >= 1900
+#	pragma comment(lib, "legacy_stdio_definitions.lib")
+#endif
 
 
 enum GX_LOG
