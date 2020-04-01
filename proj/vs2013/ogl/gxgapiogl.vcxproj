@@ -22,6 +22,7 @@
     <ClInclude Include="..\..\..\source\graphix.h" />
     <ClInclude Include="..\..\..\source\ogl\GXContext.h" />
     <ClInclude Include="..\..\..\source\ogl\GLPFN.h" />
+    <ClInclude Include="..\..\..\source\ogl\GXDevice.h" />
     <ClInclude Include="..\..\..\source\ogl\GXIndexBuffer.h" />
     <ClInclude Include="..\..\..\source\ogl\GXRenderBuffer.h" />
     <ClInclude Include="..\..\..\source\ogl\GXShader.h" />
@@ -32,6 +33,7 @@
     <ClCompile Include="..\..\..\source\ogl\GXContext.cpp" />
     <ClCompile Include="..\..\..\source\ogl\dllmain.cpp" />
     <ClCompile Include="..\..\..\source\ogl\GLPFN.cpp" />
+    <ClCompile Include="..\..\..\source\ogl\GXDevice.cpp" />
     <ClCompile Include="..\..\..\source\ogl\GXIndexBuffer.cpp" />
     <ClCompile Include="..\..\..\source\ogl\GXRenderBuffer.cpp" />
     <ClCompile Include="..\..\..\source\ogl\GXShader.cpp" />

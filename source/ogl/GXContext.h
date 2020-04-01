@@ -1,9 +1,10 @@
-#ifndef _CGXContext_H_
-#define _CGXContext_H_
+#ifndef _GXCONTEXT_H_
+#define _GXCONTEXT_H_
 
 #include "../../graphix.h"
 
 #include "GLPFN.h"
+#include "GXDevice.h"
 
 #if defined(_WINDOWS)
 #	define WIN32_LEAN_AND_MEAN
@@ -13,9 +14,11 @@
 
 class CGXContext: public IGXContext
 {
+	friend class CGXDevice;
+
 public:
 	BOOL initContext(SXWINDOW wnd);
-	CGXContext();
+	CGXContext(CGXContext *pDXContext, CGXDevice *pGXDevice, bool isDirect);
 	~CGXContext();
 
 	void swapBuffers();
@@ -149,7 +152,10 @@ protected:
 
 	SXWINDOW m_hWnd;
 
+	CGXContext *m_pDeviceContext = NULL;
+	CGXDevice *m_pGXDevice;
 	bool m_isDirect;
+	ID3D11CommandList *m_pCommandList = NULL;
 
 	GXFrameStats m_frameStats;
 
@@ -159,6 +165,31 @@ protected:
 
 	IGXVertexDeclaration * m_pCurVertexDecl;
 	GLenum m_drawPT;
+
+	IGXSamplerState *m_pSamplerState[GX_MAX_SAMPLERS];
+	IGXSamplerState* m_pDefaultSamplerState = NULL;
+
+	IGXRasterizerState* m_pDefaultRasterizerState = NULL;
+
+	IGXDepthStencilState* m_pDefaultDepthStencilState = NULL;
+
+	//IGXBlendState* m_pBlendState = NULL;
+	IGXBlendState* m_pDefaultBlendState = NULL;
+
+	IGXDepthStencilSurface* m_pDefaultDepthStencilSurface = NULL;
+
+	IGXSurface *m_pColorTarget[GX_MAX_COLORTARGETS];
+	GLuint *m_pDXColorTarget[GX_MAX_COLORTARGETS];
+
+	IGXBaseTexture* m_pTextures[GX_MAX_TEXTURES];
+	IGXBaseTexture* m_pTexturesVS[GX_MAX_TEXTURES];
+	IGXBaseTexture* m_pTexturesCS[GX_MAX_TEXTURES];
+	IGXBaseTexture* m_pUAVsCS[GX_MAX_UAV_TEXTURES];
+
+	IGXConstantBuffer* m_pVSConstant[GX_MAX_SHADER_CONST];
+	IGXConstantBuffer* m_pPSConstant[GX_MAX_SHADER_CONST];
+	IGXConstantBuffer* m_pGSConstant[GX_MAX_SHADER_CONST];
+	IGXConstantBuffer* m_pCSConstant[GX_MAX_SHADER_CONST];
 
 	struct _sync_state
 	{
@@ -186,7 +217,7 @@ protected:
 
 	//DSourcePreprocessor * m_pSPP;
 
-	void syncronize();
+	void syncronize(UINT flags=0);
 	UINT getPTcount(UINT idxCount);
 	UINT getIndexSize(UINT idx);
 	GLuint getShaderPart(GLenum type, const char *szName, UINT flags = 0, const char ** defs = NULL);

@@ -11,17 +11,42 @@
 #include "GXShader.h"
 #include "GXRenderBuffer.h"
 
-CGXContext::CGXContext():
-	m_pGL(NULL),
-	m_pCurIndexBuffer(NULL),
-	m_drawPT(NULL),
-	m_pCurRenderBuffer(NULL)
+CGXContext::CGXContext(CGXContext* pDXContext, CGXDevice* pGXDevice, bool isDirect) :
+	m_pDeviceContext(pDXContext),
+	m_pGXDevice(pGXDevice),
+	m_isDirect(isDirect)
 {
+	memset(&m_sync_state, 0, sizeof(m_sync_state));
+	memset(&m_pSamplerState, 0, sizeof(m_pSamplerState));
+	memset(&m_pColorTarget, 0, sizeof(m_pColorTarget));
+	memset(&m_pDXColorTarget, 0, sizeof(m_pDXColorTarget));
+	memset(&m_pTextures, 0, sizeof(m_pTextures));
+	memset(&m_pTexturesVS, 0, sizeof(m_pTexturesVS));
+	memset(&m_pTexturesCS, 0, sizeof(m_pTexturesCS));
+	memset(&m_pUAVsCS, 0, sizeof(m_pUAVsCS));
+	memset(&m_pPSConstant, 0, sizeof(m_pPSConstant));
+	memset(&m_pVSConstant, 0, sizeof(m_pVSConstant));
+	memset(&m_pCSConstant, 0, sizeof(m_pCSConstant));
+	memset(&m_pGSConstant, 0, sizeof(m_pGSConstant));
+	memset(&m_frameStats, 0, sizeof(m_frameStats));
+
+	m_pDefaultDepthStencilSurface = m_pGXDevice->m_pDefaultDepthStencilSurface;
+	m_pDefaultRasterizerState = m_pGXDevice->m_pDefaultRasterizerState;
+	m_pDefaultSamplerState = m_pGXDevice->m_pDefaultSamplerState;
+	m_pDefaultBlendState = m_pGXDevice->m_pDefaultBlendState;
+	m_pDefaultDepthStencilState = m_pGXDevice->m_pDefaultDepthStencilState;
+
+	m_pDefaultDepthStencilSurface->AddRef();
+	m_pDefaultRasterizerState->AddRef();
+	m_pDefaultSamplerState->AddRef();
+	m_pDefaultBlendState->AddRef();
+	m_pDefaultDepthStencilState->AddRef();
+
 	/*for(int i = 0; i < MAXDSGVSTREAM; ++i)
 	{
 		m_pCurVertexBuffer[i] = NULL;
 	}*/
-	memset(&m_sync_state, 0, sizeof(m_sync_state));
+	//memset(&m_sync_state, 0, sizeof(m_sync_state));
 
 	//m_pSPP->Define("_OGL");
 
@@ -240,10 +265,10 @@ IGXIndexBuffer * CGXContext::createIndexBuffer(size_t size, UINT flags, GXINDEXT
 	//	pBuff->m_uIndexSize = GL_UNSIGNED_BYTE;
 	//	break;
 	case GXIT_UINT16:
-		pBuff->m_uIndexSize = GL_UNSIGNED_SHORT;
+		pBuff->m_uSize = GL_UNSIGNED_SHORT;
 		break;
 	case GXIT_UINT32:
-		pBuff->m_uIndexSize = GL_UNSIGNED_INT;
+		pBuff->m_uSize = GL_UNSIGNED_INT;
 		break;
 	}
 
@@ -281,16 +306,7 @@ void CGXContext::destroyVertexBuffer(IGXVertexBuffer * pBuff)
 	mem_delete(pBuff);
 }
 
-IGXVertexDeclaration * CGXContext::createVertexDeclaration(const GXVertexElement * pDecl)
-{
-	CGXVertexDeclaration * vd = new CGXVertexDeclaration(this, pDecl);
-
-//	m_pGL->glGenVertexArrays(1, &vd->m_pVAO);
-	//m_pGL->glBindVertexArray(vd->m_pVAO);
-	//m_sync_state.bVertexLayout = FALSE;
-	return(vd);
-}
-void CGXContext::destroyVertexDeclaration(IGXVertexDeclaration * pDecl)
+/*void CGXContext::destroyVertexDeclaration(IGXVertexDeclaration * pDecl)
 {
 	if(m_pCurVertexDecl == pDecl)
 	{
@@ -302,7 +318,7 @@ void CGXContext::destroyVertexDeclaration(IGXVertexDeclaration * pDecl)
 	
 }
 
-/*void CGXContext::IASetInputLayout(IDSGvertexDeclaration * pDecl)
+void CGXContext::IASetInputLayout(IDSGvertexDeclaration * pDecl)
 {
 	m_pCurVertexDecl = pDecl;
 	m_sync_state.bVertexLayout = TRUE;
@@ -342,7 +358,7 @@ void CGXContext::drawIndexed(UINT uIndexCount, UINT uStartIndexLocation, int iBa
 	//UINT ptC = GetPTcount(IndexCount);
 	UINT ptC = uIndexCount;
 
-	UINT uIDXtype = ((CGXIndexBuffer*)m_pCurIndexBuffer)->m_uIndexSize;
+	UINT uIDXtype = ((CGXIndexBuffer*)m_pCurIndexBuffer)->m_uSize;
 
 	if(iBaseVertexLocation == 0)
 	{
@@ -354,7 +370,7 @@ void CGXContext::drawIndexed(UINT uIndexCount, UINT uStartIndexLocation, int iBa
 	}
 }
 
-void CGXContext::syncronize()
+void CGXContext::syncronize(UINT flags)
 {
 #if 0
 	if(m_sync_state.bVertexLayout)
@@ -617,21 +633,6 @@ GLuint CGXContext::GetShaderPart(GLenum type, const DString & name, UINT flags, 
 	return(pSH);
 }*/
 
-IGXVertexShader * CGXContext::createVertexShader(const char * szFile)
-{
-	assert(!"Not imlemented");
-	return(NULL);
-}
-IGXVertexShader * CGXContext::createVertexShader(void *pData, UINT uSize)
-{
-	assert(!"Not imlemented");
-	return(NULL);
-}
-void CGXContext::destroyVertexShader(IGXVertexShader * pSH)
-{
-	assert(!"Not imlemented");
-}
-
 IGXPixelShader * CGXContext::createPixelShader(const char * szFile)
 {
 	assert(!"Not imlemented");
@@ -655,41 +656,6 @@ void CGXContext::setPixelShader(IGXPixelShader * pSH)
 	assert(!"Not imlemented");
 }
 
-IGXRenderBuffer * CGXContext::createRenderBuffer(UINT countSlots, IGXVertexBuffer ** pBuff, IGXVertexDeclaration * pDecl)
-{
-	CGXRenderBuffer * pRB = new CGXRenderBuffer(this);
-
-	m_pGL->glGenVertexArrays(1, &pRB->m_uVAO);
-
-	m_pGL->glBindVertexArray(pRB->m_uVAO);
-	m_sync_state.bRenderBuffer = TRUE;
-
-
-	CGXVertexDeclaration * vd = (CGXVertexDeclaration*)pDecl;
-
-	UINT buff = 0;
-
-	for(UINT i = 0; i < vd->m_uDeclCount; i++)
-	{
-		if(countSlots <= vd->m_pDeclItems[i].stream)
-		{
-			m_pGL->glBindBuffer(GL_ARRAY_BUFFER, 0);
-			buff = 0;
-		}
-		else
-		{
-			UINT cb = ((CGXVertexBuffer*)pBuff[vd->m_pDeclItems[i].stream])->m_pBuffer;
-			if(buff != cb || i == 0)
-			{
-				m_pGL->glBindBuffer(GL_ARRAY_BUFFER, cb);
-				buff = cb;
-			}
-		}
-		m_pGL->glVertexAttribPointer(vd->m_pDeclItems[i].index, vd->m_pDeclItems[i].size, vd->m_pDeclItems[i].type​, vd->m_pDeclItems[i].normalized, vd->m_pDeclItems[i].stride​, vd->m_pDeclItems[i].pointer​);
-		m_pGL->glEnableVertexAttribArray(vd->m_pDeclItems[i].index);
-	}
-	return(pRB);
-}
 void CGXContext::destroyRenderBuffer(IGXRenderBuffer * pBuff)
 {
 	if(pBuff)

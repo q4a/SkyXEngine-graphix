@@ -7,6 +7,7 @@
 class CGXIndexBuffer: public IGXIndexBuffer
 {
 	friend class CGXContext;
+	friend class CGXDevice;
 
 	CGXIndexBuffer(CGXContext * pRender):m_pRender(pRender)
 	{
@@ -14,7 +15,7 @@ class CGXIndexBuffer: public IGXIndexBuffer
 	CGXContext * m_pRender;
 	GLuint m_pBuffer;
 	bool m_wasReset = true;
-	UINT m_uIndexSize;
+	UINT m_uSize;
 public:
 	void Release();
 

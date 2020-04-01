@@ -2,10 +2,10 @@
 
 void CGXVertexDeclaration::Release()
 {
-	m_pRender->destroyVertexDeclaration(this);
+	//m_pRender->destroyVertexDeclaration(this);
 }
 
-CGXVertexDeclaration::CGXVertexDeclaration(CGXContext * pRender, const GXVertexElement *pDecl):
+CGXVertexDeclaration::CGXVertexDeclaration(CGXDevice *pDevice, CGXDevice *pRender, const GXVertexElement *pDecl):
 	m_pRender(pRender),
 	m_uDeclCount(0),
 	m_pDeclItems(NULL)

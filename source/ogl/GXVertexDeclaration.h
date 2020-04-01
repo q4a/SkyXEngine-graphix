@@ -6,6 +6,7 @@
 class CGXVertexDeclaration: public IGXVertexDeclaration
 {
 	friend class CGXContext;
+	friend class CGXDevice;
 
 	struct _declItem
 	{
@@ -18,9 +19,9 @@ class CGXVertexDeclaration: public IGXVertexDeclaration
 		const GLvoid * pointer​;//UINT16
 	};
 
-	CGXVertexDeclaration(CGXContext * pRender, const GXVertexElement * pDecl);
+	CGXVertexDeclaration(CGXDevice *pDevice, CGXDevice *pRender, const GXVertexElement *pDecl);
 	~CGXVertexDeclaration();
-	CGXContext * m_pRender;
+	CGXDevice *m_pRender;
 
 	UINT m_uDeclCount;
 	_declItem * m_pDeclItems;
