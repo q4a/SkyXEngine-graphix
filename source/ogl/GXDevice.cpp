@@ -193,7 +193,107 @@ void CGXDevice::resize(int iWidth, int iHeight, bool isWindowed)
 
 BOOL CGXDevice::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindowed)
 {
-	/*m_hWnd = (HWND)wnd;
+	m_hWnd = (HWND)wnd;
+#if defined(_WINDOWS)
+	m_hDC = GetDC((HWND)m_hWnd);
+
+	PIXELFORMATDESCRIPTOR pfd;
+	ZeroMemory(&pfd, sizeof(pfd));
+	pfd.nSize = sizeof(pfd);
+	pfd.nVersion = 1;
+	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+	pfd.iPixelType = PFD_TYPE_RGBA;
+	pfd.cColorBits = 24;
+	pfd.cDepthBits = 24;
+	pfd.cStencilBits = 8;
+	pfd.iLayerType = PFD_MAIN_PLANE;
+	int iFormat = ChoosePixelFormat(m_hDC, &pfd);
+	SetPixelFormat(m_hDC, iFormat, &pfd);
+
+	m_hRC = wglCreateContext(m_hDC);
+
+	wglMakeCurrent(m_hDC, m_hRC);
+
+	//glClearColor(0, 16.0f / 255.0f, 32.0f / 255.0f, 0);
+	//glClear(GL_COLOR_BUFFER_BIT);
+
+	//SwapBuffers();
+
+	m_pGL = new IDSRGLPFN();
+
+	//wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
+
+	if(m_pGL->wglSwapIntervalEXT)
+	{
+		m_pGL->wglSwapIntervalEXT(0); ///< disables vsync
+	}
+	
+	return(TRUE);
+	//
+#else
+	//GtkWidget * da = gtk_drawing_area_new();
+
+	//gtk_container_set_border_width(GTK_CONTAINER(wnd), 100);
+	//gtk_container_add(GTK_CONTAINER(wnd), da);
+	//gtk_widget_set_double_buffered(GTK_WIDGET(da), FALSE);
+	//gtk_widget_show(da);
+
+	GdkDisplay * pGtkDisplay = gtk_widget_get_display(GTK_WIDGET(wnd));
+	Display * pDisplay = gdk_x11_display_get_xdisplay(pGtkDisplay);
+	//GdkVisual * visual;
+
+	GLint attribs[] = {GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 24, GLX_STENCIL_SIZE, 8, GLX_DOUBLEBUFFER, None};
+	XVisualInfo * xvinfo = glXChooseVisual(pDisplay, XDefaultScreen(pDisplay),  attribs);
+
+	GdkWindow * gdk_window = gtk_widget_get_window(GTK_WIDGET(wnd));
+
+	if(!xvinfo)
+	{
+		return(FALSE);
+	}
+
+	//visual = gdkx_visual_get(xvinfo->visualid);
+
+	GLXContext ctx = glXCreateContext(pDisplay, xvinfo, 0, True);
+
+	if(ctx == NULL)
+	{
+		return(FALSE);
+	}
+
+	glXMakeCurrent(pDisplay, gdk_x11_window_get_xid(gdk_window), ctx);
+
+	XFree(xvinfo);
+
+	//GtkWidget * pGLarea = gtk_gl_area_new();
+	//gtk_container_add(GTK_CONTAINER(wnd), pGLarea);
+	//gtk_widget_show(pGLarea);
+
+	//g_signal_connect(pGLarea, "render", G_CALLBACK(render), NULL);
+
+	//printf("e: %s\n", gtk_gl_area_get_error((GtkGLArea*)(pGLarea))->message);
+
+
+//glXCreateContext()
+
+
+	printf("Version: %s\n", glGetString(GL_VERSION));
+	printf("Vendor: %s\n", glGetString(GL_VENDOR));
+	printf("Renderer: %s\n", glGetString(GL_RENDERER));
+	printf("Exts: %s\n", glGetString(GL_EXTENSIONS));
+	//
+
+	glClearColor(0, 16.0f / 255.0f, 32.0f / 255.0f, 0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glXSwapBuffers(pDisplay, gdk_x11_window_get_xid(gdk_window));
+
+	log(GX_LOG_INFO, "Context ready!\n\n");
+	return(TRUE);
+#endif
+	return(FALSE);
+	/*DX11
+	m_hWnd = (HWND)wnd;
 
 	assert(GXGetThreadID() == 0);
 
@@ -309,10 +409,10 @@ BOOL CGXDevice::initContext(SXWINDOW wnd, int iWidth, int iHeight, bool isWindow
 
 	IGXSurface *pColorTarget = m_pDefaultSwapChain->getColorTarget();
 	m_pDirectContext->setColorTarget(pColorTarget);
-	mem_release(pColorTarget);*/
+	mem_release(pColorTarget);
 	
 	log(GX_LOG_INFO, "Context ready!\n\n");
-	return(TRUE);
+	return(TRUE);*/
 }
 
 void CGXDevice::swapBuffers()
@@ -323,7 +423,36 @@ void CGXDevice::swapBuffers()
 
 IGXVertexBuffer* CGXDevice::createVertexBuffer(size_t size, GXBUFFER_USAGE flags, void *pInitData)
 {
-/*	CGXVertexBuffer * pBuff = new CGXVertexBuffer(this);
+	//PFNGLGENVERTEXARRAYSPROC
+
+	CGXVertexBuffer* pBuff = new CGXVertexBuffer(this);
+	m_pGL->glGenBuffers(1, &pBuff->m_pBuffer);
+
+	m_pGL->glBindBuffer(GL_ARRAY_BUFFER, pBuff->m_pBuffer);
+	UINT usage = GL_STATIC_DRAW;
+
+	if (flags & GXBUFFER_USAGE_STATIC)
+	{
+		usage = GL_STATIC_DRAW;
+	}
+	if (flags & GXBUFFER_USAGE_DYNAMIC)
+	{
+		usage = GL_DYNAMIC_DRAW;
+	}
+	if (flags & GXBUFFER_USAGE_STREAM)
+	{
+		usage = GL_STREAM_DRAW;
+	}
+	//if(flags & GX_BUFFER_POOL_DEFAULT)
+	//{
+	//}
+
+	m_pGL->glBufferData(GL_ARRAY_BUFFER, size, pInitData, usage);
+
+	//restore pprev buffer
+	return(pBuff);
+	/*DX11
+	CGXVertexBuffer * pBuff = new CGXVertexBuffer(this);
 
 	D3D11_BUFFER_DESC bd;
 	memset(&bd, 0, sizeof(bd));
@@ -368,7 +497,45 @@ IGXVertexBuffer* CGXDevice::createVertexBuffer(size_t size, GXBUFFER_USAGE flags
 
 IGXIndexBuffer* CGXDevice::createIndexBuffer(size_t size, GXBUFFER_USAGE flags, GXINDEXTYPE it, void *pInitData)
 {
-/*	CGXIndexBuffer * pBuff = new CGXIndexBuffer(this);
+	CGXIndexBuffer * pBuff = new CGXIndexBuffer(this);
+	m_pGL->glGenBuffers(1, &pBuff->m_pBuffer);
+
+	m_pGL->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pBuff->m_pBuffer);
+	UINT usage = GL_STATIC_DRAW;
+
+	if(flags & GXBUFFER_USAGE_STATIC)
+	{
+		usage = GL_STATIC_DRAW;
+	}
+	if(flags & GXBUFFER_USAGE_DYNAMIC)
+	{
+		usage = GL_DYNAMIC_DRAW;
+	}
+	if(flags & GXBUFFER_USAGE_STREAM)
+	{
+		usage = GL_STREAM_DRAW;
+	}
+
+	m_pGL->glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, pInitData, usage);
+
+	m_sync_state.bIndexBuffer = TRUE;
+
+	switch(it)
+	{
+	//case GXIT_UBYTE:
+	//	pBuff->m_uIndexSize = GL_UNSIGNED_BYTE;
+	//	break;
+	case GXIT_UINT16:
+		pBuff->m_uSize = GL_UNSIGNED_SHORT;
+		break;
+	case GXIT_UINT32:
+		pBuff->m_uSize = GL_UNSIGNED_INT;
+		break;
+	}
+
+	return(pBuff);
+	/*DX11
+	CGXIndexBuffer * pBuff = new CGXIndexBuffer(this);
 	
 	D3D11_BUFFER_DESC bd;
 	memset(&bd, 0, sizeof(bd));
@@ -426,12 +593,37 @@ void CGXDevice::destroyIndexBuffer(CGXIndexBuffer *pBuff)
 	assert(pBuff);
 
 	m_memoryStats.sizeIndexBufferBytes -= pBuff->m_uSize;
+	/*OGL
+	if(pBuff)
+	{
+		m_pGL->glDeleteBuffers(1, &(((CGXIndexBuffer*)pBuff)->m_pBuffer));
+		if(m_pCurIndexBuffer == pBuff)
+		{
+			m_pCurIndexBuffer = NULL;
+			m_sync_state.bIndexBuffer = TRUE;
+		}
+	}
+	mem_delete(pBuff);*/
 }
 
 void CGXDevice::destroyVertexBuffer(CGXVertexBuffer *pBuff)
 {
+	if(pBuff)
+	{
+		m_pGL->glDeleteBuffers(1, &(((CGXVertexBuffer*)pBuff)->m_pBuffer));
+		/*for(int i = 0; i < MAXDSGVSTREAM; ++i)
+		{
+			if(m_pCurVertexBuffer[i] == pBuff)
+			{
+				m_sync_state.bVertexBuffers[i] = TRUE;
+				m_sync_state.bVertexLayout = TRUE;
+			}
+		}*/
+	}
+	mem_delete(pBuff);
+	/*DX11
 	assert(pBuff);
-	m_memoryStats.sizeVertexBufferBytes -= pBuff->m_uSize;
+	m_memoryStats.sizeVertexBufferBytes -= pBuff->m_uSize;*/
 }
 
 IGXVertexDeclaration* CGXDevice::createVertexDeclaration(const GXVertexElement *pDecl)

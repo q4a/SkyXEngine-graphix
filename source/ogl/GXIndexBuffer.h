@@ -9,13 +9,16 @@ class CGXIndexBuffer: public IGXIndexBuffer
 	friend class CGXContext;
 	friend class CGXDevice;
 
-	CGXIndexBuffer(CGXContext * pRender):m_pRender(pRender)
+	CGXIndexBuffer(CGXDevice *pRender):
+		m_pRender(pRender)
 	{
-	};
-	CGXContext * m_pRender;
+	}
+
+	CGXDevice *m_pRender;
 	GLuint m_pBuffer;
 	bool m_wasReset = true;
 	UINT m_uSize;
+
 public:
 	void Release();
 

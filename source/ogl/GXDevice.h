@@ -4,6 +4,8 @@
 #include "../../graphix.h"
 #include <common/array.h>
 
+#include "GLPFN.h"
+
 #if defined(_WINDOWS)
 #	define WIN32_LEAN_AND_MEAN
 #	include <Windows.h>
@@ -22,6 +24,14 @@ enum GX_LOG
 	GX_LOG_INFO,
 	GX_LOG_WARN,
 	GX_LOG_ERROR
+};
+
+struct _sync_state
+{
+	//BOOL bVertexLayout;
+	BOOL bIndexBuffer;
+	BOOL bRenderBuffer;
+	//BOOL bVertexBuffers[MAXDSGVSTREAM];
 };
 
 #define DX_CALL(code) ([](HRESULT hr, const char *szCode){if(FAILED(hr)){CGXDevice::logDXcall(szCode, hr);}return(hr);})((code), #code)
@@ -154,7 +164,14 @@ public:
 		m_memoryStats.sizeShaderConstBytes += uBytes;
 	}
 
+	IDSRGLPFN *m_pGL;
+
 protected:
+	
+#if defined(_WINDOWS)
+	HDC m_hDC;
+	HGLRC m_hRC;
+#endif
 	
 	CGXDevice *m_pDevice = NULL;
 	CGXContext *m_pDeviceContext;
@@ -192,6 +209,8 @@ protected:
 	IGXDepthStencilState *m_pDefaultDepthStencilState = NULL;
 	IGXBlendState *m_pDefaultBlendState = NULL;
 	IGXDepthStencilSurface *m_pDefaultDepthStencilSurface = NULL;
+	
+	_sync_state m_sync_state;
 };
 
 #endif

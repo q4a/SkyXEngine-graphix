@@ -144,11 +144,6 @@ public:
 	}
 
 protected:
-	
-#if defined(_WINDOWS)
-	HDC m_hDC;
-	HGLRC m_hRC;
-#endif
 
 	SXWINDOW m_hWnd;
 
@@ -190,14 +185,6 @@ protected:
 	IGXConstantBuffer* m_pPSConstant[GX_MAX_SHADER_CONST];
 	IGXConstantBuffer* m_pGSConstant[GX_MAX_SHADER_CONST];
 	IGXConstantBuffer* m_pCSConstant[GX_MAX_SHADER_CONST];
-
-	struct _sync_state
-	{
-		//BOOL bVertexLayout;
-		BOOL bIndexBuffer;
-		BOOL bRenderBuffer;
-		//BOOL bVertexBuffers[MAXDSGVSTREAM];
-	};
 
 	_sync_state m_sync_state;
 

@@ -8,13 +8,15 @@ class CGXVertexBuffer: public IGXVertexBuffer
 	friend class CGXContext;
 	friend class CGXDevice;
 
-	CGXVertexBuffer(CGXContext * pRender):m_pRender(pRender)
+	CGXVertexBuffer(CGXDevice *pRender):
+		m_pRender(pRender)
 	{
-	};
-	CGXContext * m_pRender;
+	}
+	CGXDevice *m_pRender;
 	GLuint m_pBuffer;
 	bool m_wasReset = true;
 	UINT m_uSize;
+
 public:
 	void Release();
 
