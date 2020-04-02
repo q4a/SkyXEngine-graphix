@@ -9,7 +9,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\source\ogl\GLPFN.h">
+    <ClInclude Include="..\..\..\source\graphix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+   <ClInclude Include="..\..\..\source\ogl\GLPFN.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\ogl\GXBlendState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\ogl\GXContext.h">
@@ -33,15 +39,15 @@
     <ClInclude Include="..\..\..\source\ogl\GXVertexDeclaration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\graphix.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\ogl\dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\ogl\GLPFN.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\ogl\GXBlendState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\ogl\GXContext.cpp">

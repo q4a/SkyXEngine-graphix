@@ -8,7 +8,7 @@ class CGXRenderBuffer: public IGXRenderBuffer
 	friend class CGXContext;
 	friend class CGXDevice;
 
-	CGXRenderBuffer(CGXDevice* pRender, UINT uCountStreams, IGXVertexBuffer** ppVertexBuffers, IGXVertexDeclaration* pVertexDeclaration);
+	CGXRenderBuffer(CGXDevice *pRender, UINT uCountStreams, IGXVertexBuffer **ppVertexBuffers, IGXVertexDeclaration *pVertexDeclaration);
 	~CGXRenderBuffer();
 
 	CGXDevice* m_pRender;

@@ -1,4 +1,4 @@
-#include "GXDevice.h"
+﻿#include "GXDevice.h"
 
 #include "GXIndexBuffer.h"
 #include "GXVertexBuffer.h"
@@ -10,7 +10,7 @@
 //#include "GXDepthStencilState.h"
 //#include "GXDepthStencilSurface.h"
 //#include "GXSurface.h"
-//#include "GXBlendState.h"
+#include "GXBlendState.h"
 //#include "GXTexture.h"
 //#include "GXSwapChain.h"
 //#include "GXConstantBuffer.h"
@@ -491,8 +491,6 @@ IGXVertexBuffer* CGXDevice::createVertexBuffer(size_t size, GXBUFFER_USAGE flags
 	m_memoryStats.sizeVertexBufferBytes += pBuff->m_uSize;
 
 	return(pBuff);*/
-	assert(!"Not imlemented");
-	return(NULL);
 }
 
 IGXIndexBuffer* CGXDevice::createIndexBuffer(size_t size, GXBUFFER_USAGE flags, GXINDEXTYPE it, void *pInitData)
@@ -925,11 +923,7 @@ IGXRenderBuffer* CGXDevice::createRenderBuffer(UINT countSlots, IGXVertexBuffer 
 	assert(pBuff);
 	assert(pDecl);
 
-	CGXRenderBuffer * pRB = new CGXRenderBuffer(this, countSlots, pBuff, pDecl);
-
-	return(pRB);
-	/*OpenGL
-	CGXRenderBuffer * pRB = new CGXRenderBuffer(this);
+	CGXRenderBuffer* pRB = new CGXRenderBuffer(this, countSlots, pBuff, pDecl);
 
 	m_pGL->glGenVertexArrays(1, &pRB->m_uVAO);
 
@@ -937,13 +931,13 @@ IGXRenderBuffer* CGXDevice::createRenderBuffer(UINT countSlots, IGXVertexBuffer 
 	m_sync_state.bRenderBuffer = TRUE;
 
 
-	CGXVertexDeclaration * vd = (CGXVertexDeclaration*)pDecl;
+	CGXVertexDeclaration* vd = (CGXVertexDeclaration*)pDecl;
 
 	UINT buff = 0;
 
-	for(UINT i = 0; i < vd->m_uDeclCount; i++)
+	for (UINT i = 0; i < vd->m_uDeclCount; i++)
 	{
-		if(countSlots <= vd->m_pDeclItems[i].stream)
+		if (countSlots <= vd->m_pDeclItems[i].stream)
 		{
 			m_pGL->glBindBuffer(GL_ARRAY_BUFFER, 0);
 			buff = 0;
@@ -951,7 +945,7 @@ IGXRenderBuffer* CGXDevice::createRenderBuffer(UINT countSlots, IGXVertexBuffer 
 		else
 		{
 			UINT cb = ((CGXVertexBuffer*)pBuff[vd->m_pDeclItems[i].stream])->m_pBuffer;
-			if(buff != cb || i == 0)
+			if (buff != cb || i == 0)
 			{
 				m_pGL->glBindBuffer(GL_ARRAY_BUFFER, cb);
 				buff = cb;
@@ -960,6 +954,14 @@ IGXRenderBuffer* CGXDevice::createRenderBuffer(UINT countSlots, IGXVertexBuffer 
 		m_pGL->glVertexAttribPointer(vd->m_pDeclItems[i].index, vd->m_pDeclItems[i].size, vd->m_pDeclItems[i].type​, vd->m_pDeclItems[i].normalized, vd->m_pDeclItems[i].stride​, vd->m_pDeclItems[i].pointer​);
 		m_pGL->glEnableVertexAttribArray(vd->m_pDeclItems[i].index);
 	}
+	return(pRB);
+	/*DX11
+	assert(countSlots);
+	assert(pBuff);
+	assert(pDecl);
+
+	CGXRenderBuffer * pRB = new CGXRenderBuffer(this, countSlots, pBuff, pDecl);
+
 	return(pRB);*/
 }
 
@@ -1057,13 +1059,11 @@ IGXDepthStencilState* CGXDevice::createDepthStencilState(GXDepthStencilDesc *pDS
 
 IGXBlendState* CGXDevice::createBlendState(GXBlendDesc *pBSDesc)
 {
-	/*CGXBlendState *pBS = new CGXBlendState(this);
+	CGXBlendState *pBS = new CGXBlendState(this);
 	
 	pBS->m_desc = *pBSDesc;
 	pBS->onDevRst();
-	return(pBS);*/
-	assert(!"Not imlemented");
-	return(NULL);
+	return(pBS);
 }
 
 

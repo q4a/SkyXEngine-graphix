@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\graphix.h" />
+    <ClInclude Include="..\..\..\source\ogl\GXBlendState.h" />
     <ClInclude Include="..\..\..\source\ogl\GXContext.h" />
     <ClInclude Include="..\..\..\source\ogl\GLPFN.h" />
     <ClInclude Include="..\..\..\source\ogl\GXDevice.h" />
@@ -30,8 +31,9 @@
     <ClInclude Include="..\..\..\source\ogl\GXVertexDeclaration.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\source\ogl\GXContext.cpp" />
     <ClCompile Include="..\..\..\source\ogl\dllmain.cpp" />
+    <ClCompile Include="..\..\..\source\ogl\GXBlendState.cpp" />
+    <ClCompile Include="..\..\..\source\ogl\GXContext.cpp" />
     <ClCompile Include="..\..\..\source\ogl\GLPFN.cpp" />
     <ClCompile Include="..\..\..\source\ogl\GXDevice.cpp" />
     <ClCompile Include="..\..\..\source\ogl\GXIndexBuffer.cpp" />
@@ -50,26 +52,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
