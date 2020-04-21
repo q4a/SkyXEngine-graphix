@@ -114,6 +114,7 @@ void CGXContext::executeIndirectContext(IGXContext *pContext)
 		m_frameStats.uUploadedBuffersShaderConst += pCtx->m_frameStats.uUploadedBuffersShaderConst;
 		m_frameStats.uUploadedBuffersTextures += pCtx->m_frameStats.uUploadedBuffersTextures;
 		m_frameStats.uUploadedBuffersVertexes += pCtx->m_frameStats.uUploadedBuffersVertexes;
+		m_frameStats.uShaderSwitches += pCtx->m_frameStats.uShaderSwitches;
 	}
 	else
 	{
@@ -553,6 +554,7 @@ void CGXContext::syncronize(UINT flags)
 				m_pDeviceContext->CSSetShader(NULL, NULL, 0);
 			}
 			m_sync_state.bShader = FALSE;
+			++m_frameStats.uShaderSwitches;
 		}
 	}
 

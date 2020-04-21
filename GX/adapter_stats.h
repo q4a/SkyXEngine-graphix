@@ -36,6 +36,9 @@ struct GXFrameStats
 
 	//! количество байт переданных шейдерных констант
 	UINT uUploadedBuffersShaderConst;
+
+	//! количество переключений шейдера
+	UINT uShaderSwitches;
 };
 
 /*! статистика занятой памяти адаптера
