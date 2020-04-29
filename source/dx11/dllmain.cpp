@@ -15,6 +15,8 @@
 #endif
 #define C extern "C"
 
+GX_ENABLE_HIGH_PERFORMANCE_DUAL_GPU()
+
 #if defined(_WINDOWS)
 BOOL APIENTRY DllMain(HMODULE hModule,
 	DWORD  ul_reason_for_call,
