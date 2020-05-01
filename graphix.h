@@ -32,7 +32,7 @@ virtual IGXShaderBase* createShader(GX_SHADER_TYPE type, const char * szFile, GX
 #include <common/Math.h>
 
 /* Enable High Performance Graphics while using Integrated Graphics. */
-#define GX_ENABLE_HIGH_PERFORMANCE_DUAL_GPU() C {                                     \
+#define GX_ENABLE_HIGH_PERFORMANCE_DUAL_GPU() EXTERN_C {                                     \
 	__declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;        /* Nvidia */ \
 	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;  /* AMD    */ \
 }

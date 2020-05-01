@@ -13,7 +13,7 @@
 #else
 #	define DSGAPI
 #endif
-#define C extern "C"
+#define EXTERN_C extern "C"
 
 #if defined(_WINDOWS)
 BOOL APIENTRY DllMain(HMODULE hModule,
@@ -35,7 +35,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 }
 #endif
 
-C GXGAPI IGXContext * GetInstance()
+EXTERN_C GXGAPI IGXContext * GetInstance()
 {
 	return(new CGXContext());
 }

@@ -13,7 +13,7 @@
 #else
 #	define DSGAPI
 #endif
-#define C extern "C"
+#define EXTERN_C extern "C"
 
 GX_ENABLE_HIGH_PERFORMANCE_DUAL_GPU()
 
@@ -37,7 +37,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 }
 #endif
 
-C GXGAPI IGXDevice* GetInstance()
+EXTERN_C GXGAPI IGXDevice* GetInstance()
 {
 	return(new CGXDevice());
 }
