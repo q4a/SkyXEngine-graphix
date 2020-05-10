@@ -243,7 +243,7 @@ void CGXContext::setFullState(IGXContextState *pState_)
 	}
 }
 
-void CGXContext::clear(UINT what, GXCOLOR color, float fDepth, UINT uStencil)
+void CGXContext::clear(UINT what, const float4 &vColor, float fDepth, UINT uStencil)
 {
 	if(what & GX_CLEAR_COLOR)
 	{
@@ -251,7 +251,7 @@ void CGXContext::clear(UINT what, GXCOLOR color, float fDepth, UINT uStencil)
 		{
 			if(m_pColorTarget[i])
 			{
-				m_pDeviceContext->ClearRenderTargetView(((CGXSurface*)m_pColorTarget[i])->m_pRTV, (float*)&GX_COLOR_COLOR_TO_F4(color));
+				m_pDeviceContext->ClearRenderTargetView(((CGXSurface*)m_pColorTarget[i])->m_pRTV, (float*)&vColor);
 			}
 		}
 	}

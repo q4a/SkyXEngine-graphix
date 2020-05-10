@@ -45,7 +45,7 @@ public:
 	IGXContextState* getCurrentState() override;
 	void setFullState(IGXContextState *pState) override;
 
-	void clear(UINT what, GXCOLOR color = 0, float fDepth = 1.0f, UINT uStencil = 0) override;
+	void clear(UINT what, const float4 &vColor = 0.0f, float fDepth = 1.0f, UINT uStencil = 0) override;
 
 	void setIndexBuffer(IGXIndexBuffer *pBuff) override;
 	void setRenderBuffer(IGXRenderBuffer *pBuff) override;

@@ -57,7 +57,7 @@ public:
 	@param fDepth - глубина [0.0, 1.0] для #GXCLEAR_DEPTH
 	@param uStencil - значение для #GXCLEAR_STENCIL
 	*/
-	virtual void clear(UINT what, GXCOLOR color = 0, float fDepth = 1.0f, UINT uStencil = 0) = 0;
+	virtual void clear(UINT what, const float4 &vColor = 0.0f, float fDepth = 1.0f, UINT uStencil = 0) = 0;
 
 	//! установка индексного буфера
 	virtual void setIndexBuffer(IGXIndexBuffer *pBuff) = 0;
