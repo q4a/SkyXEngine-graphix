@@ -121,7 +121,7 @@ public:
 	virtual IGXShaderSet* createShader(IGXVertexShader *pVS = NULL, IGXPixelShader *pPS = NULL, IGXGeometryShader *pGS = NULL, IGXComputeShader *pCS = NULL) = 0;
 
 	//! создание константы размером uSize байт
-	virtual IGXConstantBuffer* createConstantBuffer(UINT uSize) = 0;
+	virtual IGXConstantBuffer* createConstantBuffer(UINT uSize, bool isPartialUpdateAllowed = false) = 0;
 
 	//########################################################################
 

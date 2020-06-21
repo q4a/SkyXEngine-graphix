@@ -49,7 +49,7 @@ public:
 	 @param pData указатель на буфер с данными
 	 @param pContext указатель контекст, в котором нужно произвести обновление
 	*/
-	virtual void update(const void *pData) = 0;
+	virtual void update(const void *pData, size_t sizeUpdate = 0) = 0;
 
 	//! возвращает размер буфера в байтах
 	virtual UINT getSize() = 0;

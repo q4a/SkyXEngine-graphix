@@ -112,7 +112,7 @@ public:
 	IGXRasterizerState* createRasterizerState(GXRasterizerDesc *pDSDesc) override;
 	IGXSamplerState* createSamplerState(GXSamplerDesc *pSamplerDesc) override;
 
-	IGXConstantBuffer* createConstantBuffer(UINT uSize) override;
+	IGXConstantBuffer* createConstantBuffer(UINT uSize, bool isPartialUpdateAllowed = false) override;
 
 	void log(GX_LOG lvl, const char *msg, ...);
 	static void debugMessage(GX_LOG, const char *msg);

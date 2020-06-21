@@ -126,7 +126,7 @@ void CGXVertexShader::getData(void *_pData, UINT *pSize)
 	{
 		*((UINT*)pData) = m_mConstLocations.Size();
 		pData += sizeof(UINT);
-		for(AssotiativeArray<AAString, D3DXCONSTANT_DESC>::Iterator i = m_mConstLocations.begin(); i; i++)
+		for(AssotiativeArray<AAString, D3DXCONSTANT_DESC>::Iterator i = m_mConstLocations.begin(); i; ++i)
 		{
 			strcpy((char*)pData, i.first->getName());
 			pData += strlen(i.first->getName()) + 1;
@@ -148,7 +148,7 @@ void CGXVertexShader::getData(void *_pData, UINT *pSize)
 	else
 	{
 		UINT uSize = sizeof(UINT); // constant count
-		for(AssotiativeArray<AAString, D3DXCONSTANT_DESC>::Iterator i = m_mConstLocations.begin(); i; i++)
+		for(AssotiativeArray<AAString, D3DXCONSTANT_DESC>::Iterator i = m_mConstLocations.begin(); i; ++i)
 		{
 			uSize += strlen(i.first->getName()) + 1;
 			uSize += sizeof(D3DXCONSTANT_DESC);
@@ -289,7 +289,7 @@ void CGXPixelShader::getData(void *_pData, UINT *pSize)
 	{
 		*((UINT*)pData) = m_mConstLocations.Size();
 		pData += sizeof(UINT);
-		for(AssotiativeArray<AAString, D3DXCONSTANT_DESC>::Iterator i = m_mConstLocations.begin(); i; i++)
+		for(AssotiativeArray<AAString, D3DXCONSTANT_DESC>::Iterator i = m_mConstLocations.begin(); i; ++i)
 		{
 			strcpy((char*)pData, i.first->getName());
 			pData += strlen(i.first->getName()) + 1;
@@ -311,7 +311,7 @@ void CGXPixelShader::getData(void *_pData, UINT *pSize)
 	else
 	{
 		UINT uSize = sizeof(UINT); // constant count
-		for(AssotiativeArray<AAString, D3DXCONSTANT_DESC>::Iterator i = m_mConstLocations.begin(); i; i++)
+		for(AssotiativeArray<AAString, D3DXCONSTANT_DESC>::Iterator i = m_mConstLocations.begin(); i; ++i)
 		{
 			uSize += strlen(i.first->getName()) + 1;
 			uSize += sizeof(D3DXCONSTANT_DESC);

@@ -1669,11 +1669,11 @@ IDXGIFactory* CGXDevice::getDXGIFactory()
 	return(m_pDXGIFactory);
 }
 
-IGXConstantBuffer* CGXDevice::createConstantBuffer(UINT uSize)
+IGXConstantBuffer* CGXDevice::createConstantBuffer(UINT uSize, bool isPartialUpdateAllowed)
 {
 	assert(uSize && (uSize % 16 == 0));
 
-	return(new CGXConstantBuffer(this, uSize));
+	return(new CGXConstantBuffer(this, uSize, isPartialUpdateAllowed));
 }
 
 IGXContext* CGXDevice::getThreadContext()
